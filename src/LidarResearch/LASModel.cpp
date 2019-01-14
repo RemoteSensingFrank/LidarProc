@@ -2,9 +2,9 @@
 // Created by wuwei on 18-1-21.
 //
 
-#include"../LidarApplication/LASModel.h"
+#include "../LidarResearch/LASModel.h"
 #include "../LidarBase/LASPoint.h"
-#include "../LidarAlgorithm/Geometry.h"
+#include "../LidarGeometry/Geometry.h"
 
 void LASModel::LASModel_PointsDense(ILASDataset* dataset, float cubeRange)
 {

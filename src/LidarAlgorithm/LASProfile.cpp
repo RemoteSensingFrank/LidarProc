@@ -4,7 +4,7 @@
 #include<math.h>
 #include<gdal_priv.h>
 
-#include"../LidarAlgorithm/GeometryAlgorithm.h"
+#include"../LidarGeometry/GeometryAlgorithm.h"
 #include"../LidarBase/LASReader.h"
 
 
@@ -252,7 +252,7 @@ void LASProfile::LASProfile_VerticleLabel(const char* strLasDataset, Point2D pnt
 
 
 
-	draw->DrawLabel_Construct_Label()
+	draw->DrawLabel_Construct_Label();
 
 
 }

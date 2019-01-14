@@ -4,10 +4,11 @@
 
 #include "LASColorMap.h"
 #include <iostream>
+#include <string>
+#include <vector>
 #include "../LidarBase/LASReader.h"
 #include "../LidarGeometry/Geometry.h"
 #include "../LidarGeometry/GeometryAlgorithm.h"
-
 #pragma comment(lib,"gdal_i.lib")
 
 long LASColorMap::LASColorMap_Map(const char* pathLas, vector<string> pathImgs, const char* pathOutLas)

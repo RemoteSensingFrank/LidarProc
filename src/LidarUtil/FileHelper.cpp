@@ -1,12 +1,14 @@
 #include "FileHelper.h"
 
 #include <iostream>
-#include <cstring>        // for strcpy(), strcat()
-#include <io.h>
-#include<vector>
-#include<algorithm>
+#include <stdio.h>
+#include <algorithm>
 
-using namespace std;
+#ifdef LINUX
+	#include<sys/types.h>
+	#include<dirent.h>
+	#include<unistd.h>
+#endif
 
 
 FileHelper::FileHelper()
@@ -20,6 +22,7 @@ FileHelper::~FileHelper()
 
 void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 {
+#ifdef WIN32
 	char dirNew[200];
 	strcpy_s(dirNew, dir);
 	strcat_s(dirNew, "\\*.*");    // 在目录后面加上"\\*.*"进行第一次搜索
@@ -44,10 +47,37 @@ void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 
 	cout << "GetFileList Done!\n";
 	_findclose(handle);    // 关闭搜索句柄
+#endif
+
+#ifdef LINUX
+	DIR *dirDir;
+	struct dirent *fptr;
+
+	if((dirDir=opendir(dir)==NULL))
+	{
+		printf("failed to open directory");
+		exit(-1);
+	}
+	while((fptr=readdir(dirDir))!=NULL)
+	{
+		if(strcmp(fptr->d_name,".")||strcmp(fptr->d_name,".."))
+			continue;
+		else if(fptr->d_type==8){
+			fileNameList.push(fptr->d_name);
+		}
+		else{
+			continue;
+		}
+	}
+	closedir(dirDir);
+	printf("GetFileList Done!\n");
+#endif
 }
+
 
 void FileHelper::listFilesIncludeSubDir(const char * dir) 
 {
+#ifdef WIN32
 	char dirNew[200];
 	strcpy_s(dirNew, dir);
 	strcat_s(dirNew, "\\*.*");    // 在目录后面加上"\\*.*"进行第一次搜索
@@ -80,6 +110,9 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 	} while (_findnext(handle, &findData) == 0);
 
 	_findclose(handle);    // 关闭搜索句柄
+#endif
+
+
 }
 
 void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
@@ -102,7 +135,7 @@ void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 	_findclose(lf);
 #endif
 
-#ifdef linux
+#ifdef LINUX
 	DIR *dir;
 	struct dirent *ptr;
 	char base[1000];
@@ -160,7 +193,7 @@ void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 	_findclose(lf);
 #endif
 
-#ifdef linux
+#ifdef LINUX
 	DIR *dir;
 	struct dirent *ptr;
 	char base[1000];

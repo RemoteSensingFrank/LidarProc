@@ -143,7 +143,9 @@
 #include <vector>
 #include <string>
 #include"gdal_priv.h"
-
+#include "../LidarGeometry/Geometry.h"
+using namespace std;
+using namespace GeometryLas;
 /**/
 class LASColorMap{
 public:
@@ -195,4 +197,4 @@ protected:
 	* @return 
 	*/
     bool LASColorMap_ImageToMap(int ix, int iy, double *adfGeoTransform, double &mx, double &my);
-}
+};

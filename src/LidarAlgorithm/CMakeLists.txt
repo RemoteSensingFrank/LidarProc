@@ -2,14 +2,24 @@
 aux_source_directory(. DIR_ALGORITHM_SRCS)
 find_package(GDAL REQUIRED)
 include_directories(${GDAL_INCLUDE_DIR})
+message("compile Lidar Algorithm")
+message("libraries:")
+message(${GDAL_INCLUDE_DIR})
+message(${GDAL_LIBRARY})
+
+include_directories("../../library/")
+
 
 find_package(OpenCV)
 if(OpenCV_FOUND)
-    add_compile_definitions(_USE_OPENCV_)
-    message(STATUS "complie with openCV included")
-    include_directories(${OpenCV_DIRS})
-else
-    message(STATUS "complie with openCV not included")
+	add_definitions(-D_USE_OPENCV_)
+    	message(STATUS "complie with openCV")
+    	message("libraries:")
+    	message(${OpenCV_INCLUDE_DIRS})
+    	message(${OpenCV_LIBS})
+    	include_directories(${OpenCV_DIRS})
+else()
+    	message("compile without openCV")
 endif()
 
 
@@ -17,5 +27,5 @@ add_library(libalgorithm ${DIR_ALGORITHM_SRCS})
 target_link_libraries(libalgorithm libbase libgeometry)
 target_link_libraries(libalgorithm ${GDAL_LIBRARY})
 if(OpenCV_FOUND)
-    target_link_libraries(libalgorithm ${OpenCV_LIBS})
+    	target_link_libraries(libalgorithm ${OpenCV_LIBS})
 endif()

@@ -7,7 +7,7 @@
 
 #include <string>
 #include "../LidarGeometry/Geometry.h"
-#include "LASPoint.h"
+#include "../LidarBase/LASPoint.h"
 
 class LASFormatTransform3DTiles {
 public:

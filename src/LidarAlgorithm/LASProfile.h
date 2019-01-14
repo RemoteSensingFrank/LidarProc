@@ -2,7 +2,7 @@
 
 #include "../LidarBase/LASPoint.h"
 #include "../LidarGeometry/Geometry.h"
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 
 #ifdef _USE_OPENCV_
 #include <opencv/cv.h>

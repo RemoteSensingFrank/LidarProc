@@ -1,5 +1,5 @@
 #include"LASTowerClassify.h"
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 #include"../LidarGeometry/Geometry.h"
 #include"../LidarGeometry/GeometryAlgorithm.h"
 
@@ -8,7 +8,7 @@ using namespace Eigen;
 
 #ifdef _ARTICLE__USE_
 
-#include"../Utility/FileHelper.h"
+#include"../LidarUtility/FileHelper.h"
 #include"../LidarBase/LASReader.h"
 #include"../LidarBase/tsmToUTM.h"
 #include"../LidarAlgorithm/PointProcAlgorithm.h"
