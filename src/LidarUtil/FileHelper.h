@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include <string>
+#include <vector>
 using namespace std;
 class FileHelper
 {
@@ -19,8 +19,7 @@ public:
 		@param dir：输入文件目录 以\\结束
 		@param fileNameList：将文件目录保存到数据中
 	*/
-	static void listFiles(const char * dir, vector<string>& fileNameList);  //遍历目录下的所有文件(不包括子目录)
-	
+	static void listFiles(const char * dir, vector<string>& fileNameList);  //遍历目录下的所有文件(不包括子目录)	
 	/*
 		遍历目录下的所有文件(不包括子目录)
 		@param dir：输入文件目录 以\\结束

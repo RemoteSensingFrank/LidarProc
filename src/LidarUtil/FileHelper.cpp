@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <algorithm>
-
+#include <string.h>
 #ifdef LINUX
 	#include<sys/types.h>
 	#include<dirent.h>
@@ -53,7 +53,7 @@ void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 	DIR *dirDir;
 	struct dirent *fptr;
 
-	if((dirDir=opendir(dir)==NULL))
+	if((dirDir=opendir(dir))==NULL)
 	{
 		printf("failed to open directory");
 		exit(-1);
@@ -63,7 +63,7 @@ void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 		if(strcmp(fptr->d_name,".")||strcmp(fptr->d_name,".."))
 			continue;
 		else if(fptr->d_type==8){
-			fileNameList.push(fptr->d_name);
+			fileNameList.push_back(fptr->d_name);
 		}
 		else{
 			continue;
@@ -73,7 +73,6 @@ void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 	printf("GetFileList Done!\n");
 #endif
 }
-
 
 void FileHelper::listFilesIncludeSubDir(const char * dir) 
 {
@@ -96,6 +95,7 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 			if (strcmp(findData.name, ".") == 0 || strcmp(findData.name, "..") == 0)
 				continue;
 
+			
 			cout << findData.name << "\t<dir>\n";
 
 			// 在目录后面加上"\\"和搜索到的目录名进行下一次搜索
@@ -112,6 +112,35 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 	_findclose(handle);    // 关闭搜索句柄
 #endif
 
+#ifdef LINUX
+	DIR *tdir;
+	struct dirent *ptr;
+	char base[1000];
+
+	if ((tdir = opendir(dir)) == NULL)
+	{
+		perror("Open dir error...");
+		exit(1);
+	}
+
+	while ((ptr = readdir(tdir)) != NULL)
+	{
+		if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0)    ///current dir OR parrent dir
+			continue;
+		else if (ptr->d_type == 8)    ///file
+		{
+			string name = string(ptr->d_name);
+			cout<<name<<endl;
+		}
+		else if (ptr->d_type == 10)    ///link file
+			continue;
+		else if (ptr->d_type == 4)    ///dir
+		{
+			listFilesIncludeSubDir(ptr->d_name);
+		}
+	}
+	closedir(tdir);
+#endif
 
 }
 
@@ -172,6 +201,7 @@ void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 #endif
 	std::sort(files.begin(), files.end());
 }
+
 
 void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 {
