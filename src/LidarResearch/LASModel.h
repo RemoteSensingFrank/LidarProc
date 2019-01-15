@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <memory>
 #include "../LidarGeometry/Geometry.h"
+
+class ILASDataset;
+
 using namespace GeometryLas;
 
 //点密度和模型的定义的定义

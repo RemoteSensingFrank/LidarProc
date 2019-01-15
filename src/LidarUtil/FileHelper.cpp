@@ -20,7 +20,7 @@ FileHelper::~FileHelper()
 {
 }
 
-void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
+long FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 {
 #ifdef WIN32
 	char dirNew[200];
@@ -34,7 +34,7 @@ void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 	if (handle == -1)
 	{
 		cout << "Failed to find first file!\n";
-		return;
+		return -2;
 	}
 
 	do
@@ -47,34 +47,37 @@ void FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 
 	cout << "GetFileList Done!\n";
 	_findclose(handle);    // 关闭搜索句柄
-#endif
+#else 
+	#ifdef LINUX
+		DIR *dirDir;
+		struct dirent *fptr;
 
-#ifdef LINUX
-	DIR *dirDir;
-	struct dirent *fptr;
-
-	if((dirDir=opendir(dir))==NULL)
-	{
-		printf("failed to open directory");
-		exit(-1);
-	}
-	while((fptr=readdir(dirDir))!=NULL)
-	{
-		if(strcmp(fptr->d_name,".")||strcmp(fptr->d_name,".."))
-			continue;
-		else if(fptr->d_type==8){
-			fileNameList.push_back(fptr->d_name);
+		if((dirDir=opendir(dir))==NULL)
+		{
+			printf("failed to open directory");
+			return -2;
 		}
-		else{
-			continue;
+		while((fptr=readdir(dirDir))!=NULL)
+		{
+			if(strcmp(fptr->d_name,".")||strcmp(fptr->d_name,".."))
+				continue;
+			else if(fptr->d_type==8){
+				fileNameList.push_back(fptr->d_name);
+			}
+			else{
+				continue;
+			}
 		}
-	}
-	closedir(dirDir);
-	printf("GetFileList Done!\n");
+		closedir(dirDir);
+		printf("GetFileList Done!\n");
+	#else
+		return -1;
+	#endif
 #endif
+	return 0;
 }
 
-void FileHelper::listFilesIncludeSubDir(const char * dir) 
+long FileHelper::listFilesIncludeSubDir(const char * dir) 
 {
 #ifdef WIN32
 	char dirNew[200];
@@ -86,7 +89,7 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 
 	handle = _findfirst(dirNew, &findData);
 	if (handle == -1)        // 检查是否成功
-		return;
+		return -2;
 
 	do
 	{
@@ -110,7 +113,7 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 	} while (_findnext(handle, &findData) == 0);
 
 	_findclose(handle);    // 关闭搜索句柄
-#endif
+#else
 
 #ifdef LINUX
 	DIR *tdir;
@@ -120,7 +123,7 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 	if ((tdir = opendir(dir)) == NULL)
 	{
 		perror("Open dir error...");
-		exit(1);
+		return -2;
 	}
 
 	while ((ptr = readdir(tdir)) != NULL)
@@ -140,17 +143,21 @@ void FileHelper::listFilesIncludeSubDir(const char * dir)
 		}
 	}
 	closedir(tdir);
+#else
+	return -1;
 #endif
-
+#endif
+	return 0;
 }
 
-void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
+long FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 {
 #ifdef WIN32
 	_finddata_t file;
 	intptr_t lf;
 	if ((lf = _findfirst((cate_dir+"*"+ext).c_str(), &file)) == -1) {
 		printf("not found!");
+		return -2;
 	}
 	else {
 		files.push_back(cate_dir + file.name);
@@ -162,7 +169,7 @@ void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 		}
 	}
 	_findclose(lf);
-#endif
+#else
 
 #ifdef LINUX
 	DIR *dir;
@@ -172,7 +179,7 @@ void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 	if ((dir = opendir(cate_dir.c_str())) == NULL)
 	{
 		perror("Open dir error...");
-		exit(1);
+		return -2;
 	}
 
 	while ((ptr = readdir(dir)) != NULL)
@@ -183,9 +190,9 @@ void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 		{
 			string name = string(ptr->d_name);
 			string::size_type pos = name.rfind('.');
-			string ext = name.substr(pos == string::npos ? name.length() : pos + 1);
+			string fext = name.substr(pos == string::npos ? name.length() : pos + 1);
 
-			if (!strcmp("ext", ext.c_str()))
+			if (!strcmp(fext.c_str(), ext.c_str()))
 				files.push_back(string(cate_dir) + name);
 
 		}
@@ -198,18 +205,23 @@ void FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 		}
 	}
 	closedir(dir);
+#else
+	return -1;
+#endif
 #endif
 	std::sort(files.begin(), files.end());
+	return 0;
 }
 
 
-void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
+long FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 {
 #ifdef WIN32
 	_finddata_t file;
 	intptr_t lf;
 	if ((lf = _findfirst((cate_dir + "*" + ext).c_str(), &file)) == -1) {
 		printf("not found!");
+		return -2;
 	}
 	else {
 		files.push_back(file.name);
@@ -221,7 +233,7 @@ void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 		}
 	}
 	_findclose(lf);
-#endif
+#else
 
 #ifdef LINUX
 	DIR *dir;
@@ -231,7 +243,7 @@ void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 	if ((dir = opendir(cate_dir.c_str())) == NULL)
 	{
 		perror("Open dir error...");
-		exit(1);
+		return -2;
 	}
 
 	while ((ptr = readdir(dir)) != NULL)
@@ -242,9 +254,9 @@ void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 		{
 			string name = string(ptr->d_name);
 			string::size_type pos = name.rfind('.');
-			string ext = name.substr(pos == string::npos ? name.length() : pos + 1);
+			string fext = name.substr(pos == string::npos ? name.length() : pos + 1);
 
-			if (!strcmp("ext", ext.c_str()))
+			if (!strcmp(fext.c_str(), ext.c_str()))
 				files.push_back(name);
 
 		}
@@ -257,6 +269,10 @@ void FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 		}
 	}
 	closedir(dir);
+#else
+	return -1;
+#endif
 #endif
 	std::sort(files.begin(), files.end());
+	return 0;
 }
