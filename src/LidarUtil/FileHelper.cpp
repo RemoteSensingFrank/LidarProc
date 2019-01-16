@@ -49,26 +49,31 @@ long FileHelper::listFiles(const char * dir, vector<string>& fileNameList)
 	_findclose(handle);    // 关闭搜索句柄
 #else 
 	#ifdef LINUX
-		DIR *dirDir;
-		struct dirent *fptr;
+		DIR *tdir;
+		struct dirent *ptr;
+		char base[1000];
 
-		if((dirDir=opendir(dir))==NULL)
+		if ((tdir = opendir(dir)) == NULL)
 		{
-			printf("failed to open directory");
+			perror("Open dir error...");
 			return -2;
 		}
-		while((fptr=readdir(dirDir))!=NULL)
+	
+		while ((ptr = readdir(tdir)) != NULL)
 		{
-			if(strcmp(fptr->d_name,".")||strcmp(fptr->d_name,".."))
+			if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0)    ///current dir OR parrent dir
 				continue;
-			else if(fptr->d_type==8){
-				fileNameList.push_back(fptr->d_name);
+			else if (ptr->d_type == 8)    ///file
+			{
+				string name = string(ptr->d_name);
+				fileNameList.push_back(name);
 			}
-			else{
+			else if (ptr->d_type == 10)    ///link file
 				continue;
-			}
+			else if (ptr->d_type == 4)    ///dir
+				continue;
 		}
-		closedir(dirDir);
+		closedir(tdir);
 		printf("GetFileList Done!\n");
 	#else
 		return -1;
@@ -191,7 +196,6 @@ long FileHelper::listFiles(string cate_dir, vector<string> &files, string ext)
 			string name = string(ptr->d_name);
 			string::size_type pos = name.rfind('.');
 			string fext = name.substr(pos == string::npos ? name.length() : pos + 1);
-
 			if (!strcmp(fext.c_str(), ext.c_str()))
 				files.push_back(string(cate_dir) + name);
 

@@ -3,7 +3,6 @@
 //
 
 #include "LASFormatTransform.h"
-#include <zlib.h>
 #include "../LidarBase/LASPoint.h"
 
 void LASFormatTransform3DTiles::LASFormatTransform_3DTilesJson(Point3D *center,std::string pathOut){

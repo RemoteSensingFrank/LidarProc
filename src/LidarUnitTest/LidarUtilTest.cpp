@@ -24,25 +24,25 @@ protected:
 
 TEST_F(FileHelperTest,PrintFilesIncludeSubDirs)
 {
-	EXPECT_EQ(0 ,FileHelper::listFilesIncludeSubDir("/home/frank/Downloads/"));	
-	EXPECT_EQ(-2 ,FileHelper::listFilesIncludeSubDir("/home/frank/Download"));
+	EXPECT_EQ(0 ,FileHelper::listFilesIncludeSubDir("/home/wuwei/Program/LidarProc/src/LidarBase/"));	
+	EXPECT_EQ(-2 ,FileHelper::listFilesIncludeSubDir("../LidarFault/"));
 }
 
 TEST_F(FileHelperTest,ListFiles)
 {
 	vector<string> filenameLists;
-	EXPECT_EQ(0 ,FileHelper::listFiles("/home/frank/Downloads/",filenameLists));
-	EXPECT_EQ(8 ,filenameLists.size());
-	EXPECT_EQ(-2 ,FileHelper::listFiles("/home/frank/Dwonload/",filenameLists));
-	EXPECT_EQ(8 ,filenameLists.size());
+	EXPECT_EQ(0 ,FileHelper::listFiles("/home/wuwei/Program/LidarProc/src/LidarBase/",filenameLists));
+	EXPECT_EQ(7 ,filenameLists.size());
+	EXPECT_EQ(-2 ,FileHelper::listFiles("../LidarFault/",filenameLists));
+	EXPECT_EQ(7 ,filenameLists.size());
 }
 
 TEST_F(FileHelperTest,ListFilesExt)
 {
 	vector<string> filenameLists;
-	EXPECT_EQ(0 ,FileHelper::listFiles("/home/frank/Downloads/",filenameLists,".slpk"));
-	EXPECT_EQ(2 ,filenameLists.size());
-	EXPECT_EQ(-2 ,FileHelper::listFiles("/home/frank/Dwonload/",filenameLists,".slpk"));
-	EXPECT_EQ(2 ,filenameLists.size());
+	EXPECT_EQ(0 ,FileHelper::listFiles("/home/wuwei/Program/LidarProc/src/LidarBase/",filenameLists,"h"));
+	EXPECT_EQ(3 ,filenameLists.size());
+	EXPECT_EQ(-2 ,FileHelper::listFiles("../LidarFault/",filenameLists,"h"));
+	EXPECT_EQ(3 ,filenameLists.size());
 
 }
