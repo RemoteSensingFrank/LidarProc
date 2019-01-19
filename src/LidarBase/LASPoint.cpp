@@ -139,7 +139,7 @@ ILASDataset::ILASDataset()
 }
 ILASDataset::~ILASDataset()
 {
-	printf("正在释放内存...\n");
+	printf("release memory...\n");
 	if (m_lasRectangles != NULL)
 		delete[]m_lasRectangles;
 	if (m_LASPointID != NULL)

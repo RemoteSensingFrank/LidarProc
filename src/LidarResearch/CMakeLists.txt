@@ -2,7 +2,7 @@ aux_source_directory(. RESEARCH_DIR_SRCS)
 find_package(ZLIB)
 if(ZLIB_FOUND)
 	message(${ZLIB_VERSION_STRING})
-	include(${ZLIB_INCLUDE_DIRS})
+	#include(${ZLIB_INCLUDE_DIR})
 endif()
 
 include_directories("../../library")

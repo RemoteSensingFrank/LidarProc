@@ -118,7 +118,7 @@ long LidarMemReader::LidarReader_Read(bool inMemory, int skip, _OUT_ ILASDataset
 	catch (bad_alloc &e)
 	{
 		printf("%s\n", e.what());
-		exit(-1);
+		return -1;
 	}
 
 	dataset->LASDataset_Trim(inMemory);
@@ -164,7 +164,10 @@ long LidarMemReader::LidarReader_Write(const char *pathLidar, ILASDataset* datas
 	lasHeader.version_minor = 2;
 	FILE* fLasOut = fopen(pathLidar, "wb");
 	if (fLasOut == nullptr)
+	{
+		printf("create las file failed!\n");
 		return -1;
+	}
 	lasHeader.WriteHeader(fLasOut);
 
 	//中间有问题 不知道怎么搞 变长字段还没有进行处理
