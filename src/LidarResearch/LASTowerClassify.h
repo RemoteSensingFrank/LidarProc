@@ -165,8 +165,75 @@ private:
 	
 	//tower position
 	vector<Point2D> m_towerLocate;
-
-
 };
 #endif
 
+
+
+/*
+	used for electric patrol fast
+	classify the tower, line vegetation and ground
+	the algorithm is used for engineering so the convient and 
+	the speed is the factor considered first in this case 
+	we try to use the simplest algorithm to do the work and the 
+	accuracy will inevitably decrease
+*/
+
+struct LASIndexDis {
+	LASIndex indx;
+	double distance;
+};
+typedef std::vector<LASIndexDis> LASIndexDisList;
+
+/*
+	extract electric line information and classify the object auto fast
+*/
+class classifyElectricPatrolFast {
+public:
+	/*
+		extract tower points set from las data
+		the algorithm decscribed as follows:
+		1. get the tower point range and find all the points in the range;
+		2. for the tower points is higher than the vegetation points use precentage to extract point higher than 40% 
+		3. some vegetation points will mixed inevitable so we use dbscan algorthm to remove vegetation points 
+		ILASDataset* dataset:las dataset
+		Point2D towerPnt:tower position
+		double range:tower range 
+		LASColorExt color: the tower color
+	*/
+	long ElectricPatrolFast_Tower(ILASDataset* dataset, Point2D towerPnt, double range, LASColorExt color);
+
+	/*
+		extract line point set from las data
+		the algorithm decscribed as follows:
+		1. get the tower point range and find all the points in the range and the the base height;
+		2. caculate the plane and the points above the plane will be considerd as line point(if not classified)
+		3. use region grow up algoritm to get all the points
+		ILASDataset* dataset:las dataset
+		Point2D *towerPnt:tower position
+		double range:tower range
+		double height:height threshold
+		LASColorExt color: the tower color
+	*/
+	long ElectricPatrolFast_Lines(ILASDataset* dataset, Point2D* towerPnt, double range, double height, LASColorExt color);
+
+private:
+	/*
+		tower segment algorithm
+		ILASDataset* dataset:las dataset
+		LASIndexDisList idxDisLists:las data index
+		LASColorExt color: the tower color
+		double distance:scan distance
+	*/
+	long ElectrixPatrolFast_Seg(ILASDataset* dataset, LASIndexDisList idxDisLists, LASColorExt color,double distance);
+
+
+	/*
+		seed grow up algorithm
+		ILASDataset* dataset:las dataset
+		Point3Ds seedPoints:seed points
+		double range:seed distance
+		LASColorExt color:color
+	*/
+	long ElectrixPatrolFast_Seed(ILASDataset* dataset, Point3Ds seedPoints, double range, LASColorExt color);
+};

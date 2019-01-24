@@ -182,11 +182,12 @@ enum  eLASClassification
 	elcTowerDown		 = 26,
 	elcDriveWay			 = 27,      //公路
 
-	elcFallingTree		 = 30,
+	elcFallingTree		 = 30,		//树木倒伏
 	elcFallingTreeLevel1 = 31,
 	elcFallingTreeLevel2 = 32,
 	elcFallingTreeLevel3 = 33,
 	elcFallingTreeEnd	 = 34,
+	elcLine				 = 35,		//电力线
 
 	elcDeletedPoint		 = -1	// 已删除的点
 };

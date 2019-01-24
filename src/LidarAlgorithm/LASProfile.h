@@ -15,7 +15,10 @@ enum LabelType {
 	Star_with_Text
 };
 
-//keyPnts 第一个点为中心点，在绘制的时候需要注意
+//keyPnts: take care- the first point is the center point
+/*
+	Interface
+*/
 class DrawLabel
 {
 public:
@@ -55,13 +58,40 @@ public:
 	*/
 	void LASProfile_GetPCARotMat(Point2D pntTowers[2], Eigen::MatrixXd &rotMat);
 
-	/*
-		use to get profile
+	/**
+	* @brief  get vertical vision profile
+	* @note   
+	* @param  strLasDataset: path of the LAS dataset
+	* @param  pntTowers[2]:  tower point
+	* @param  fRange: 		 range of the vision
+	* @param  fResolution: 	 image resolution
+	* @param  strOutImg: 	 output image path
+	* @retval None
 	*/
 	void LASProfile_Verticle(const char* strLasDataset, Point2D pntTowers[2], float fRange, float fResolution, const char* strOutImg);
 
+	/**
+	* @brief  get horizontal vision profile
+	* @note   
+	* @param  strLasDataset: path of the LAS dataset
+	* @param  pntTowers[2]:  tower point
+	* @param  fRange: 		 range of the vision
+	* @param  fResolution: 	 image resolution
+	* @param  strOutImg: 	 output image path
+	* @retval None
+	*/
 	void LASProfile_Horizontal(const char* strLasDataset, Point2D pntTowers[2], float fRange, float fResolution, const char* strOutImg);
 
+	/**
+	* @brief  get front vision profile
+	* @note   
+	* @param  strLasDataset: path of the LAS dataset
+	* @param  pntTowers[2]:  tower point
+	* @param  fRange: 		 range of the vision
+	* @param  fResolution: 	 image resolution
+	* @param  strOutImg: 	 output image path
+	* @retval None
+	*/
 	void LASProfile_Front(const char* strLasDataset, Point2D pntTowers[2], float fRange, float fResolution, const char* strOutImg);
 
 #ifdef _USE_OPENCV_
@@ -84,7 +114,7 @@ private:
 	
 #ifdef _USE_OPENCV_
 	/*
-		get image size according to points range using opencv
+		get image according to points range using opencv
 	*/
 	void LASProfile_ImageFillHorizontal(ILASDataset* dataset,Rect2D rect, Eigen::MatrixXd rotMat,
 											float resolution, cv::Mat &img,bool order=false);
@@ -97,7 +127,7 @@ private:
 
 #else
 	/*
-	get image size according to points range using opencv
+		get image according to points range using gdal
 	*/
 	void LASProfile_ImageFillHorizontal(ILASDataset* dataset, Rect2D rect, Eigen::MatrixXd rotMat,
 		float resolution, unsigned char* ucImageData,double xmin,double ymin,double xmax,double ymax,

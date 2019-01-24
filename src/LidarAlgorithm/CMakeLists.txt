@@ -9,7 +9,6 @@ message(${GDAL_LIBRARY})
 
 include_directories("../../library/")
 
-
 find_package(OpenCV)
 if(OpenCV_FOUND)
 	add_definitions(-D_USE_OPENCV_)

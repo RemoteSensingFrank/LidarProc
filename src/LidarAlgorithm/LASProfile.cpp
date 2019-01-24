@@ -2,7 +2,7 @@
 
 #include<iostream>
 #include<math.h>
-#include<gdal_priv.h>
+#include"gdal_priv.h"
 
 #include"../LidarGeometry/GeometryAlgorithm.h"
 #include"../LidarBase/LASReader.h"

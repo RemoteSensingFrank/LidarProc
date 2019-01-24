@@ -417,6 +417,16 @@ bool GeometryRelation::IsRectIntersectRect(const Rect2D& rect1, const Rect2D& re
 
 }
 
+double GeometryRelation::VectorAngle(const Point3D vec1,const Point3D vec2)
+{
+	double aDotb[3] = { vec1.x*vec2.x,vec1.y*vec2.y ,vec1.z*vec2.z };
+	double aMo = sqrt(vec1.x*vec1.x + vec1.y*vec1.y + vec1.z*vec1.z);
+	double bMo = sqrt(vec2.x*vec2.x + vec2.y*vec2.y + vec2.z*vec2.z);
+	double abMo = sqrt(aDotb[0]* aDotb[0] + aDotb[1] * aDotb[1] + aDotb[2] * aDotb[2]);
+
+	return acos(abMo / aMo / bMo);
+}
+
 
 /*****************************************************************************
 * @brief : ???????
@@ -447,7 +457,12 @@ double DistanceComputation::Distance(Point2Ds& pts, bool isclosed)
 	}
 	return dis;
 }
-
+double DistanceComputation::Distance(Point3D pt1, Point3D pt2)
+{
+	return sqrt((pt1.x - pt2.x)*(pt1.x - pt2.x) +
+		(pt1.y - pt2.y)*(pt1.y - pt2.y) +
+		(pt1.z - pt2.z)*(pt1.z - pt2.z));
+}
 /*****************************************************************************
 * @brief : ?????????
 * @author : W.W.Frank

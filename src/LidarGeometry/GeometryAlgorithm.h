@@ -64,8 +64,13 @@ public:
 	*/
 	static bool IsRectIntersectRect(const Rect2D& rect1, const Rect2D& rect2);
 	static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts);
-	static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts,
-		const Rect2D& slantingRect);
+	static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts,const Rect2D& slantingRect);
+
+	/*
+	* 求两个向量的夹角
+	*/
+	static double VectorAngle(const Point3D vec1,const Point3D vec2);
+
 };
 
 /*距离计算函数*/
@@ -80,6 +85,11 @@ public:
 	* 计算点集中所有点间的距离之和，欧氏距离
 	*/
 	static double Distance(Point2Ds& pts, bool isclosed);
+
+	/*
+	* 计算两点间的距离
+	*/
+	static double Distance(Point3D pt1, Point3D pt2);
 };
 
 /*点线相交函数*/
