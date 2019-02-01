@@ -1,17 +1,38 @@
 //
 // Created by wuwei on 18-1-24.
 //
-#include <omp.h>
-#include "gdal_priv.h"
+#include<omp.h>
+#include"gdal_priv.h"
 #include "LASDangerPoints.h"
 
-#include "PointProcAlgorithm.h"
+#include"../LidarAlgorithm/PointProcAlgorithm.h"
+
+typedef long DangerLevel;
+static omp_lock_t mutelock;
 
 static void SetPointColor(LASPoint &pnt, short r, short g, short b)
 {
 	pnt.m_colorExt.Red = r;
 	pnt.m_colorExt.Green = g;
 	pnt.m_colorExt.Blue = b;
+}
+
+static void inline SetPointColorLevel(LASPoint &pnt, DangerLevel level)
+{
+	switch (level)
+	{
+	case 1:
+		SetPointColor(pnt, 153, 0, 255);
+		break;
+	case 2:
+		SetPointColor(pnt, 255, 153, 0);
+		break;
+	case 3:
+		SetPointColor(pnt, 255, 0, 0);
+		break;
+	default:
+		break;
+	}
 }
 
 long LASDangerPoints::LASDangerPoints_Range(const Point3D *pnt, float distance, ILASDataset* datasetVegterain, vector<int> &rectIds)
@@ -155,7 +176,7 @@ long LASDangerPoints::LASDangerPoints_Detect(float* distance, int dangerSectionN
 }
 
 /*
-//deleted by Frank.Wu ÂºÉÁî®Ê≠§ÂáΩÊï∞
+//deleted by Frank.Wu ∆˙”√¥À∫Ø ˝
 long LASDangerPoints::LADDangerPoints_SplitDanger(ILASDataset *datasetVegterain, const char *pathSplit)
 {
 	LidarMemReader lidarOpt;
@@ -173,7 +194,6 @@ long LASDangerPointsFlann::LASDangerPoints_PerPoint(float distance, const Point3
 	//size_t ret_index[10];
 	//double out_dist_sqr[10];
 	//KNNResultSet<double> resultSet(num_results);
-
 	const double radius = distance;
 	std::vector<std::pair<size_t, double> > indices_dists;
 	RadiusResultSet<double, size_t> resultSet(radius, indices_dists);
@@ -200,7 +220,7 @@ long LASDangerPointsFlann::LASDangerPoints_PerPoint(float* distance, int dangerS
 	//size_t ret_index[10];
 	//double out_dist_sqr[10];
 	//KNNResultSet<double> resultSet(num_results);
-	//ÁõÆÂâçÂè™ËÄÉËôë‰∏â‰∏™ÊÆµ
+	//ƒø«∞÷ªøº¬«»˝∏ˆ∂Œ
 	const double radius = distance[2];
 	std::vector<std::pair<size_t, double> > indices_dists;
 	RadiusResultSet<double, size_t> resultSet(radius, indices_dists);
@@ -222,46 +242,46 @@ long LASDangerPointsFlann::LASDangerPoints_PerPoint(float* distance, int dangerS
 			if (dis<distance[0] && classType>elcDanger + 1)
 			{
 				pnt.m_classify = elcDangerLevel1;
-				SetPointColor(pnt, 255, 0, 0);
+				SetPointColorLevel(pnt,3);
 			}
 			else if (dis<distance[1] && classType>elcDanger + 2)
 			{
 				pnt.m_classify = elcDangerLevel2;
-				SetPointColor(pnt, 255, 153, 0);
+				SetPointColorLevel(pnt,2);
 			}
 			else if (dis<distance[2] && classType>elcDanger + 3)
 			{
 				pnt.m_classify = elcDanger;
-				SetPointColor(pnt, 153, 0, 255);
+				SetPointColorLevel(pnt, 1);
 			}
 		}
 		else
 		{
 			double dis = resultSet.m_indices_dists[i].second;
-			if (dis < distance[0])
+			if (dis<distance[0])
 			{
 				pnt.m_classify = elcDangerLevel1;
-				SetPointColor(pnt, 255, 0, 0);
+				SetPointColorLevel(pnt,3);
 			}
-			else if (dis < distance[1])
+			else if (dis<distance[1])
 			{
 				pnt.m_classify = elcDangerLevel2;
-				SetPointColor(pnt, 255, 153, 0);
+				SetPointColorLevel(pnt,2);
 			}
-			else if (dis < distance[2])
+			else if (dis<distance[2])
 			{
 				pnt.m_classify = elcDangerLevel3;
-				SetPointColor(pnt, 153, 0, 255);
+				SetPointColorLevel(pnt, 1);
 			}
 		}
-	}//for Âæ™ÁéØÁªìÊùü
+	}
 	return 0;
 }
 
 long LASDangerPointsFlann::LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain)
 {
 	double dis = distance * distance;
-	//ÊûÑÈÄ†Êï∞ÊçÆÁªìÊûÑ
+	//ππ‘Ï ˝æ›Ω·ππ
 	std::vector<Point3D> pntCloud;
 	for (int i = 0; i < datasetVegterain->m_totalReadLasNumber; ++i)
 	{
@@ -273,7 +293,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float distance, ILASDataset* d
 	kd_tree treeVegeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeVegeIndex.buildIndex();
 
-	//ÊØè‰∏Ä‰∏™ÁÇπËøõË°åÂÅöFLANN
+	//√ø“ª∏ˆµ„Ω¯––◊ˆFLANN
 	for (int i = 0; i < datasetLine->m_totalReadLasNumber; ++i)
 	{
 		printf("\rprocess points %d/%d", datasetLine->m_totalReadLasNumber, i + 1);
@@ -293,7 +313,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float* distance, int dangerSec
 	for (int i = 0; i < dangerSectionNumber; ++i)
 		dis[i] = distance[i] * distance[i];
 
-	//ÊûÑÈÄ†Êï∞ÊçÆÁªìÊûÑ
+	//ππ‘Ï ˝æ›Ω·ππ
 	std::vector<Point3D> pntCloud;
 	for (int i = 0; i < datasetVegterain->m_totalReadLasNumber; ++i)
 	{
@@ -305,7 +325,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float* distance, int dangerSec
 	kd_tree treeVegeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeVegeIndex.buildIndex();
 
-	//ÊØè‰∏Ä‰∏™ÁÇπËøõË°åÂÅöFLANN
+	//√ø“ª∏ˆµ„Ω¯––◊ˆFLANN
 	for (int i = 0; i < datasetLine->m_totalReadLasNumber; ++i)
 	{
 		printf("\rprocess points %d/%d", datasetLine->m_totalReadLasNumber, i + 1);
@@ -324,6 +344,325 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float* distance, int dangerSec
 	}
 	delete[]dis; dis = nullptr;
 	pntCloud.clear();
+	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//FLANN Block Danger Detect
+long LASDangerPointsFlannBlock::LASDangerPoints_PerPoint(float distance, const Point3D* pnt, ILASDataset* datasetVegterain)
+{
+	// ◊œ»ªÒ»°À˘”–Block
+	vector<int> rectIdx;
+	LASDangerPoints_Range(pnt, distance, datasetVegterain, rectIdx);
+
+	//√ø“ª∏ˆBlock÷––°”⁄æ‡¿Î“™«Ûµƒµ„
+	//ø…“‘∂‡œﬂ≥Ã≤¢––º∆À„
+	for (auto idx : rectIdx) 
+	{
+		double query_pt[3] = { pnt->x, pnt->y, pnt->z };
+		const double radius = distance;
+		std::vector<std::pair<size_t, double> > indices_dists;
+		RadiusResultSet<double, size_t> resultSet(radius, indices_dists);
+		if (datasetVegterain->m_lasRectangles[idx].m_lasPoints_numbers < 0)
+			continue;
+		else
+		{
+			datasetVegterain->m_lasRectangles[idx].m_block_tree->findNeighbors(resultSet, &query_pt[0], SearchParams());
+			for (int i = 0; i < resultSet.m_indices_dists.size(); ++i)
+			{
+				int pntIdx = resultSet.m_indices_dists[i].first;
+				//for debug
+				//printf("ret_index=%d out_dist_sqr=%lf\n", resultSet.m_indices_dists[i].first, resultSet.m_indices_dists[i].second);
+				LASPoint &pnt = datasetVegterain->m_lasRectangles[idx].m_lasPoints[pntIdx];
+				pnt.m_classify = elcDanger;
+			}
+		}
+	}
+	return 0;
+}
+
+long LASDangerPointsFlannBlock::LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D* pnt, ILASDataset* datasetVegterain)
+{
+	// ◊œ»ªÒ»°À˘”–Block
+	vector<int> rectIdx;
+	LASDangerPoints_Range(pnt, distance[dangerSectionNumber-1], datasetVegterain, rectIdx);
+
+	//√ø“ª∏ˆBlock÷––°”⁄æ‡¿Î“™«Ûµƒµ„
+	//ø…“‘∂‡œﬂ≥Ã≤¢––º∆À„
+	for (auto idx : rectIdx)
+	{
+		double query_pt[3] = { pnt->x, pnt->y, pnt->z };
+		const double radius = distance[dangerSectionNumber - 1];
+		std::vector<std::pair<size_t, double> > indices_dists;
+		RadiusResultSet<double, size_t> resultSet(radius, indices_dists);
+		if (datasetVegterain->m_lasRectangles[idx].m_lasPoints_numbers <= 0)
+			continue;
+		else
+		{
+			datasetVegterain->m_lasRectangles[idx].m_block_tree->findNeighbors(resultSet, &query_pt[0], SearchParams());
+			//printf("%d\n", resultSet.m_indices_dists.size());
+			for (int i = 0; i < resultSet.m_indices_dists.size(); ++i)
+			{
+				int pntIdx = resultSet.m_indices_dists[i].first;
+				//for debug
+				//printf("ret_index=%d out_dist_sqr=%lf\n", resultSet.m_indices_dists[i].first, resultSet.m_indices_dists[i].second);
+				LASPoint &pnt = datasetVegterain->m_lasRectangles[idx].m_lasPoints[pntIdx];
+				int classType = pnt.m_classify;
+				double dis = resultSet.m_indices_dists[i].second;
+				if (classType>elcDanger&&classType<elcDangerEnd)
+				{
+					if (dis<distance[0] && classType>elcDanger + 1)
+					{
+						pnt.m_classify = elcDangerLevel1;
+						SetPointColorLevel(pnt,3);
+					}
+					else if (dis<distance[1] && classType>elcDanger + 2)
+					{
+						pnt.m_classify = elcDangerLevel2;
+						SetPointColorLevel(pnt,2);
+					}
+					else if (dis<distance[2] && classType>elcDanger + 3)
+					{
+						pnt.m_classify = elcDanger;
+						SetPointColorLevel(pnt, 1);
+					}
+				}
+				else
+				{
+					double dis = resultSet.m_indices_dists[i].second;
+					if (dis<distance[0])
+					{
+						pnt.m_classify = elcDangerLevel1;
+						SetPointColorLevel(pnt,3);
+					}
+					else if (dis<distance[1])
+					{
+						pnt.m_classify = elcDangerLevel2;
+						SetPointColorLevel(pnt,2);
+					}
+					else if (dis<distance[2])
+					{
+						pnt.m_classify = elcDangerLevel3;
+						SetPointColorLevel(pnt, 1);
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+long LASDangerPointsFlannBlock::LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D pnt, 
+	kd_tree &treeLine, const LASIndex treeIdx, ILASDataset* dataset)
+{
+	double query_pt[3] = { pnt.x, pnt.y, pnt.z };
+	const size_t num_results = 1;
+	size_t ret_index;
+	double out_dist_sqr;
+	KNNResultSet<double> resultSet(num_results);
+	resultSet.init(&ret_index, &out_dist_sqr);
+	treeLine.findNeighbors(resultSet, &query_pt[0], SearchParams(10));
+
+	LASPoint &lasPnt = dataset->m_lasRectangles[treeIdx.rectangle_idx].m_lasPoints[treeIdx.point_idx_inRect];
+	int classType = lasPnt.m_classify;
+	double dis = out_dist_sqr;
+
+	omp_set_lock(&mutelock);
+	if (classType>elcDanger&&classType<elcDangerEnd)
+	{
+		if (dis<distance[0] && classType>elcDanger + 1)
+		{
+			lasPnt.m_classify = elcDangerLevel1;
+			SetPointColorLevel(lasPnt, 3);
+		}
+		else if (dis<distance[1] && classType>elcDanger + 2)
+		{
+			lasPnt.m_classify = elcDangerLevel2;
+			SetPointColorLevel(lasPnt, 2);
+		}
+		else if (dis<distance[2] && classType>elcDanger + 3)
+		{
+			lasPnt.m_classify = elcDanger;
+			SetPointColorLevel(lasPnt, 1);
+		}
+	}
+	else
+	{
+		if (dis<distance[0])
+		{
+			lasPnt.m_classify = elcDangerLevel1;
+			SetPointColorLevel(lasPnt, 3);
+		}
+		else if (dis<distance[1])
+		{
+			lasPnt.m_classify = elcDangerLevel2;
+			SetPointColorLevel(lasPnt, 2);
+		}
+		else if (dis<distance[2])
+		{
+			lasPnt.m_classify = elcDangerLevel3;
+			SetPointColorLevel(lasPnt, 1);
+		}
+	}
+	omp_unset_lock(&mutelock);
+	return 0;
+}
+
+long LASDangerPointsFlannBlock::LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain)
+{
+	int rs = 0;
+	int numLineRects = datasetLine->m_numRectangles;
+	for (int i = 0; i<numLineRects; ++i)
+	{
+		int numPntInRect = datasetLine->m_lasRectangles[i].m_lasPoints_numbers;
+		for (int j = 0; j<numPntInRect; ++j)
+		{
+			printf("\r%d-%d", numPntInRect, j);
+			const Point3D linePnt = datasetLine->m_lasRectangles[i].m_lasPoints[j].m_vec3d;
+			rs = rs | LASDangerPoints_PerPoint(distance, &linePnt, datasetVegterain);
+		}
+		printf("\n");
+	}
+	return rs;
+	return 0;
+}
+
+long LASDangerPointsFlannBlock::LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain)
+{
+	int rs = 0;
+	int numLineRects = datasetLine->m_numRectangles;
+	for (int i = 0; i<numLineRects; ++i)
+	{
+		int numPntInRect = datasetLine->m_lasRectangles[i].m_lasPoints_numbers;
+		for (int j = 0; j<numPntInRect; ++j)
+		{
+			const Point3D linePnt = datasetLine->m_lasRectangles[i].m_lasPoints[j].m_vec3d;
+			rs = rs | LASDangerPoints_PerPoint(distance, dangerSectionNumber, &linePnt, datasetVegterain);
+		}
+	}
+	printf("\n");
+
+	//trim to elcDanger to export and process
+	for (int i = 0; i<datasetVegterain->m_numRectangles; ++i)
+	{
+		int numPntInRect = datasetVegterain->m_lasRectangles[i].m_lasPoints_numbers;
+		for (int j = 0; j<numPntInRect; ++j)
+		{
+			LASPoint &pnt = datasetVegterain->m_lasRectangles[i].m_lasPoints[j];
+			int classType = pnt.m_classify;
+			if (classType>elcDanger&&classType<elcDangerEnd) {
+				pnt.m_classify = elcDanger;
+			}
+		}
+	}
+
+	return rs;
+}
+
+long LASDangerPointsFlannBlock::LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset, double segDis, Point2D* ptTower, std::vector<LASIndex> &pntIdx)
+{
+	try
+	{
+		Point3Ds  ptLine;
+		std::vector<LASIndex> lineIdx, treeIdx;
+		//try memory comsume
+		for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
+		{
+			const LASIndex &lasIdx = dataset->m_LASPointID[i];
+			const LASPoint &lasPnt = dataset->m_lasRectangles[lasIdx.rectangle_idx].m_lasPoints[lasIdx.point_idx_inRect];
+			if (lasPnt.m_classify == elcLine)
+			{
+				ptLine.push_back(lasPnt.m_vec3d);
+				lineIdx.push_back(lasIdx);
+			}
+			else if (lasPnt.m_classify == elcVegetation)
+			{
+				treeIdx.push_back(lasIdx);
+			}
+		}
+
+		//construct kdtree from the dataset
+		typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
+		const PCAdaptor pcAdaptorLinePnts(ptLine);
+
+		typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor, 3> kd_tree;
+		kd_tree treeLineIndex(3, pcAdaptorLinePnts, KDTreeSingleIndexAdaptorParams(10));
+		treeLineIndex.buildIndex();
+		omp_init_lock(&mutelock);
+#pragma omp parallel for
+		for (int i = 0; i < treeIdx.size(); ++i)
+		{
+			const LASIndex &lasIdx = treeIdx[i];
+			const Point3D &lasPnt = dataset->m_lasRectangles[lasIdx.rectangle_idx].m_lasPoints[lasIdx.point_idx_inRect].m_vec3d;
+			LASDangerPoints_PerPoint(distance, dangerSectionNumber, lasPnt, treeLineIndex, treeIdx[i], dataset);
+		}
+		omp_destroy_lock(&mutelock);
+		//clear memory 
+		lineIdx.clear();
+
+		//danger points represent
+		Point3Ds ptDanger;
+		std::vector<LASIndex> dangerIdx;
+		for (int i = 0; i < treeIdx.size(); ++i)
+		{
+			const LASIndex &lasIdx = treeIdx[i];
+			try {
+				LASPoint &lasPnt = dataset->m_lasRectangles[lasIdx.rectangle_idx].m_lasPoints[lasIdx.point_idx_inRect];
+				printf("\r%d %d %d", i, lasIdx.rectangle_idx, lasIdx.point_idx_inRect);
+				if (lasPnt.m_classify>elcDanger && lasPnt.m_classify<elcDangerEnd)
+				{
+					dangerIdx.push_back(lasIdx);
+					lasPnt.m_classify = elcDanger;
+					ptDanger.push_back(lasPnt.m_vec3d);
+				}
+			}
+			catch (exception e)
+			{
+				printf("%d %d %d\n",i, lasIdx.rectangle_idx, lasIdx.point_idx_inRect);
+			}
+
+		}
+		treeIdx.clear();
+		int *type = new int[ptDanger.size()];
+		LasAlgorithm::PointCloudSegment pntCloudSeg;
+		int segNumber = pntCloudSeg.PointCloudSegment_DBScan(ptDanger, type, segDis);
+
+		//vector is sequence
+		vector<int> typePntNumber,idxType;
+		vector<double> disType;
+		typePntNumber.resize(segNumber);disType.resize(segNumber);idxType.resize(segNumber);
+		memset(&typePntNumber, 0, sizeof(int)*segNumber);
+		memset(&typePntNumber, _MAX_LIMIT_, sizeof(double)*segNumber);
+
+		//select a represent point for each seg
+		for (int i = 0; i < ptDanger.size(); ++i)
+		{
+			int tpIdx = type[i];typePntNumber[tpIdx]++;
+			double query_pt[3] = { ptDanger[i].x, ptDanger[i].y, ptDanger[i].z };
+
+			const size_t num_results = 1;
+			size_t ret_index;
+			double out_dist_sqr;
+			KNNResultSet<double> resultSet(num_results);
+			resultSet.init(&ret_index, &out_dist_sqr);
+			treeLineIndex.findNeighbors(resultSet, &query_pt[0], SearchParams(10));
+			if (out_dist_sqr < disType[tpIdx]) idxType[tpIdx] = i;
+		}
+
+		//get represent danger points
+		//std::for_each(typePntNumber[0], typePntNumber[segNumber - 1], [&pntIdx, &cidx, lineIdx](int n) {if (n > 5) { pntIdx.push_back(lineIdx[cidx]); }cidx++; });
+		for (int i = 0; i < segNumber; ++i)
+		{
+			if (typePntNumber[i] > 5) { pntIdx.push_back(lineIdx[idxType[i]]); }
+		}
+
+		delete[]type; type = nullptr;
+	}
+	catch (bad_alloc e)
+	{
+		printf("%s\n", e.what());
+		return -1;
+	}
 	return 0;
 }
 
@@ -378,7 +717,6 @@ long LASFallingTreesDangerPoints::LASDangerPoints_FllingTree_PrePoint(float* dis
 		printf("plz input 3 number range\n");
 		return -1;
 	}
-	
 	Point3D pntGround;
 	pntGround.x = pnt->x;
 	pntGround.y = pnt->y;
@@ -509,11 +847,10 @@ long LASDangerPointsMergeArrgegate::LASDangerExtract(ILASDataset* lasDataset, Po
 long LASDangerPointsMergeArrgegate::LASDangerExtractLinePoints(ILASDataset *lineDataset,
 	Point3Ds dangerPnts, Point3Ds &linePnts)
 {
-	//ÊûÑÂª∫Ê†ëÁªìÊûÑ
+	//ππΩ® ˜Ω·ππ
 	const PCAdaptor pcAdaptorPnts(dangerPnts);
 	kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeIndex.buildIndex();
-
 	const size_t num_results = 1;
 	size_t ret_index;
 	double out_dist_sqr;
@@ -542,7 +879,7 @@ long LASDangerPointsMergeArrgegate::LASDangerExtractLinePoints(ILASDataset *line
 
 long LASDangerPointsMergeArrgegate::LASDangerAggregate(Point3Ds dangerPnts, int *type, float knnRange)
 {
-	PointCloudSegment segmentAlg;
+	LasAlgorithm::PointCloudSegment segmentAlg;
 	return segmentAlg.PointCloudSegment_DBScan(dangerPnts, type, knnRange);
 }
 
@@ -553,7 +890,7 @@ long LASDangerPointsMergeArrgegate::LASDangerMerge(Point3Ds dangerPnts, int *typ
 	double *distance = new double[typeNumbers];
 	for (int i = 0; i < typeNumbers; ++i)
 	{
-		distance[i] = _MAX_LIMIT_;//ÂàùÂßãÂÄº
+		distance[i] = _MAX_LIMIT_;//≥ı º÷µ
 		correspondPairs[i] = 0;
 	}
 	for (int i = 0; i < numberPnts; ++i)

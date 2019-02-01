@@ -1,6 +1,6 @@
 #pragma once
 /*****************************************************************************
-* @brief : å‡ ä½•å½¢çŠ¶çš„å®šä¹‰
+* @brief : ¼¸ºÎĞÎ×´µÄ¶¨Òå
 * @author : W.W.Frank
 * @date : 2015/11/30 8:21
 * @version : version 1.0
@@ -24,13 +24,12 @@
 using namespace std;
 
 /*****************************************************************************
-* @brief : ç‚¹ä½ç½®çš„å®šä¹‰
+* @brief : µãÎ»ÖÃµÄ¶¨Òå
 * @author : W.W.Frank
 * @date : 2015/11/29 14:20
 * @version : version 1.0
 *****************************************************************************/
-//åºŸå¼ƒ
-//Notes By Frank.Wu
+//·ÏÆú
 //struct  vector3D
 //{
 //    vector3D(double x,double y,double z){this->x=x;this->y=y;this->z=z;}
@@ -95,7 +94,7 @@ using namespace std;
 
 namespace GeometryLas {
 	/*****************************************************************************
-	* @brief : ç‚¹é›†çš„å®šä¹‰
+	* @brief : µã¼¯µÄ¶¨Òå
 	* @author : W.W.Frank
 	* @date : 2015/11/30 9:28
 	* @version : version 1.0
@@ -243,7 +242,7 @@ namespace GeometryLas {
 	}
 
 
-	//ä¸‰ç»´ç‚¹
+	//ÈıÎ¬µã
 	template<class T> class Point3_T;
 #define RCPoint3_T const Point3_T<T>&
 
@@ -387,7 +386,7 @@ namespace GeometryLas {
 #endif // _POINT_H_
 
 	/*****************************************************************************
-	* @brief : RECTçŸ©å½¢çš„å®šä¹‰
+	* @brief : RECT¾ØĞÎµÄ¶¨Òå
 	* @author : W.W.Frank
 	* @date : 2015/11/30 8:21
 	* @version : version 1.0
@@ -409,15 +408,15 @@ namespace GeometryLas {
 
 	enum eRectPointRelation
 	{
-		RF_In = 0x00,		// åœ¨çŸ©å½¢å†…
-		RF_OutLeft = 0x01,	// åœ¨çŸ©å½¢å·¦è¾¹
-		RF_OutRight = 0x02,	// åœ¨çŸ©å½¢å³è¾¹
-		RF_OutTop = 0x04,	// åœ¨çŸ©å½¢ä¸Šè¾¹
-		RF_OutBottom = 0x08,// åœ¨çŸ©å½¢ä¸‹è¾¹
-		RF_OnLeft = 0x10,	// åœ¨çŸ©å½¢å·¦è¾¹ç•Œä¸Šï¼ŒåŒ…æ‹¬å»¶é•¿çº¿
-		RF_OnRight = 0x20,	// åœ¨çŸ©å½¢å³è¾¹ç•Œä¸Š
-		RF_OnTop = 0x40,	// åœ¨çŸ©å½¢ä¸Šè¾¹ç•Œä¸Š
-		RF_OnBottom = 0x80, // åœ¨çŸ©å½¢ä¸‹è¾¹ç•Œä¸Š
+		RF_In = 0x00,	// ÔÚ¾ØĞÎÄÚ
+		RF_OutLeft = 0x01,	// ÔÚ¾ØĞÎ×ó±ß
+		RF_OutRight = 0x02,	// ÔÚ¾ØĞÎÓÒ±ß
+		RF_OutTop = 0x04,	// ÔÚ¾ØĞÎÉÏ±ß
+		RF_OutBottom = 0x08,	// ÔÚ¾ØĞÎÏÂ±ß
+		RF_OnLeft = 0x10,	// ÔÚ¾ØĞÎ×ó±ß½çÉÏ£¬°üÀ¨ÑÓ³¤Ïß
+		RF_OnRight = 0x20, // ÔÚ¾ØĞÎÓÒ±ß½çÉÏ
+		RF_OnTop = 0x40, // ÔÚ¾ØĞÎÉÏ±ß½çÉÏ
+		RF_OnBottom = 0x80, // ÔÚ¾ØĞÎÏÂ±ß½çÉÏ
 	};
 
 	template<class T>
@@ -557,19 +556,19 @@ namespace GeometryLas {
 		maxy = max(r1.maxy, r2.maxy);
 	}
 	/********************************************************************
-	*  ç”¨äºç‚¹ä¸çŸ©å½¢å…³ç³»çš„æ ‡è®°
+	*  ÓÃÓÚµãÓë¾ØĞÎ¹ØÏµµÄ±ê¼Ç
 	********************************************************************/
 	//enum eRectPointRelation
 	//{
-	//    RF_In		= 0x00,	// åœ¨çŸ©å½¢å†…
-	//    RF_OutLeft	= 0x01,	// åœ¨çŸ©å½¢å·¦è¾¹
-	//    RF_OutRight	= 0x02,	// åœ¨çŸ©å½¢å³è¾¹
-	//    RF_OutTop	= 0x04,	// åœ¨çŸ©å½¢ä¸Šè¾¹
-	//    RF_OutBottom= 0x08,	// åœ¨çŸ©å½¢ä¸‹è¾¹
-	//    RF_OnLeft	= 0x10,	// åœ¨çŸ©å½¢å·¦è¾¹ç•Œä¸Šï¼ŒåŒ…æ‹¬å»¶é•¿çº¿
-	//    RF_OnRight	= 0x20, // åœ¨çŸ©å½¢å³è¾¹ç•Œä¸Š
-	//    RF_OnTop	= 0x40, // åœ¨çŸ©å½¢ä¸Šè¾¹ç•Œä¸Š
-	//    RF_OnBottom	= 0x80, // åœ¨çŸ©å½¢ä¸‹è¾¹ç•Œä¸Š
+	//    RF_In		= 0x00,	// ÔÚ¾ØĞÎÄÚ
+	//    RF_OutLeft	= 0x01,	// ÔÚ¾ØĞÎ×ó±ß
+	//    RF_OutRight	= 0x02,	// ÔÚ¾ØĞÎÓÒ±ß
+	//    RF_OutTop	= 0x04,	// ÔÚ¾ØĞÎÉÏ±ß
+	//    RF_OutBottom= 0x08,	// ÔÚ¾ØĞÎÏÂ±ß
+	//    RF_OnLeft	= 0x10,	// ÔÚ¾ØĞÎ×ó±ß½çÉÏ£¬°üÀ¨ÑÓ³¤Ïß
+	//    RF_OnRight	= 0x20, // ÔÚ¾ØĞÎÓÒ±ß½çÉÏ
+	//    RF_OnTop	= 0x40, // ÔÚ¾ØĞÎÉÏ±ß½çÉÏ
+	//    RF_OnBottom	= 0x80, // ÔÚ¾ØĞÎÏÂ±ß½çÉÏ
 	//};
 
 	template<class T>
@@ -582,13 +581,13 @@ namespace GeometryLas {
 		if (r.minx == r.maxx && dis1 < tolerance && dis2 < tolerance)
 			return b;
 
-		if (dis1 < dis2 && dis1 < tolerance)		 // åœ¨å·¦è¾¹ç•Œä¸Š
+		if (dis1 < dis2 && dis1 < tolerance)		 // ÔÚ×ó±ß½çÉÏ
 			b |= RF_OnLeft;
-		else if (dis1 > dis2 && dis2 < tolerance) // åœ¨å³è¾¹ç•Œä¸Š
+		else if (dis1 > dis2 && dis2 < tolerance) // ÔÚÓÒ±ß½çÉÏ
 			b |= RF_OnRight;
-		else if (x < r.minx)						 // åœ¨å·¦è¾¹
+		else if (x < r.minx)						 // ÔÚ×ó±ß
 			b |= RF_OutLeft;
-		else if (x > r.maxx)					 // åœ¨å³è¾¹
+		else if (x > r.maxx)					 // ÔÚÓÒ±ß
 			b |= RF_OutRight;
 
 		dis1 = abs(y - r.miny);
@@ -596,56 +595,56 @@ namespace GeometryLas {
 		if (r.miny == r.maxy && dis1 < tolerance && dis2 < tolerance)
 			return b;
 
-		if (dis1 < dis2 && dis1 < tolerance)		 // åœ¨ä¸Šè¾¹ç•Œä¸Š
+		if (dis1 < dis2 && dis1 < tolerance)		 // ÔÚÉÏ±ß½çÉÏ
 			b |= RF_OnTop;
-		else if (dis1 > dis2 && dis2 < tolerance) // åœ¨ä¸‹è¾¹ç•Œä¸Š
+		else if (dis1 > dis2 && dis2 < tolerance) // ÔÚÏÂ±ß½çÉÏ
 			b |= RF_OnBottom;
-		else if (y > r.maxy)					 // åœ¨ä¸Šè¾¹
+		else if (y > r.maxy)					 // ÔÚÉÏ±ß
 			b |= RF_OutBottom;
-		else if (y < r.miny)						 // åœ¨ä¸‹è¾¹
+		else if (y < r.miny)						 // ÔÚÏÂ±ß
 			b |= RF_OutTop;
 
 		return b;
 	}
 
 	/********************************************************************
-	*  åˆ©ç”¨RectPointRelationæ ‡è®°æ¥å¸®åŠ©åˆ¤æ–­ç‚¹ä¸çŸ©å½¢çš„å…³ç³»
+	*  ÀûÓÃRectPointRelation±ê¼ÇÀ´°ïÖúÅĞ¶ÏµãÓë¾ØĞÎµÄ¹ØÏµ
 	********************************************************************/
 	class RectPointRelationJudge
 	{
 	public:
 		/*
-		* æ˜¯å¦åœ¨å·¦è¾¹ç•Œä¸Šï¼ŒåŒ…æ‹¬é¡¶ç‚¹å’Œå»¶é•¿çº¿
+		* ÊÇ·ñÔÚ×ó±ß½çÉÏ£¬°üÀ¨¶¥µãºÍÑÓ³¤Ïß
 		*/
 		static bool IsOnLeftEdge(int rel) { return (rel & RF_OnLeft) == RF_OnLeft; }
 		/*
-		* æ˜¯å¦åœ¨å³è¾¹ç•Œä¸Šï¼ŒåŒ…æ‹¬é¡¶ç‚¹å’Œå»¶é•¿çº¿
+		* ÊÇ·ñÔÚÓÒ±ß½çÉÏ£¬°üÀ¨¶¥µãºÍÑÓ³¤Ïß
 		*/
 		static bool IsOnRightEdge(int rel) { return (rel & RF_OnRight) == RF_OnRight; }
 		/*
-		* æ˜¯å¦åœ¨ä¸Šè¾¹ç•Œä¸Šï¼ŒåŒ…æ‹¬é¡¶ç‚¹å’Œå»¶é•¿çº¿
+		* ÊÇ·ñÔÚÉÏ±ß½çÉÏ£¬°üÀ¨¶¥µãºÍÑÓ³¤Ïß
 		*/
 		static bool IsOnTopEdge(int rel) { return (rel & RF_OnTop) == RF_OnTop; }
 		/*
-		* æ˜¯å¦åœ¨ä¸‹è¾¹ç•Œä¸Šï¼ŒåŒ…æ‹¬é¡¶ç‚¹å’Œå»¶é•¿çº¿
+		* ÊÇ·ñÔÚÏÂ±ß½çÉÏ£¬°üÀ¨¶¥µãºÍÑÓ³¤Ïß
 		*/
 		static bool IsOnBottomEdge(int rel) { return (rel & RF_OnBottom) == RF_OnBottom; }
 		/*
-		* æ˜¯å¦åœ¨çŸ©å½¢å†…ï¼Œä¸åŒ…æ‹¬è¾¹ç•Œ
+		* ÊÇ·ñÔÚ¾ØĞÎÄÚ£¬²»°üÀ¨±ß½ç
 		*/
 		static bool IsInRect(int rel) { return rel == RF_In; }
 		/*
-		* æ˜¯å¦åœ¨çŸ©å½¢å¤–
+		* ÊÇ·ñÔÚ¾ØĞÎÍâ
 		*/
 		static bool IsOutRect(int rel) { return (rel & 0x0F) != 0; }
 		/*
-		* æ˜¯å¦åœ¨çŸ©å½¢è¾¹ç•Œä¸Šï¼Œä¸åŒ…æ‹¬è¾¹ç•Œå»¶é•¿çº¿ï¼Œä¸åŒ…æ‹¬é¡¶ç‚¹
+		* ÊÇ·ñÔÚ¾ØĞÎ±ß½çÉÏ£¬²»°üÀ¨±ß½çÑÓ³¤Ïß£¬²»°üÀ¨¶¥µã
 		*/
 		static bool IsOnEdge(int rel) { return !IsInRect(rel) && !IsOutRect(rel); }
 		/*
-		* æ˜¯å¦åœ¨çŸ©å½¢è¾¹ç•Œä¸Šï¼Œä¸åŒ…æ‹¬è¾¹ç•Œå»¶é•¿çº¿ï¼Œä¸åŒ…æ‹¬é¡¶ç‚¹
-		* !!! è°ƒç”¨è€…è‡ªå·±ç¡®ä¿ä¸åœ¨é¡¶ç‚¹ä¸Š
-		* @param return : ä¸åœ¨è¾¹ç•Œä¸Šè¿”å›0ï¼Œå·¦è¾¹ç•Œè¿”å›1ï¼Œå³è¾¹ç•Œè¿”å›2ï¼Œä¸Šè¾¹ç•Œè¿”å›3ï¼Œä¸‹è¾¹ç•Œè¿”å›4
+		* ÊÇ·ñÔÚ¾ØĞÎ±ß½çÉÏ£¬²»°üÀ¨±ß½çÑÓ³¤Ïß£¬²»°üÀ¨¶¥µã
+		* !!! µ÷ÓÃÕß×Ô¼ºÈ·±£²»ÔÚ¶¥µãÉÏ
+		* @param return : ²»ÔÚ±ß½çÉÏ·µ»Ø0£¬×ó±ß½ç·µ»Ø1£¬ÓÒ±ß½ç·µ»Ø2£¬ÉÏ±ß½ç·µ»Ø3£¬ÏÂ±ß½ç·µ»Ø4
 		*/
 		static int OnEdgeNo(int rel)
 		{
@@ -663,12 +662,12 @@ namespace GeometryLas {
 			return 0;
 		}
 		/*
-		* ç‚¹æ‰€åœ¨çš„çŸ©å½¢é¡¶ç‚¹åºå·
-		* @param return : æ²¡åœ¨å®šç‚¹ä¸Šä¸º0ï¼Œå·¦ä¸Šè§’é¡¶ç‚¹ä¸º1ï¼Œå³ä¸Šè§’é¡¶ç‚¹ä¸º2ï¼Œå³ä¸‹è§’é¡¶ç‚¹ä¸º3ï¼Œå·¦ä¸‹è§’é¡¶ç‚¹ä¸º4
+		* µãËùÔÚµÄ¾ØĞÎ¶¥µãĞòºÅ
+		* @param return : Ã»ÔÚ¶¨µãÉÏÎª0£¬×óÉÏ½Ç¶¥µãÎª1£¬ÓÒÉÏ½Ç¶¥µãÎª2£¬ÓÒÏÂ½Ç¶¥µãÎª3£¬×óÏÂ½Ç¶¥µãÎª4
 		*/
 		static int OnVertexNo(int rel)
 		{
-			if ((rel & 0xF0) != 0) // è‡³å°‘åœ¨è¾¹ç•Œå»¶é•¿çº¿ä¸Š
+			if ((rel & 0xF0) != 0) // ÖÁÉÙÔÚ±ß½çÑÓ³¤ÏßÉÏ
 			{
 				if ((rel & RF_OnLeft) == RF_OnLeft)
 				{
@@ -691,7 +690,7 @@ namespace GeometryLas {
 #endif
 
 	/*****************************************************************************
-	* @brief : æ–œçŸ©å½¢çš„å®šä¹‰
+	* @brief : Ğ±¾ØĞÎµÄ¶¨Òå
 	* @author : W.W.Frank
 	* @date : 2015/11/30 9:27
 	* @version : version 1.0
@@ -708,7 +707,7 @@ namespace GeometryLas {
 #endif
 
 	/*****************************************************************************
-	* @brief : AABBæœ€å°åŒ…å›´ç›’çš„å®šä¹‰
+	* @brief : AABB×îĞ¡°üÎ§ºĞµÄ¶¨Òå
 	* @author : W.W.Frank
 	* @date : 2015/11/30 16:37
 	* @version : version 1.0
@@ -721,11 +720,11 @@ namespace GeometryLas {
 	{
 	public:
 		/*
-		* xyzè½´åæ ‡æœ€å°ç‚¹
+		* xyzÖá×ø±ê×îĞ¡µã
 		*/
 		Point3D PointMin;
 		/*
-		* xyzè½´åæ ‡æœ€å¤§ç‚¹
+		* xyzÖá×ø±ê×î´óµã
 		*/
 		Point3D PointMax;
 
@@ -755,7 +754,7 @@ namespace GeometryLas {
 		void Assign(const Point3D& min, const Point3D& max) { PointMin = min; PointMax = max; }
 		void Assign(double mx, double my, double mz, double Mx, double My, double Mz) { PointMin.x = mx; PointMin.y = my; PointMin.z = mz; PointMax.x = Mx; PointMax.y = My; PointMax.z = Mz; }
 		/*
-		* æ ¹æ®ä¼ å…¥çš„ç‚¹é›†è®¡ç®—å¤–åŒ…
+		* ¸ù¾İ´«ÈëµÄµã¼¯¼ÆËãÍâ°ü
 		*/
 		void Assign(const Point2Ds& pts);
 		/*
@@ -791,7 +790,7 @@ namespace GeometryLas {
 
 		void Union(const AABB& rhs);
 		/*
-		* è¿”å›8ä¸ªé¡¶ç‚¹æ•°ç»„ï¼Œé¡¶ç‚¹æ’åˆ—é¡ºåºå¦‚å›¾
+		* ·µ»Ø8¸ö¶¥µãÊı×é£¬¶¥µãÅÅÁĞË³ĞòÈçÍ¼
 		<pre>
 		   1-----2
 		  /|    /|
@@ -804,15 +803,15 @@ namespace GeometryLas {
 		</pre>
 		*/
 		void GetCorners(Point3D  _Corners[8]) const;
-		//æ–°æ·»åŠ ï¼Œé€‰æ‹©æ˜¯å¿½ç•¥é«˜ç¨‹ cz 090512***********************************
+		//ĞÂÌí¼Ó£¬Ñ¡ÔñÊÇºöÂÔ¸ß³Ì cz 090512***********************************
 		bool IsIntersect2D(const AABB& b2) const;
 		bool IsInBox2D(const Point3D& pt, bool includeBound = true) const;
-		//æ–°æ·»åŠ ï¼Œé€‰æ‹©æ˜¯å¿½ç•¥é«˜ç¨‹ cz 090512*****************************************
+		//ĞÂÌí¼Ó£¬Ñ¡ÔñÊÇºöÂÔ¸ß³Ì cz 090512*****************************************
 
 		bool IsIntersect(const AABB& b2, bool ignorez = false) const;
 		AABB Intersection(const AABB& b2) const;
 		/*
-		* è®¡ç®—åŒ…å›´ç›’ä½“ç§¯
+		* ¼ÆËã°üÎ§ºĞÌå»ı
 		*/
 		inline double Volume(void) const
 		{
@@ -820,7 +819,7 @@ namespace GeometryLas {
 			return diff.x * diff.y * diff.z;
 		}
 		/*
-		* åˆ¤æ–­ç‚¹æ˜¯å¦åœ¨åŒ…å›´ç›’å†…
+		* ÅĞ¶ÏµãÊÇ·ñÔÚ°üÎ§ºĞÄÚ
 		*/
 		bool IsInBox(const Point3D& pt, bool includeBound = true, bool ignoreZ = false) const;
 		bool IsInBox(const Point3D& pt, double tolorance, bool ignoreZ = false) const;

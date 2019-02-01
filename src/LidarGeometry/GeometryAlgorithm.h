@@ -3,117 +3,289 @@
 #define _GEOMETRY_ALGORITHMS_H_
 
 #include "Geometry.h"
-using namespace GeometryLas;
+namespace GeometryLas {
+	class  GeometryRelation
+	{
+	public:
+		static int IsPointOnPolyline(double x, double y, const double* polyline, int doubleArrayCnt,
+			double tolerance, bool isClosed, int offset = sizeof(Point3D) / sizeof(double));
+		/*
+		* ÅĞ¶ÏµãÊÇ·ñÔÚÏß¶ÎÉÏ£¨¿Õ¼ä¹ØÏµ£ºline contains point£©
+		*/
+		static bool IsPointOnLine(double x, double y, double x0, double y0, double x1, double y1,
+			double tolerance);
+		/*
+		* ÅĞ¶ÏµãÊÇ·ñÔÚÖ±ÏßÉÏ£¨¿Õ¼ä¹ØÏµ£ºline contains point£©
+		*/
+		static bool IsPointOnBeeline(double x, double y, double x0, double y0, double x1, double y1,
+			double tolerance);
+		/*
+		* ÅĞ¶ÏµãÊÇ·ñÔÚ¶à±ßĞÎÀï£¬°üÀ¨ÔÚ±ß½çÉÏ£¨¿Õ¼ä¹ØÏµ£ºregion contains point£©
+		* Ë³Ê±Õë¼ÆËãÃ¿¸ö±ß
+		* @param allowonisin : ÊÇ·ñÈÏÎªÔÚ±ß½çÉÏÒ²ËãÔÚ±ß½çÄÚ£¬Îªtrue£¬ÔòtoleranceÓĞĞ§£¬·ñÔòÎŞĞ§
+		*/
+		static bool IsPointInPolygon(double x, double y, const double* polygon, double doubleArrayCnt,
+			bool allowonisin, double tolerance, int offset = sizeof(Point3D) / sizeof(double));
+		/*
+		* ÅĞ¶ÏµãÊÇ·ñÔÚ¶à±ßĞÎÀï
+		*/
+		static bool IsPointInPolygon(double x, double y, const double* polygon,
+			int doubleArrayCnt, int offset = sizeof(Point3D) / sizeof(double));
+		static bool IsPointInPolygon(double x, double y, const Point2Ds& polygon);
+		/*
+		* used for IsPointInPolygon follows
+		*/
+		static double IsLeft(double startx, double starty, double endx, double endy, double x, double y);
+		/*
+		* µãÊÇ·ñÔÚ¾ØĞÎ±ß½çÉÏ£¨¿Õ¼ä¹ØÏµ£ºlines contains point£©
+		*/
+		static bool IsPointOnRect(double x, double y, double minx, double miny,
+			double maxx, double maxy, double tolerance);
+		/*
+		* ÅĞ¶ÏÕÛÏß¡¢¶à±ßĞÎÊÇ·ñÔÚ¾ØĞÎÀï£¬°üÀ¨¶¥µãÔÚ¾ØĞÎ±ß½çÉÏ£¨¿Õ¼ä¹ØÏµ£ºregion contains region, region contains lines£©
+		*/
+		static bool IsPolylineInRect(const double* polyline, int doubleArrayCnt, double minx,
+			double miny, double maxx, double maxy, int offset = sizeof(Point3D) / sizeof(double));
+		/*
+		* ÅĞ¶ÏÏß¶ÎÓë¾ØĞÎ±ß½çÊÇ·ñÏà½»£¬°üÀ¨±ß½çµã£¨¿Õ¼ä¹ØÏµ£ºline crosses line£©
+		*/
+		static bool IsLineIntersectRect(double x0, double y0, double x1, double y1, double xmin,
+			double ymin, double xmax, double ymax);
+		/*
+		* ÅĞ¶Ï¾ØĞÎ±ß½çÓëÕÛÏßÊÇ·ñÏà½»£¬°üÀ¨±ß½çµã£¨¿Õ¼ä¹ØÏµ£ºline crosses line£©
+		*/
+		static bool IsRectIntersectPolyline(double xmin, double ymin, double xmax,
+			double ymax, const double* polyline, int doubleArrayCnt, bool isClosed,
+			int offset = sizeof(Point3D) / sizeof(double));
+		static bool IsPointInRect(int x, int y, int rect_x1, int rect_y1, int rect_x2, int rect_y2);
+		static bool IsPointInRect(double x, double y, double rect_x1, double rect_y1, double rect_x2, double rect_y2);
+		/*
+		* ÅĞ¶ÏÕı¾ØĞÎÓëĞ±¾ØĞÎÊÇ·ñÏà½»
+		*/
+		static bool IsRectIntersectRect(const Rect2D& rect1, const Rect2D& rect2);
+		static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts);
+		static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts,
+			const Rect2D& slantingRect);
 
-class  GeometryRelation
-{
-public:
-	static int IsPointOnPolyline(double x, double y, const double* polyline, int doubleArrayCnt,
-		double tolerance, bool isClosed, int offset = sizeof(Point3D) / sizeof(double));
-	/*
-	* åˆ¤æ–­ç‚¹æ˜¯å¦åœ¨çº¿æ®µä¸Šï¼ˆç©ºé—´å…³ç³»ï¼šline contains pointï¼‰
-	*/
-	static bool IsPointOnLine(double x, double y, double x0, double y0, double x1, double y1,
-		double tolerance);
-	/*
-	* åˆ¤æ–­ç‚¹æ˜¯å¦åœ¨ç›´çº¿ä¸Šï¼ˆç©ºé—´å…³ç³»ï¼šline contains pointï¼‰
-	*/
-	static bool IsPointOnBeeline(double x, double y, double x0, double y0, double x1, double y1,
-		double tolerance);
-	/*
-	* åˆ¤æ–­ç‚¹æ˜¯å¦åœ¨å¤šè¾¹å½¢é‡Œï¼ŒåŒ…æ‹¬åœ¨è¾¹ç•Œä¸Šï¼ˆç©ºé—´å…³ç³»ï¼šregion contains pointï¼‰
-	* é¡ºæ—¶é’ˆè®¡ç®—æ¯ä¸ªè¾¹
-	* @param allowonisin : æ˜¯å¦è®¤ä¸ºåœ¨è¾¹ç•Œä¸Šä¹Ÿç®—åœ¨è¾¹ç•Œå†…ï¼Œä¸ºtrueï¼Œåˆ™toleranceæœ‰æ•ˆï¼Œå¦åˆ™æ— æ•ˆ
-	*/
-	static bool IsPointInPolygon(double x, double y, const double* polygon, double doubleArrayCnt,
-		bool allowonisin, double tolerance, int offset = sizeof(Point3D) / sizeof(double));
-	/*
-	* åˆ¤æ–­ç‚¹æ˜¯å¦åœ¨å¤šè¾¹å½¢é‡Œ
-	*/
-	static bool IsPointInPolygon(double x, double y, const double* polygon,
-		int doubleArrayCnt, int offset = sizeof(Point3D) / sizeof(double));
-	static bool IsPointInPolygon(double x, double y, const Point2Ds& polygon);
-	/*
-	* used for IsPointInPolygon follows
-	*/
-	static double IsLeft(double startx, double starty, double endx, double endy, double x, double y);
-	/*
-	* ç‚¹æ˜¯å¦åœ¨çŸ©å½¢è¾¹ç•Œä¸Šï¼ˆç©ºé—´å…³ç³»ï¼šlines contains pointï¼‰
-	*/
-	static bool IsPointOnRect(double x, double y, double minx, double miny,
-		double maxx, double maxy, double tolerance);
-	/*
-	* åˆ¤æ–­æŠ˜çº¿ã€å¤šè¾¹å½¢æ˜¯å¦åœ¨çŸ©å½¢é‡Œï¼ŒåŒ…æ‹¬é¡¶ç‚¹åœ¨çŸ©å½¢è¾¹ç•Œä¸Šï¼ˆç©ºé—´å…³ç³»ï¼šregion contains region, region contains linesï¼‰
-	*/
-	static bool IsPolylineInRect(const double* polyline, int doubleArrayCnt, double minx,
-		double miny, double maxx, double maxy, int offset = sizeof(Point3D) / sizeof(double));
-	/*
-	* åˆ¤æ–­çº¿æ®µä¸çŸ©å½¢è¾¹ç•Œæ˜¯å¦ç›¸äº¤ï¼ŒåŒ…æ‹¬è¾¹ç•Œç‚¹ï¼ˆç©ºé—´å…³ç³»ï¼šline crosses lineï¼‰
-	*/
-	static bool IsLineIntersectRect(double x0, double y0, double x1, double y1, double xmin,
-		double ymin, double xmax, double ymax);
-	/*
-	* åˆ¤æ–­çŸ©å½¢è¾¹ç•Œä¸æŠ˜çº¿æ˜¯å¦ç›¸äº¤ï¼ŒåŒ…æ‹¬è¾¹ç•Œç‚¹ï¼ˆç©ºé—´å…³ç³»ï¼šline crosses lineï¼‰
-	*/
-	static bool IsRectIntersectPolyline(double xmin, double ymin, double xmax,
-		double ymax, const double* polyline, int doubleArrayCnt, bool isClosed,
-		int offset = sizeof(Point3D) / sizeof(double));
-	static bool IsPointInRect(int x, int y, int rect_x1, int rect_y1, int rect_x2, int rect_y2);
-	/*
-	* åˆ¤æ–­æ­£çŸ©å½¢ä¸æ–œçŸ©å½¢æ˜¯å¦ç›¸äº¤
-	*/
-	static bool IsRectIntersectRect(const Rect2D& rect1, const Rect2D& rect2);
-	static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts);
-	static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts,const Rect2D& slantingRect);
+		/*
+		* ÇóÁ½¸öÏòÁ¿µÄ¼Ğ½Ç
+		*/
+		static double VectorAngle(const Point3D vec1, const Point3D vec2);
+	};
 
-	/*
-	* æ±‚ä¸¤ä¸ªå‘é‡çš„å¤¹è§’
-	*/
-	static double VectorAngle(const Point3D vec1,const Point3D vec2);
+	/*¾àÀë¼ÆËãº¯Êı*/
+	class  DistanceComputation
+	{
+	public:
+		/*
+		* µãµ½Ö±ÏßµÄ¾àÀëµÄÆ½·½
+		*/
+		static double SquarePointToBeeline(double x, double y, double x0, double y0, double x1, double y1);
+		/*
+		* ¼ÆËãµã¼¯ÖĞËùÓĞµã¼äµÄ¾àÀëÖ®ºÍ£¬Å·ÊÏ¾àÀë
+		*/
+		static double Distance(Point2Ds& pts, bool isclosed);
 
-};
+		/*
+		* ¼ÆËãÁ½µã¼äµÄ¾àÀë
+		*/
+		static double Distance(Point3D pt1, Point3D pt2);
 
-/*è·ç¦»è®¡ç®—å‡½æ•°*/
-class  DistanceComputation
-{
-public:
-	/*
-	* ç‚¹åˆ°ç›´çº¿çš„è·ç¦»çš„å¹³æ–¹
-	*/
-	static double SquarePointToBeeline(double x, double y, double x0, double y0, double x1, double y1);
-	/*
-	* è®¡ç®—ç‚¹é›†ä¸­æ‰€æœ‰ç‚¹é—´çš„è·ç¦»ä¹‹å’Œï¼Œæ¬§æ°è·ç¦»
-	*/
-	static double Distance(Point2Ds& pts, bool isclosed);
+		/*
+		* ¼ÆËãµãµ½ÃæÖ®¼äµÄ¾àÀë
+		*/
+		static double Distance(Point3D pt1, Point3D pl1, Point3D pl2, Point3D pl3);
 
-	/*
-	* è®¡ç®—ä¸¤ç‚¹é—´çš„è·ç¦»
-	*/
-	static double Distance(Point3D pt1, Point3D pt2);
-};
+	};
 
-/*ç‚¹çº¿ç›¸äº¤å‡½æ•°*/
-class  PointJointComputation
-{
-public:
-	/*
-	* ç‚¹(x, y)åˆ°ç›´çº¿(bln0x, bln0y)(bln1x, bln1y)çš„å‚è¶³å çº¿æ®µçš„æ¯”ä¾‹
-	*/
-	static void PointJointBeeline(double x, double y, double bln0x, double bln0y, double bln1x,
-		double bln1y, double& ratio);
-	/*
-	* ç‚¹(x, y)åˆ°ç›´çº¿(bln0x, bln0y)(bln1x, bln1y)çš„å‚è¶³
-	*/
-	static Point2D PointJointBeeline(double x, double y, double bln0x, double bln0y, double bln1x,
-		double bln1y);
-};
+	/*µãÏßÏà½»º¯Êı*/
+	class  PointJointComputation
+	{
+	public:
+		/*
+		* µã(x, y)µ½Ö±Ïß(bln0x, bln0y)(bln1x, bln1y)µÄ´¹×ãÕ¼Ïß¶ÎµÄ±ÈÀı
+		*/
+		static void PointJointBeeline(double x, double y, double bln0x, double bln0y, double bln1x,
+			double bln1y, double& ratio);
+		/*
+		* µã(x, y)µ½Ö±Ïß(bln0x, bln0y)(bln1x, bln1y)µÄ´¹×ã
+		*/
+		static Point2D PointJointBeeline(double x, double y, double bln0x, double bln0y, double bln1x,
+			double bln1y);
+	};
 
-/*æŠ•å½±åæ ‡è½¬æ¢*/
-class  PointProjection
-{
-public:
-	/*ç»çº¬åº¦åæ ‡è½¬æ¢åˆ°æŠ•å½±åæ ‡*/
-	static void PointProjectLatLngToUTM(double lat, double lng, int nZone, double &x, double &y);
-};
+	/*Í¶Ó°×ø±ê×ª»»*/
+	class  PointProjection
+	{
+	public:
+		/*¾­Î³¶È×ø±ê×ª»»µ½Í¶Ó°×ø±ê*/
+		static void PointProjectLatLngToUTM(double lat, double lng, int nZone, double &x, double &y);
+	};
+
+	/*¼¸ºÎ¼ÆËã*/
+	class  GeometryComputation
+	{
+	public:
+		/**
+		* ×îĞ¡¶ş³ËÇúÏßÄâºÏ£¨¶şÎ¬XY£©
+		* @param point  Ïà¶Ô×ø±êÏµÆ½Ãæ×ø±êµã¼¯
+		* @param maxPower  ¶àÏîÊ½×î´ó½×Êı£¨Ãİ£©
+		* @return ¶àÏîÊ½ÏµÊı£¬´ÓµÍµ½¸ß£¨½×Êı´Ó0¿ªÊ¼£©
+		*/
+		//template <typename T, typename T1>
+		//static vector <double> LeastSquare(T point, T1 maxPower);
+		template <typename T, typename T1>
+		static vector <double> LeastSquare(T point, T1 maxPower)
+		{
+			vector <double> factors;
+			int rows = point.size();
+			MatrixXd A(rows, maxPower + 1);
+			VectorXd b(rows);
+			for (int i = 0; i < rows; i++)
+			{
+				for (int j = 0; j < maxPower + 1; j++)
+				{
+					A(i, j) = pow(point[i].x, j);
+				}
+				b(i) = point[i].y;
+			}
+			VectorXd d = A.jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
+			for (size_t k = 0; k < d.rows(); k++)
+			{
+				factors.push_back(d(k));
+			}
+			return factors;
+		}
+
+
+		/**
+		* ¿¹²îÕûÌå×îĞ¡¶ş³ËÇúÏßÄâºÏ£¨¶şÎ¬XY£©(È¥³ı´Ö²îµãµÄÓ°Ïì)
+		* @param points    Ïà¶Ô×ø±êÏµÆ½Ãæ×ø±êµã¼¯(·µ»Ø½á¹ûÖĞ»áÈ¥³ı´Ö²îµã)
+		* @param residual  ÊäÈëÎªµü´úÖÕÖ¹ãĞÖµ£¬·µ»ØÎªÆ½¾ù²Ğ²î
+		* @param maxPower  ¶àÏîÊ½×î´ó½×Êı£¨Ãİ£©
+		* @return ¶àÏîÊ½ÏµÊı£¬´ÓµÍµ½¸ß£¨½×Êı´Ó0¿ªÊ¼£©
+		*/
+		//template <typename T, typename T1, typename T2>
+		//static vector <double> RobustLeastSquare(vector <T> &points, T1 &residual, T2 maxPower);
+		template <typename T, typename T1, typename T2>
+		static vector <double> RobustLeastSquare(vector <T> &points, T1 &residual, T2 maxPower)
+		{
+			int iteration = 0;
+			vector <double> factors;
+			VectorXd F;
+
+			vector <T> tmpPoints;
+			double residualNorm = residual + 1;
+			double thelta0 = 0;
+			while (residualNorm > residual)
+			{
+				int rows = points.size();
+				MatrixXd A(rows, maxPower + 1);
+				VectorXd L(rows);
+				VectorXd EL(rows);
+				for (int i = 0; i < rows; i++)
+				{
+					for (int j = 0; j < maxPower + 1; j++)
+					{
+						A(i, j) = pow(points[i].x, j);
+					}
+					L(i) = points[i].y;
+				}
+				F = A.jacobiSvd(ComputeThinU | ComputeThinV).solve(L);
+				for (size_t i = 0; i < rows; i++)
+				{
+					Point2D knownPoint(points[i].x, points[i].y);
+					EL(i) = GetPointToLineDistance(F, knownPoint);
+				}
+				thelta0 = EL.norm() / sqrt(EL.rows());
+				residualNorm = thelta0;
+
+				for (size_t i = 0; i < EL.rows(); i++)
+				{
+					if (abs(EL(i)) < 3 * thelta0)
+					{
+						tmpPoints.push_back(points[i]);
+					}
+				}
+				if (tmpPoints.size() == points.size())
+				{
+					vector <T>().swap(tmpPoints);
+					break;
+				}
+				vector <T>().swap(points);
+				points = tmpPoints;
+				vector <T>().swap(tmpPoints);
+				iteration++;
+			}
+
+			residual = residualNorm;
+			for (size_t k = 0; k < F.rows(); k++)
+			{
+				factors.push_back(F(k));
+			}
+			return factors;
+		}
+
+		/**
+		* Í¶Ó°µ½XOYÆ½Ãæ
+		* @param pntCloud  ÈıÎ¬µãÔÆ
+		* @return ¶şÎ¬µÄXOY×ø±êÏµÆ½Ãæ×ø±êµã¼¯
+		*/
+		static vector <Point2D> ProjectToXOY(vector<Point3D> pntCloud);
+
+		/**
+		* Í¶Ó°µ½XOYÆ½Ãæ
+		* @param pntCloud  ÈıÎ¬µãÔÆ
+		* @param Opoint    ½¨Á¢×ø±êÏµµÄ×ø±êÔ­µã
+		* @return ¶ÏÃæ×ø±êÏµÆ½Ãæ×ø±êµã¼¯
+		*/
+		static vector <Point2D> ProjectToSection(vector<Point3D> pntCloud, Point3D Opoint);//ÔİÊ±Ã»ÓÃµ½
+
+																						   /**
+																						   * ÒÑÖªÖ±ÏßµÄĞ±ÂÊ·½³Ì£¬Çó½âµãµ½Ö±ÏßµÄ´¹×ã
+																						   * @param lineFactors Ö±Ïß·½³Ì²ÎÊı£¬´ÓµÍ½×µ½¸ß½×
+																						   * @param knownPoint  ÒÑÖªµã
+																						   * @return
+																						   */
+		static Point2D GetFootOfPerpendicular(vector <double> lineFactors, Point2D knownPoint);
+
+		/**
+		* ÒÑÖªÖ±ÏßµÄĞ±ÂÊ·½³Ì£¬Çó½âµãµ½Ö±ÏßµÄ´¹¾à
+		* @param lineFactors Ö±Ïß·½³Ì²ÎÊı£¬´ÓµÍ½×µ½¸ß½×
+		* @param knownPoint  ÒÑÖªµã
+		* @return
+		*/
+		//template <typename T, typename T1>
+		//static double GetPointToLineDistance(T lineFactors, T1 knownPoint);
+		template <typename T, typename T1>
+		static double GetPointToLineDistance(T lineFactors, T1 knownPoint)
+		{
+			double dis = 0;
+			if (lineFactors[1] == 0)
+			{
+				assert(-1);
+			}
+			dis = abs((lineFactors[1] * knownPoint.x - knownPoint.y + lineFactors[0]) / sqrt(pow(lineFactors[1], 2) + 1));
+			return dis;
+		}
+
+		/**
+		* ÒÑÖª¶àÏîÊ½·½³ÌºÍXÇóY
+		* @param lineFactors ¶àÏîÊ½·½³Ì£¬´ÓµÍ½×µ½¸ß½×
+		* @param x
+		* @return
+		*/
+		static double GetYByLineFactors(vector <double> lineFactors, double x);
+
+		/**
+		* ÒÑÖª¶àÏîÊ½·½³Ì¡¢ÒÑÖªx×ø±êºÍXYÆ«ÒÆ×ø±êÇóY×ø±ê
+		* @param x  ÒÑÖªx×ø±ê
+		* @param lineFactors ¶àÏîÊ½·½³Ì£¬´ÓµÍ½×µ½¸ß½×
+		* @param offsetPoint Æ«ÒÆ×ø±ê
+		* @return
+		*/
+		static Point2D GetXYByFactorsOffset(double x, vector <double> lineFactors, Point2D offsetPoint);//ÔİÊ±Ã»ÓÃµ½
+	};
 
 #endif
+}

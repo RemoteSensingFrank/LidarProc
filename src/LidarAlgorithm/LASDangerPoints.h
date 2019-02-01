@@ -1,15 +1,15 @@
 #pragma once
 //
 // Created by wuwei on 18-1-24.
-// emailï¼šwuwei_cug@163.com
+// email£ºwuwei_cug@163.com
 
 #ifndef LASGUI_LASDANGERPOINTS_H
 #define LASGUI_LASDANGERPOINTS_H
 
 #include <vector>
 
-#include "../LidarGeometry/Geometry.h"
-#include "../LidarGeometry/GeometryFlann.h"
+#include "../LidarAlgorithm/Geometry.h"
+#include"../LidarAlgorithm/GeometryFlann.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
 using namespace GeometryLas;
@@ -20,18 +20,16 @@ typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor
 
 
 /**
-* è·å–çº¿è·¯å±é™©ç‚¹ä¿¡æ¯
+* »ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
 */
 class LASDangerPoints {
-
-
 public:
 	/**
-	* æ ¹æ®è·ç¦»è·å–çº¿è·¯å±é™©ç‚¹ä¿¡æ¯
+	* ¸ù¾İ¾àÀë»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
 	* @param distance
 	* @return
 	*/
-	long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
+	virtual long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
 	/**
 	* danger level according distance
@@ -41,20 +39,20 @@ public:
 	* @param datasetVegterain
 	* @return
 	*/
-	long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
+	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
 private:
 	/**
-	* å°†å±é™©ç‚¹åŒºåˆ†å‡ºæ¥å†™å…¥æ–‡ä»¶ä¸­
+	* ½«Î£ÏÕµãÇø·Ö³öÀ´Ğ´ÈëÎÄ¼şÖĞ
 	* @param datasetVegterain
 	* @param pathSplit
 	* @return
-	* deleted by Frank.Wu é€šè¿‡ç›´æ¥é€šè¿‡å†™å‡½æ•°å°†å±é™©ç‚¹å†™å…¥
+	* deleted by Frank.Wu Í¨¹ıÖ±½ÓÍ¨¹ıĞ´º¯Êı½«Î£ÏÕµãĞ´Èë
 	long LADDangerPoints_SplitDanger(ILASDataset* datasetVegterain, const char* pathSplit);
 	*/
 
 	/**
-	* æ£€æµ‹æŸä¸€ä¸ªç‚¹èŒƒå›´
+	* ¼ì²âÄ³Ò»¸öµã·¶Î§
 	* @param distance
 	* @param pnt
 	* @param datasetVegterian
@@ -74,7 +72,7 @@ private:
 
 protected:
 	/**
-	* è·å–å±é™©ç‚¹å¯èƒ½æ‰€åœ¨çš„èŒƒå›´
+	* »ñÈ¡Î£ÏÕµã¿ÉÄÜËùÔÚµÄ·¶Î§
 	* @param pnt
 	* @param distance
 	* @param datasetVegterain
@@ -85,21 +83,23 @@ protected:
 };
 
 /*
-	è·å–çº¿è·¯å±é™©ç‚¹ä¿¡æ¯ï¼Œé€šè¿‡ANNç®—æ³•è¿›è¡ŒåŠ é€Ÿå®ç°ï¼Œç›¸æ¯”äºç®€å•åˆ†å—
-	é‡‡ç”¨kdtreeç®—æ³•èƒ½å¤Ÿæå¤§çš„æé«˜å¤„ç†æ•ˆç‡
-	***ç”±äºAdaptorä»¥åŠç‚¹äº‘ç´¢å¼•çš„æ„å»ºå› æ­¤åœ¨å¤„ç†è¿‡ç¨‹ä¸­éœ€è¦è¾ƒå¤§å†…å­˜***
-	***ä¸€èˆ¬æ¥è¯´éœ€è¦è¶…è¿‡ç‚¹äº‘å¤§å°ä¸¤åˆ°ä¸‰å€å†…å­˜æ‰èƒ½å¤Ÿè¿›è¡Œå¤„ç†å¦åˆ™å¯èƒ½äº§ç”Ÿå†…å­˜ä¸è¶³é”™è¯¯***
+	»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢£¬Í¨¹ıANNËã·¨½øĞĞ¼ÓËÙÊµÏÖ£¬Ïà±ÈÓÚ¼òµ¥·Ö¿é
+	²ÉÓÃkdtreeËã·¨ÄÜ¹»¼«´óµÄÌá¸ß´¦ÀíĞ§ÂÊ
+	***ÓÉÓÚAdaptorÒÔ¼°µãÔÆË÷ÒıµÄ¹¹½¨Òò´ËÔÚ´¦Àí¹ı³ÌÖĞĞèÒª½Ï´óÄÚ´æ***
+	***Ò»°ãÀ´ËµĞèÒª³¬¹ıµãÔÆ´óĞ¡Á½µ½Èı±¶ÄÚ´æ²ÅÄÜ¹»½øĞĞ´¦Àí·ñÔò¿ÉÄÜ²úÉúÄÚ´æ²»×ã´íÎó***
+	Ä¿Ç°ÒÑÆúÓÃ£¬²ÉÓÃ¸ü¼Ó¸ßĞ§µÄ»ìºÏË÷ÒıÄ£Ê½
 	Created by Frank.Wu 2018-07-19
 */
-class LASDangerPointsFlann
+class __declspec(deprecated("** too large memory taken **"))
+LASDangerPointsFlann:public LASDangerPoints
 {
 public:
 	/**
-	* æ ¹æ®è·ç¦»è·å–çº¿è·¯å±é™©ç‚¹ä¿¡æ¯
+	* ¸ù¾İ¾àÀë»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
 	* @param distance
 	* @return
 	*/
-	long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
+	virtual long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
 	/**
 	* danger level according distance
@@ -109,11 +109,11 @@ public:
 	* @param datasetVegterain
 	* @return
 	*/
-	long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
+	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
 private:
 	/**
-	* æ£€æµ‹æŸä¸€ä¸ªç‚¹èŒƒå›´
+	* ¼ì²âÄ³Ò»¸öµã·¶Î§
 	* @param distance
 	* @param pnt
 	* @param treeVege
@@ -132,6 +132,75 @@ private:
 	long LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D* pnt, kd_tree &treeVege, ILASDataset* datasetVegterain);
 };
 
+/*
+	»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢£¬Í¨¹ıBlock ANNËã·¨¼ÓËÙÊµÏÖ£¬
+	ÒÔÇ°µÄËã·¨ÖĞÁíÍâ¹¹ÔìkdtrddµÄAdaptor£¬ÔÚ¹¹ÔìµÄ
+	¹ı³ÌÖĞĞèÒªÖØĞÂ¿ª±ÙÄÚ´æ£¬Ïàµ±ÓÚ½«Êı¾İ¶ÁÈëÄÚ´æÁ½±é
+	Òò´Ë»Ø²úÉú¼«¸ßµÄÄÚ´æÏûºÄ£¬¸Ä½øºóµÄËã·¨¶ÔÃ¿Ò»¿éÊı¾İ
+	¹¹½¨kdtree£¬È»ºó·Ö¿é½øĞĞ±È½ÏºÍ·ÖÎö£¬Ìá¸ßÁË´¦ÀíĞ§ÂÊ
+	½µµÍÁËÄÚ´æÏûºÄ£¬Ö»ÊÇÔÚÊı¾İ¶ÁÈ¡¹ı³ÌÖĞ¹¹½¨Ê÷±È½ÏºÄÊ±
+	Created by Frank.Wu 2018-08-31
+*/
+class LASDangerPointsFlannBlock :public LASDangerPoints
+{
+public:
+	/**
+	* ¸ù¾İ¾àÀë»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
+	* @param distance ¾àÀëÒªÇó
+	* @return ·µ»Ø´íÎó´úÂë
+	*/
+	virtual long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
+
+	/**
+	* danger level according distance
+	* @param distance
+	* @param dangerSectionNumber
+	* @param datasetLine
+	* @param datasetVegterain
+	* @return
+	*/
+	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
+
+	/*
+	* get danger points from the inner classify
+	* @param distance
+	* @param dangerSectionNumber
+	* @param classified dataset
+	*/
+	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset,double range,Point2D* ptTower, std::vector<LASIndex> &pntIdx);
+private:
+	/**
+	* ¼ì²âÄ³Ò»¸öµã·¶Î§
+	* @param distance
+	* @param pnt
+	* @param treeVege
+	* @return
+	*/
+	long LASDangerPoints_PerPoint(float distance, const Point3D* pnt,ILASDataset* datasetVegterain);
+
+	/**
+	* danger level according distance pre point
+	* @param distance
+	* @param dangerSectionNumber
+	* @param pnt
+	* @param datasetVegterian
+	* @return
+	*/
+	long LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D* pnt, ILASDataset* datasetVegterain);
+
+	/**
+	* danger level according distance pre point
+	* @param distance
+	* @param dangerSectionNumber
+	* @param pnt
+	* @param treeVege:kdtree of the dataset
+	* @param treeIdx:las index
+	* @param dataset:dataset
+	* @return
+	*/
+	long LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D pnt,
+		kd_tree &treeLine, const LASIndex treeIdx, ILASDataset* dataset);
+};
 /*
 * detect falling trees
 * */

@@ -98,7 +98,6 @@ header struct is as the code above:
 as usual the size of the header is 277 bytes and the means of each byte is in the code, and be careful that usful data only occupy 225 bytes, so for jump to the data record directly you should seek 227 bytes.   
 
 ```C
-/*����ز��ź�*/s
 enum  eLASEchos
 {
 	eLidarEchoOnly = 0,
@@ -106,24 +105,24 @@ enum  eLASEchos
 	eLidarEchoMidian = 2,
 	eLidarEchoLast = 3
 };
-/*���Ƶ����*/
+
 #pragma pack(1)
 enum  eLASClassification
 {
-	elcCreated			 = 0,	// �����ģ�û�б������
-	elcUnclassified		 = 1,	// �����ģ����޷�ʶ�����ĵ�
-	elcGround			 = 2,	// �����
-	elcLowVegetation	 = 3,	// ����ֲ��
-	elcMediumVegetation  = 4,	// �еȸ߶ȵ�ֲ��
-	elcHighVegetation	 = 5,	// �ߵ�ֲ��
-	elcBuilding			 = 6,	// ������
-	elcLowPoint			 = 7,	// ���ڵر�ĵ㣨����
-	elcModelKeyPoint	 = 8,	// ���Ƶ�
-	elcWater			 = 9,	// ˮ
-	elcOverlapPoint		 = 12,	// �����ص���
-	elcDanger			 = 13,	// ��·Σ�յ�
-	elcTowerRange		 = 14,	// ������Χ
-	elcDeletedPoint		 = -1	// ��ɾ���ĵ�
+	elcCreated			 = 0,	
+	elcUnclassified		 = 1,	
+	elcGround			 = 2,	
+	elcLowVegetation	 = 3,	
+	elcMediumVegetation  = 4,	
+	elcHighVegetation	 = 5,	
+	elcBuilding			 = 6,	
+	elcLowPoint			 = 7,	
+	elcModelKeyPoint	 = 8,	
+	elcWater			 = 9,	
+	elcOverlapPoint		 = 12,	
+	elcDanger			 = 13,	
+	elcTowerRange		 = 14,	
+	elcDeletedPoint		 = -1	
 };
 #pragma pack()
 
@@ -141,19 +140,19 @@ struct LASColorExt
 };
 #pragma pack()
 
-//las���ļ�
-#pragma pack(1)/*�ֽڶ���*/
+//las Point def
+#pragma pack(1)
 class LASPoint
 {
 public:
 	/*
-	* ��д
+	* constructor 
 	*/
 	void Write(FILE *fs, const LASHeader& info) const;
 	void Read(FILE *fs, const LASHeader& info);
 
 	/**
-	* �ڴ��н����������ĵ�������
+	* extract from binnary data
 	* @param data
 	* @param info
 	*/
@@ -177,4 +176,7 @@ from the code we can know the each point data struct:
 point(x,y,z);intensity;rnse;classify;scanAngle;userdata;flightID;gpstime(not necessary);color(not necessary).  
 there are some import things we should take care: 1.the point is saved as type int to save memory,the scale and offset is recorded in header; 2.rnse refers to return number(3 byte), number of returns(3 byte), scan angle direction(1 byte), edge of flight line(1 byte); the four part is recorded together to save memory; 3. the color part is not recorded by 3 shorts data in format 1.1 in format 1.1 the color part is recorded into a int.
 
-## Program Struct
+## Program Struct with Zh-cn
+<center><img src="https://blogimage-1251632003.cos.ap-guangzhou.myqcloud.com/%E6%BF%80%E5%85%89%E7%82%B9%E4%BA%91%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E8%BD%AF%E4%BB%B6%E7%A0%94%E5%8F%91.svg?q-sign-algorithm=sha1&q-ak=AKID4CST22UaUijjkQZb0Wnq0TCHIzrzXLcu&q-sign-time=1548830192;1548831992&q-key-time=1548830192;1548831992&q-header-list=&q-url-param-list=&q-signature=bda4cb36c7be30c21102fce40d79f5b2393ca1a7&x-cos-security-token=13f4579dc7d49a4409d6f91ac7d32515e284424710001"/></center>  
+
+program struct design describe:

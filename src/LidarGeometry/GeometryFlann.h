@@ -44,7 +44,7 @@
 *   - <a href="http://jlblancoc.github.io/GeometryLas/" >Doxygen documentation</a>
 */
 /**
-*  adaptor byï¼šFrank.Wu
+*  adaptor by£ºFrank.Wu
 *  date:2018.07.03
 **/
 #ifndef  NANOFLANN_HPP_
@@ -1389,39 +1389,39 @@ namespace GeometryLas
 	};   // class KDTree
 
 
-	/** kd-tree dynamic index
-	*
-	* Contains the k-d trees and other information for indexing a set of points
-	* for nearest-neighbor matching.
-	*
-	*  The class "DatasetAdaptor" must provide the following interface (can be non-virtual, inlined methods):
-	*
-	*  \code
-	*   // Must return the number of data poins
-	*   inline size_t kdtree_get_point_count() const { ... }
-	*
-	*   // Must return the dim'th component of the idx'th point in the class:
-	*   inline T kdtree_get_pt(const size_t idx, int dim) const { ... }
-	*
-	*   // Optional bounding-box computation: return false to default to a standard bbox computation loop.
-	*   //   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
-	*   //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
-	*   template <class BBOX>
-	*   bool kdtree_get_bbox(BBOX &bb) const
-	*   {
-	*      bb[0].low = ...; bb[0].high = ...;  // 0th dimension limits
-	*      bb[1].low = ...; bb[1].high = ...;  // 1st dimension limits
-	*      ...
-	*      return true;
-	*   }
-	*
-	*  \endcode
-	*
-	* \tparam DatasetAdaptor The user-provided adaptor (see comments above).
-	* \tparam Distance The distance metric to use: GeometryLas::metric_L1, GeometryLas::metric_L2, GeometryLas::metric_L2_Simple, etc.
-	* \tparam DIM Dimensionality of data points (e.g. 3 for 3D points)
-	* \tparam IndexType Will be typically size_t or int
-	*/
+		 /** kd-tree dynamic index
+		 *
+		 * Contains the k-d trees and other information for indexing a set of points
+		 * for nearest-neighbor matching.
+		 *
+		 *  The class "DatasetAdaptor" must provide the following interface (can be non-virtual, inlined methods):
+		 *
+		 *  \code
+		 *   // Must return the number of data poins
+		 *   inline size_t kdtree_get_point_count() const { ... }
+		 *
+		 *   // Must return the dim'th component of the idx'th point in the class:
+		 *   inline T kdtree_get_pt(const size_t idx, int dim) const { ... }
+		 *
+		 *   // Optional bounding-box computation: return false to default to a standard bbox computation loop.
+		 *   //   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
+		 *   //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
+		 *   template <class BBOX>
+		 *   bool kdtree_get_bbox(BBOX &bb) const
+		 *   {
+		 *      bb[0].low = ...; bb[0].high = ...;  // 0th dimension limits
+		 *      bb[1].low = ...; bb[1].high = ...;  // 1st dimension limits
+		 *      ...
+		 *      return true;
+		 *   }
+		 *
+		 *  \endcode
+		 *
+		 * \tparam DatasetAdaptor The user-provided adaptor (see comments above).
+		 * \tparam Distance The distance metric to use: GeometryLas::metric_L1, GeometryLas::metric_L2, GeometryLas::metric_L2_Simple, etc.
+		 * \tparam DIM Dimensionality of data points (e.g. 3 for 3D points)
+		 * \tparam IndexType Will be typically size_t or int
+		 */
 	template <typename Distance, class DatasetAdaptor, int DIM = -1, typename IndexType = size_t>
 	class KDTreeSingleIndexDynamicAdaptor_ : public KDTreeBaseClass<KDTreeSingleIndexDynamicAdaptor_<Distance, DatasetAdaptor, DIM, IndexType>, Distance, DatasetAdaptor, DIM, IndexType>
 	{
