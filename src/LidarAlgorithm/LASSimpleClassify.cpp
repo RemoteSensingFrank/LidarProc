@@ -4,8 +4,8 @@
 //
 #include "../LidarBase/LASReader.h"
 #include "LASSimpleClassify.h"
-#include "../LidarBase/tsmToUTM.h"
-#include"../LidarAlgorithm/GeometryAlgorithm.h"
+#include "../LidarGeometry/tsmToUTM.h"
+#include"../LidarGeometry/GeometryAlgorithm.h"
 #include"../LidarAlgorithm/PointProcAlgorithm.h"
 #include <Eigen/Dense>
 
@@ -139,7 +139,7 @@ long LASClassifyMemLimited::LASExportClassifiedPoints(const char* pathLas, eLASC
 	double ymin = 99999999, ymax = -9999999;
 	double zmin = 99999999, zmax = -9999999;
 
-	//get type number¡¡and range first
+	//get type numberï¿½ï¿½and range first
 	int realReadPoints = 0;
 	int firstpointReserved = pointReserved;
 	while (!feof(fLasIn) && firstpointReserved>0) {
@@ -480,10 +480,12 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Ground(ILASDataset* dataset,
 		int i = pntIdxs[k].rectangle_idx;
 		int j = pntIdxs[k].point_idx_inRect;
 		LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
-
-		pnt.m_classify = elcGround;
-		pnt.m_colorExt = color;
-
+		//get the las echo or the only echo
+		if(pnt.ExtractNumberOfReturns()==pnt.ExtractReturnNumbers())
+		{
+			pnt.m_classify = elcGround;
+			pnt.m_colorExt = color;
+		}
 	}
 	return 0;
 }
@@ -653,6 +655,8 @@ long classifyElectricPatrolFast::ElectricPatrolFast_GroundDis(ILASDataset* datas
 
 long classifyElectricPatrolFast::ElectricPatrolFast_Angle(ILASDataset* dataset, double rectRange, double angle, std::vector<LASIndex> &pntIdxs)
 {
+	//old method
+/* 	
 	double xmin = _MAX_LIMIT_, ymin = _MAX_LIMIT_, xmax = _MIN_LIMIT_, ymax = _MIN_LIMIT_;
 
 	//range
@@ -739,6 +743,57 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Angle(ILASDataset* dataset, 
 			}
 		}
 	}
+	return 0; */
+
+	/**
+	 old version calculate the point angle with the local min point
+	 the new version using the local min points construct the tirangle
+	 and then calcualte the angle of the point with the triplane
+	 */
+	Point3Ds localMin;
+	std::vector<LASIndex> tmpPntIdx(pntIdxs);
+	pntIdxs.clear();
+	ElectricPatrolFast_LocalMinNonMax(dataset, pntIdxs, rectRange,elcCreated ,localMin);
+
+	typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
+	const PCAdaptor pcAdaptorPnts(localMin);
+
+	typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor, 3> kd_tree;
+	kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
+	treeIndex.buildIndex();
+
+	for (int k = 0; k<tmpPntIdx.size(); ++k)
+	{
+		int i = tmpPntIdx[k].rectangle_idx;
+		int j = tmpPntIdx[k].point_idx_inRect;
+		LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
+
+		if (pnt.m_classify == elcCreated)
+		{
+			double pt[3] = { pnt.m_vec3d.x,pnt.m_vec3d.y,pnt.m_vec3d.z };
+
+			const size_t num_results = 3;
+			size_t ret_index[num_results];
+			double out_dist_sqr[num_results];
+			KNNResultSet<double> resultSet(num_results);
+			resultSet.init(ret_index, out_dist_sqr);
+			treeIndex.findNeighbors(resultSet, &pt[0], SearchParams(10));
+
+			int idx1 = ret_index[0];
+			int idx2 = ret_index[1];
+			int idx3 = ret_index[2];
+			double dis = DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1], localMin[idx2], localMin[idx3]);
+			double angle1 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1]));
+			double angle2 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx2]));
+			double angle3 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx3]));
+			
+			if (min(min(angle1,angle2),angle3) < angle)
+			{
+				pntIdxs.push_back(tmpPntIdx[k]);
+			}
+		}
+	}
+
 	return 0;
 }
 

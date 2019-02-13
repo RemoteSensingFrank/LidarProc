@@ -1,7 +1,7 @@
 #pragma once
 
 #include"../LidarBase/LASPoint.h"
-#include"../LidarAlgorithm/Geometry.h"
+#include"../LidarGeometry/Geometry.h"
 #include <Eigen/Dense>
 #include <string>
 #ifdef _USE_OPENCV_

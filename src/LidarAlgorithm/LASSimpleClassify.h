@@ -8,7 +8,7 @@
 
 #include <vector>
 #include "../LidarBase/LASPoint.h"
-#include "gdal_alg.h"
+//#include <gdal_alg.h>
 #ifndef ColorClassInfo
 typedef struct ColorClassInfo
 {
@@ -99,7 +99,9 @@ struct LASIndexDis {
 typedef std::vector<LASIndexDis> LASIndexDisList;
 
 /*
-extract electric line information and classify the object auto fast
+	extract electric line information and classify the object auto fast
+	author:wuwei
+	version:1.0.0.0
 */
 class classifyElectricPatrolFast {
 public:
@@ -168,6 +170,12 @@ private:
 
 	/*
 		classify the ground pnt by angle
+		created by: Frank.Wu
+		version:v1.0.0.0
+		changed by: Frank.Wu
+		version:v1.0.1.0 the last version calcualte the angle with the local min point
+						 but actually the angle of the point with the plane should
+						 be calculated 
 	*/
 	long ElectricPatrolFast_Angle(ILASDataset* dataset, double rectRange, double angle, std::vector<LASIndex> &pntIdxs);
 	/*

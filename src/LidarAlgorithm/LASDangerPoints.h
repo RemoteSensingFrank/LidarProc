@@ -1,15 +1,15 @@
 #pragma once
 //
 // Created by wuwei on 18-1-24.
-// email£ºwuwei_cug@163.com
+// emailï¿½ï¿½wuwei_cug@163.com
 
 #ifndef LASGUI_LASDANGERPOINTS_H
 #define LASGUI_LASDANGERPOINTS_H
 
 #include <vector>
 
-#include "../LidarAlgorithm/Geometry.h"
-#include"../LidarAlgorithm/GeometryFlann.h"
+#include "../LidarGeometry/Geometry.h"
+#include"../LidarGeometry/GeometryFlann.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
 using namespace GeometryLas;
@@ -20,12 +20,12 @@ typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor
 
 
 /**
-* »ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
+* Danger points classify
 */
 class LASDangerPoints {
 public:
 	/**
-	* ¸ù¾İ¾àÀë»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
+	* detect danger points
 	* @param distance
 	* @return
 	*/
@@ -43,16 +43,16 @@ public:
 
 private:
 	/**
-	* ½«Î£ÏÕµãÇø·Ö³öÀ´Ğ´ÈëÎÄ¼şÖĞ
+	* split the danger point from dataset
 	* @param datasetVegterain
 	* @param pathSplit
 	* @return
-	* deleted by Frank.Wu Í¨¹ıÖ±½ÓÍ¨¹ıĞ´º¯Êı½«Î£ÏÕµãĞ´Èë
+	* deleted by Frank.Wu memory used too much
 	long LADDangerPoints_SplitDanger(ILASDataset* datasetVegterain, const char* pathSplit);
 	*/
 
 	/**
-	* ¼ì²âÄ³Ò»¸öµã·¶Î§
+	* check each point if the point is danger points
 	* @param distance
 	* @param pnt
 	* @param datasetVegterian
@@ -72,7 +72,7 @@ private:
 
 protected:
 	/**
-	* »ñÈ¡Î£ÏÕµã¿ÉÄÜËùÔÚµÄ·¶Î§
+	* check point range of the point
 	* @param pnt
 	* @param distance
 	* @param datasetVegterain
@@ -83,19 +83,18 @@ protected:
 };
 
 /*
-	»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢£¬Í¨¹ıANNËã·¨½øĞĞ¼ÓËÙÊµÏÖ£¬Ïà±ÈÓÚ¼òµ¥·Ö¿é
-	²ÉÓÃkdtreeËã·¨ÄÜ¹»¼«´óµÄÌá¸ß´¦ÀíĞ§ÂÊ
-	***ÓÉÓÚAdaptorÒÔ¼°µãÔÆË÷ÒıµÄ¹¹½¨Òò´ËÔÚ´¦Àí¹ı³ÌÖĞĞèÒª½Ï´óÄÚ´æ***
-	***Ò»°ãÀ´ËµĞèÒª³¬¹ıµãÔÆ´óĞ¡Á½µ½Èı±¶ÄÚ´æ²ÅÄÜ¹»½øĞĞ´¦Àí·ñÔò¿ÉÄÜ²úÉúÄÚ´æ²»×ã´íÎó***
-	Ä¿Ç°ÒÑÆúÓÃ£¬²ÉÓÃ¸ü¼Ó¸ßĞ§µÄ»ìºÏË÷ÒıÄ£Ê½
+	ï¿½ï¿½È¡ï¿½ï¿½Â·Î£ï¿½Õµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Í¨ï¿½ï¿½ANNï¿½ã·¨ï¿½ï¿½ï¿½Ğ¼ï¿½ï¿½ï¿½Êµï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼òµ¥·Ö¿ï¿½?
+	ï¿½ï¿½ï¿½ï¿½kdtreeï¿½ã·¨ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß´ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½
+	***ï¿½ï¿½ï¿½ï¿½Adaptorï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ï´ï¿½ï¿½Ú´ï¿½***
+	***Ò»ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ´ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü²ï¿½ï¿½ï¿½ï¿½Ú´æ²»ï¿½ï¿½ï¿½ï¿½ï¿½***
+	Ä¿Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½Ó¸ï¿½Ğ§ï¿½Ä»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½?
 	Created by Frank.Wu 2018-07-19
 */
-class __declspec(deprecated("** too large memory taken **"))
-LASDangerPointsFlann:public LASDangerPoints
+class LASDangerPointsFlann:public LASDangerPoints
 {
 public:
 	/**
-	* ¸ù¾İ¾àÀë»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
+	* ï¿½ï¿½ï¿½İ¾ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Â·Î£ï¿½Õµï¿½ï¿½ï¿½ï¿½?
 	* @param distance
 	* @return
 	*/
@@ -113,7 +112,7 @@ public:
 
 private:
 	/**
-	* ¼ì²âÄ³Ò»¸öµã·¶Î§
+	* ï¿½ï¿½ï¿½Ä³Ò»ï¿½ï¿½ï¿½ã·¶ï¿½?
 	* @param distance
 	* @param pnt
 	* @param treeVege
@@ -133,21 +132,21 @@ private:
 };
 
 /*
-	»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢£¬Í¨¹ıBlock ANNËã·¨¼ÓËÙÊµÏÖ£¬
-	ÒÔÇ°µÄËã·¨ÖĞÁíÍâ¹¹ÔìkdtrddµÄAdaptor£¬ÔÚ¹¹ÔìµÄ
-	¹ı³ÌÖĞĞèÒªÖØĞÂ¿ª±ÙÄÚ´æ£¬Ïàµ±ÓÚ½«Êı¾İ¶ÁÈëÄÚ´æÁ½±é
-	Òò´Ë»Ø²úÉú¼«¸ßµÄÄÚ´æÏûºÄ£¬¸Ä½øºóµÄËã·¨¶ÔÃ¿Ò»¿éÊı¾İ
-	¹¹½¨kdtree£¬È»ºó·Ö¿é½øĞĞ±È½ÏºÍ·ÖÎö£¬Ìá¸ßÁË´¦ÀíĞ§ÂÊ
-	½µµÍÁËÄÚ´æÏûºÄ£¬Ö»ÊÇÔÚÊı¾İ¶ÁÈ¡¹ı³ÌÖĞ¹¹½¨Ê÷±È½ÏºÄÊ±
+	ï¿½ï¿½È¡ï¿½ï¿½Â·Î£ï¿½Õµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Í¨ï¿½ï¿½Block ANNï¿½ã·¨ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö£ï¿½
+	ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½ï¿½ï¿½ï¿½â¹¹ï¿½ï¿½kdtrddï¿½ï¿½Adaptorï¿½ï¿½ï¿½Ú¹ï¿½ï¿½ï¿½ï¿½?
+	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ï¿½Ú´æ£¬ï¿½àµ±ï¿½Ú½ï¿½ï¿½ï¿½ï¿½İ¶ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½
+	ï¿½ï¿½Ë»Ø²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½Ã¿Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	ï¿½ï¿½ï¿½ï¿½kdtreeï¿½ï¿½È»ï¿½ï¿½Ö¿ï¿½ï¿½ï¿½Ğ±È½ÏºÍ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë´ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½?
+	ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½Ä£ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ¶ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È½Ïºï¿½Ê±
 	Created by Frank.Wu 2018-08-31
 */
 class LASDangerPointsFlannBlock :public LASDangerPoints
 {
 public:
 	/**
-	* ¸ù¾İ¾àÀë»ñÈ¡ÏßÂ·Î£ÏÕµãĞÅÏ¢
-	* @param distance ¾àÀëÒªÇó
-	* @return ·µ»Ø´íÎó´úÂë
+	* ï¿½ï¿½ï¿½İ¾ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Â·Î£ï¿½Õµï¿½ï¿½ï¿½ï¿½?
+	* @param distance ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½
+	* @return ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 	*/
 	virtual long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
@@ -170,7 +169,7 @@ public:
 	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset,double range,Point2D* ptTower, std::vector<LASIndex> &pntIdx);
 private:
 	/**
-	* ¼ì²âÄ³Ò»¸öµã·¶Î§
+	* ï¿½ï¿½ï¿½Ä³Ò»ï¿½ï¿½ï¿½ã·¶ï¿½?
 	* @param distance
 	* @param pnt
 	* @param treeVege

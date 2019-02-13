@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "../LidarAlgorithm/GeometryAlgorithm.h"
-#include "../LidarAlgorithm/GeometryAlgorithm.h"
+#include "../LidarGeometry/GeometryAlgorithm.h"
+#include "../LidarGeometry/GeometryAlgorithm.h"
 
-#include "../LidarBase/tsmToUTM.h"
+#include "../LidarGeometry/tsmToUTM.h"
 
 #pragma warning(disable:4996)
 namespace GeometryLas {
@@ -370,7 +370,7 @@ namespace GeometryLas {
 	}
 	bool GeometryRelation::IsRectIntersectRect(const Rect2D& rect1, const Rect2D& rect2)
 	{
-		//ÅÐ¶Ï¾ØÐÎÏà½»µÄ´úÂëÓÐ´íÎó
+		//ï¿½Ð¶Ï¾ï¿½ï¿½ï¿½ï¿½à½»ï¿½Ä´ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½
 		//if (IsPointInRect(rect1.minx, rect1.miny, rect2.minx, rect2.miny, rect2.maxx, rect2.maxy))
 		//{
 		//	return true;

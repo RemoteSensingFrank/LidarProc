@@ -13,7 +13,7 @@ using namespace GeometryLas;
 
 namespace LasAlgorithm {
 	/*
-	point cloud segment algorithm class
+		point cloud segment algorithm class
 	*/
 	class PointCloudSegment
 	{
@@ -50,12 +50,12 @@ namespace LasAlgorithm {
 	{
 	public:
 		/*
-		Ãæ×´µãÔÆµÄÌáÈ¡·Ö¸î£¬¶ÔÓÚ²»Í¬µÄĞÎ×´µÄµãÔÆËùĞèÒªµÄ·½ÏòÌØÕ÷ÊÇ²»Ò»ÑùµÄ
-		¶ÔÓÚÃæ×´µÄµãÔÆÌØÕ÷À´ËµÖØÒªµÄÊÇ·¨Ïß·½Ïò
-		@param pointSet ÊäÈëµÄµã¼¯
-		@param type µãÔÆ·ÖÀàÀà±ğ
-		@param directionRange ½Ç¶ÈãĞÖµ
-		@param knnRange KNN¾ÛÀà·¶Î§ãĞÖµ
+		ï¿½ï¿½×´ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½È¡ï¿½Ö¸î£¬ï¿½ï¿½ï¿½Ú²ï¿½Í¬ï¿½ï¿½ï¿½ï¿½×´ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç²ï¿½Ò»ï¿½ï¿½ï¿½ï¿½
+		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½Òªï¿½ï¿½ï¿½Ç·ï¿½ï¿½ß·ï¿½ï¿½ï¿½
+		@param pointSet ï¿½ï¿½ï¿½ï¿½Äµã¼¯
+		@param type ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		@param directionRange ï¿½Ç¶ï¿½ï¿½ï¿½Öµ
+		@param knnRange KNNï¿½ï¿½ï¿½à·¶Î§ï¿½ï¿½Öµ
 		*/
 		long PointCloudSegmentDirect_SegmentPoly(Point3Ds pointSet, int *type, float directionRange, float knnRange);
 
@@ -81,8 +81,8 @@ namespace LasAlgorithm {
 		long PointCloudFilter_Point2DEM(ILASDataset *lasDataset, float resolution, const char* pathChr, int filterTimes = 0);
 
 		/*
-		P.S. ¡îwhen the problem of search all the data and no range;
-		the data tree should be constructed once more¡î
+		P.S. when the problem of search all the data and no range;
+		the data tree should be constructed once more
 		*/
 		long PointCloudFilter_Point2DEMFlann(ILASDataset *lasDataset, float resolution, const char* pathChr);
 	private:

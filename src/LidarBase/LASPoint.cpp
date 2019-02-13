@@ -90,6 +90,15 @@ void LASPoint::ExportToBuffer(unsigned char* data, const LASHeader& info) const
 	}
 }
 
+int LASPoint::ExtractNumberOfReturns()
+{
+	return (m_rnseByte>>3)&0x07;
+}
+
+int LASPoint::ExtractReturnNumber()
+{
+	return m_rnseByte&0x07;
+}
 /*****************************************************************************
 * @brief : LAS块与LAS数据集
 * @author : W.W.Frank

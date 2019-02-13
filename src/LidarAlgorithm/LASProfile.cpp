@@ -3,7 +3,7 @@
 #include<iostream>
 #include<cmath>
 #include<gdal_priv.h>
-#include"../LidarAlgorithm/GeometryAlgorithm.h"
+#include"../LidarGeometry/GeometryAlgorithm.h"
 #include"../LidarBase/LASReader.h"
 
 #pragma  comment(lib, "gdal_i.lib")
@@ -33,7 +33,7 @@
 
 
 /*
-»ñÈ¡PCA±ä»»µÄÐý×ª¾ØÕó
+ï¿½ï¿½È¡PCAï¿½ä»»ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
 */
 void  LASProfile::LASProfile_GetPCARotMat(Point2D pntTowers[2], Eigen::MatrixXd &rotMat)
 {
@@ -71,7 +71,7 @@ void LASProfile::LASProfile_ImageFillHorizontal(ILASDataset* dataset, Rect2D rec
 	double xmax = -9999999, xmin = 9999999, ymax = -9999999, ymin = 9999999;
 	//get intersect rect
 	std::vector<int> rectIds;
-	//»ñÈ¡Ô­Ê¼ËÄ¸ö½Çµã
+	//ï¿½ï¿½È¡Ô­Ê¼ï¿½Ä¸ï¿½ï¿½Çµï¿½
 	Eigen::MatrixXd p1(1, 2), p2(1, 2), p3(1, 2), p4(1, 2);
 	p1(0, 0) = rect.minx; p1(0, 1) = rect.miny;
 	p2(0, 0) = rect.maxx; p2(0, 1) = rect.miny;
@@ -946,7 +946,7 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 		txt= cv::format("%d", int(i*this->hspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
-		//½«ÎÄ±¾¿ò¾ÓÖÐ»æÖÆ
+		//ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½
 		cv::Point origin;
 		origin.x = 80 + i*widthpix - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 170 + 5 + text_size.height;
@@ -960,7 +960,7 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 		string txt = cv::format("%d", int(i*this->vspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
-		//½«ÎÄ±¾¿ò¾ÓÖÐ»æÖÆ
+		//ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½
 		cv::Point origin;
 		origin.x = 50 - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 80 - i*heighpix + text_size.height/2;
@@ -1004,7 +1004,7 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 		txt = cv::format("%d", int(i*this->hspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
-		//½«ÎÄ±¾¿ò¾ÓÖÐ»æÖÆ
+		//ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½
 		cv::Point origin;
 		origin.x = 80 + i*widthpix - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 170 + 5 + text_size.height;
@@ -1018,7 +1018,7 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 		string txt = cv::format("%d", int(i*this->vspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
-		//½«ÎÄ±¾¿ò¾ÓÖÐ»æÖÆ
+		//ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½
 		cv::Point origin;
 		origin.x = 50 - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 130 - i*heighpix + text_size.height / 2;

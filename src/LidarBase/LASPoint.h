@@ -84,6 +84,21 @@ public:
 	void ExtractFromBuffer(const unsigned char* data, const LASHeader& info);
 	void ExportToBuffer(unsigned char* data, const LASHeader& info) const;
 
+	/**
+	* @brief  extract the number of returns
+	* @note   
+	* @retval 
+	*/
+	int  ExtractNumberOfReturns();
+
+
+	/**
+	* @brief  extract the return number
+	* @note   
+	* @retval None
+	*/
+	int  ExtractReturnNumbers();
+
 public:
 	Point3D			m_vec3d;
 	unsigned short  m_intensity;
@@ -188,7 +203,7 @@ enum  eLASClassification
 	elcFallingTreeLevel3 = 33,
 	elcFallingTreeEnd	 = 34,
 	elcLine				 = 35,		//电力线
-
+	elcVegetation		 = 36,
 	elcDeletedPoint		 = -1	// 已删除的点
 };
 #pragma pack()
