@@ -474,14 +474,13 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Ground(ILASDataset* dataset,
 	std::vector<LASIndex> pntIdxs;
 	ElectricPatrolFast_Angle(dataset, rectRange, angle*M_PI/180, pntIdxs);
 	ElectricPatrolFast_GroundDis(dataset, rectRange/2, disThres, pntIdxs);
-
 	for (int k = 0; k < pntIdxs.size(); ++k)
 	{
 		int i = pntIdxs[k].rectangle_idx;
 		int j = pntIdxs[k].point_idx_inRect;
 		LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
 		//get the las echo or the only echo
-		if(pnt.ExtractNumberOfReturns()==pnt.ExtractReturnNumbers())
+		if(pnt.ExtractNumberOfReturns()==pnt.ExtractReturnNumber())
 		{
 			pnt.m_classify = elcGround;
 			pnt.m_colorExt = color;
@@ -573,7 +572,7 @@ long classifyElectricPatrolFast::ElectricPatrolFast_LocalMinNonMax(ILASDataset* 
 	kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeIndex.buildIndex();
 #ifdef _DEBUG
-	FILE* fptr = fopen("D:\\text.txt", "w+");
+	FILE* fptr = fopen("ground.txt", "w+");
 #endif
 	for (int k = 0; k<localMinMax.size(); ++k)
 	{
@@ -612,8 +611,6 @@ long classifyElectricPatrolFast::ElectricPatrolFast_GroundDis(ILASDataset* datas
 	std::vector<LASIndex> tmpPntIdx(pntIdxs);
 	pntIdxs.clear();
 	ElectricPatrolFast_LocalMinNonMax(dataset, pntIdxs, rectRange,elcCreated ,localMin);
-
-
 
 	typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 	const PCAdaptor pcAdaptorPnts(localMin);
@@ -761,38 +758,73 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Angle(ILASDataset* dataset, 
 	typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor, 3> kd_tree;
 	kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeIndex.buildIndex();
-
-	for (int k = 0; k<tmpPntIdx.size(); ++k)
+	if(tmpPntIdx.empty())
 	{
-		int i = tmpPntIdx[k].rectangle_idx;
-		int j = tmpPntIdx[k].point_idx_inRect;
-		LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
-
-		if (pnt.m_classify == elcCreated)
+		for (int k = 0; k < dataset->m_totalReadLasNumber; ++k)
 		{
-			double pt[3] = { pnt.m_vec3d.x,pnt.m_vec3d.y,pnt.m_vec3d.z };
-
-			const size_t num_results = 3;
-			size_t ret_index[num_results];
-			double out_dist_sqr[num_results];
-			KNNResultSet<double> resultSet(num_results);
-			resultSet.init(ret_index, out_dist_sqr);
-			treeIndex.findNeighbors(resultSet, &pt[0], SearchParams(10));
-
-			int idx1 = ret_index[0];
-			int idx2 = ret_index[1];
-			int idx3 = ret_index[2];
-			double dis = DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1], localMin[idx2], localMin[idx3]);
-			double angle1 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1]));
-			double angle2 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx2]));
-			double angle3 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx3]));
-			
-			if (min(min(angle1,angle2),angle3) < angle)
+			int i = dataset->m_LASPointID[k].rectangle_idx;
+			int j = dataset->m_LASPointID[k].point_idx_inRect;
+			LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
+			if (pnt.m_classify == elcCreated)
 			{
-				pntIdxs.push_back(tmpPntIdx[k]);
+				double pt[3] = { pnt.m_vec3d.x,pnt.m_vec3d.y,pnt.m_vec3d.z };
+
+				const size_t num_results = 3;
+				size_t ret_index[num_results];
+				double out_dist_sqr[num_results];
+				KNNResultSet<double> resultSet(num_results);
+				resultSet.init(ret_index, out_dist_sqr);
+				treeIndex.findNeighbors(resultSet, &pt[0], SearchParams(10));
+
+				int idx1 = ret_index[0];
+				int idx2 = ret_index[1];
+				int idx3 = ret_index[2];
+				double dis = DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1], localMin[idx2], localMin[idx3]);
+				double angle1 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1]));
+				double angle2 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx2]));
+				double angle3 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx3]));
+
+				if (min(min(angle1,angle2),angle3) < angle)
+				{
+					pntIdxs.push_back(dataset->m_LASPointID[k]);
+				}
 			}
 		}
 	}
+	else{
+		for (int k = 0; k<tmpPntIdx.size(); ++k)
+		{
+			int i = tmpPntIdx[k].rectangle_idx;
+			int j = tmpPntIdx[k].point_idx_inRect;
+			LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
+
+			if (pnt.m_classify == elcCreated)
+			{
+				double pt[3] = { pnt.m_vec3d.x,pnt.m_vec3d.y,pnt.m_vec3d.z };
+
+				const size_t num_results = 3;
+				size_t ret_index[num_results];
+				double out_dist_sqr[num_results];
+				KNNResultSet<double> resultSet(num_results);
+				resultSet.init(ret_index, out_dist_sqr);
+				treeIndex.findNeighbors(resultSet, &pt[0], SearchParams(10));
+
+				int idx1 = ret_index[0];
+				int idx2 = ret_index[1];
+				int idx3 = ret_index[2];
+				double dis = DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1], localMin[idx2], localMin[idx3]);
+				double angle1 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx1]));
+				double angle2 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx2]));
+				double angle3 = asin(dis/DistanceComputation::Distance(pnt.m_vec3d, localMin[idx3]));
+
+				if (min(min(angle1,angle2),angle3) < angle)
+				{
+					pntIdxs.push_back(tmpPntIdx[k]);
+				}
+			}
+		}
+	}
+	
 
 	return 0;
 }

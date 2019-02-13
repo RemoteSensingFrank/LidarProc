@@ -91,13 +91,12 @@ public:
 	*/
 	int  ExtractNumberOfReturns();
 
-
 	/**
 	* @brief  extract the return number
 	* @note   
 	* @retval None
 	*/
-	int  ExtractReturnNumbers();
+	int  ExtractReturnNumber();
 
 public:
 	Point3D			m_vec3d;

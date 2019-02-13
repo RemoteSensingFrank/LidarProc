@@ -21,7 +21,7 @@ else()
     	message("compile without openCV")
 endif()
 
-
+add_definitions(-D_DEBUG)
 add_library(libalgorithm ${DIR_ALGORITHM_SRCS})
 target_link_libraries(libalgorithm libbase libgeometry)
 target_link_libraries(libalgorithm ${GDAL_LIBRARY})
