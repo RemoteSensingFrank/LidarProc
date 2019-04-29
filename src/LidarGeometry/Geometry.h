@@ -821,8 +821,56 @@ namespace GeometryLas {
 		/*
 		* 判断点是否在包围盒内
 		*/
-		bool IsInBox(const Point3D& pt, bool includeBound = true, bool ignoreZ = false) const;
-		bool IsInBox(const Point3D& pt, double tolorance, bool ignoreZ = false) const;
+		bool IsInBox(const Point3D& pt, bool includeBound = true, bool ignoreZ = false) const
+		{
+			if(includeBound)
+			{
+				if(PointMin.x <= pt.x && pt.x <= PointMax.x){
+					if(PointMin.y <= pt.y && pt.y <= PointMax.y){
+						if(ignoreZ){
+							return true;
+						}
+						else{
+							if(PointMin.z <= pt.z && pt.z <= PointMax.z){
+								return true;
+							}
+						}
+					}
+				}
+			}
+			else{
+				if(PointMin.x < pt.x && pt.x < PointMax.x){
+					if(PointMin.y < pt.y && pt.y < PointMax.y){
+						if(ignoreZ){
+							return true;
+						}
+						else{
+							if(PointMin.z < pt.z && pt.z < PointMax.z){
+								return true;
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+		bool IsInBox(const Point3D& pt, double tolerance, bool ignoreZ = false) const
+		{
+			if(pt.x-PointMin.x >=-tolerance  && PointMax.x-pt.x >=-tolerance ){
+				if(pt.y-PointMin.y >=-tolerance  && PointMax.y-pt.y >=-tolerance){
+					if(ignoreZ){
+						return true;
+					}
+					else{
+						if(pt.z-PointMin.z >=-tolerance  && PointMax.z-pt.z >=-tolerance){
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
 
 		AABB& operator=(const AABB& box) { PointMin = box.PointMin; PointMax = box.PointMax; return *this; }
 		bool operator==(const AABB& box) const {
