@@ -1,3 +1,0 @@
-add_subdirectory(LASTools)
-add_subdirectory(arguments)
-add_subdirectory(rapidjson)
