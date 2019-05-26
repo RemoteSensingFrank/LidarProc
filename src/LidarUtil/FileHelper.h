@@ -35,5 +35,12 @@ public:
 		@param ext：后缀名.xxx
 	*/
 	static long listNames(string cate_dir, vector<string> &files, string ext);//获取文件名
+
+	/**
+		解析文件路径下的文件名
+		@param filePath：文件全路径
+		@param isExt：是否添加后缀
+	*/
+	static string getFileName(string filePath,bool isExt=false);
 };
 

@@ -3,89 +3,106 @@
 //
 
 #include "LASFormatTransform.h"
+#include "../LidarUtil/FileHelper.h"
 #include "../LidarBase/LASPoint.h"
 
-void LASFormatTransform3DTiles::LASFormatTransform_3DTilesJson(Point3D *center,std::string pathOut){
-    string jsTemplate="{\n\
-    \"asset\" : {\n  \
-        \"version:\" \"1.0\"\n\
-    },\n\
-    \"geometricError\":10000,\n\
-    \"refine\":\"add\",\n\
-    \"root\":\n\
-    { \n\
-        \"boundingVolume\":{\n  \
-        \"sphere\":[%lf,%lf,%lf,100]\n\
-        },\n\
-        \"geometricError\": 0,\n\
-        \"content\":{\n  \
-        \"url\":\"%s.pnts\"\n  \
-         },\n\
-         \"children\":[]\n\
-   }\n\
-}";
-    int pos=pathOut.find_last_of('/');
-    string s(pathOut.substr(pos+1));
-    char buffer[2048];
-    sprintf(buffer,jsTemplate.c_str(),center->x,center->y,center->z,s.c_str());
-    string writeStr = pathOut+".json";
+long LASTransToPotree::LASTransToPotree_Trans(const char* lasPath,const char* transdir)
+{
+    try{
+		PotreeArguments a;
+        a.outdir = transdir;
+        a.spacing = 0.0;
+        a.storeSize = 20'000;
+        a.flushLimit= 10'000'0000;
+        a.diagonalFraction = 0.0;
+        a.levels = (-1);
+        a.outFormat = Potree::OutputFormat::LAS;
+        a.outputAttributes = { "RGB" };
+        a.scale = (0.0);
+        a.storeOption = StoreOption::ABORT_IF_EXISTS;
+        vector<string> source;
+        source.push_back(lasPath);
+        a.source=source;
 
-    FILE* fjson = fopen(writeStr.c_str(),"w+");
-    fprintf(fjson,"%s",buffer);
-    fclose(fjson);
+        PotreeConverter pc(a.executablePath, a.outdir, a.source);
+		pc.spacing = a.spacing;
+		pc.diagonalFraction = a.diagonalFraction;
+		pc.maxDepth = a.levels;
+		pc.format = a.format;
+		pc.colorRange = a.colorRange;
+		pc.intensityRange = a.intensityRange;
+		pc.scale = a.scale;
+		pc.outputFormat = a.outFormat;
+		pc.outputAttributes = a.outputAttributes;
+		pc.aabbValues = a.aabbValues;
+		pc.pageName = a.pageName;
+		pc.pageTemplatePath = a.pageTemplatePath;
+		pc.storeOption = a.storeOption;
+		pc.projection = a.projection;
+		pc.sourceListingOnly = a.sourceListingOnly;
+		pc.quality = a.conversionQuality;
+		pc.title = a.title;
+		pc.description = a.description;
+		pc.edlEnabled = a.edlEnabled;
+		pc.material = a.material;
+		pc.showSkybox = a.showSkybox;
+		pc.storeSize = a.storeSize;
+		pc.flushLimit = a.flushLimit;
+
+		pc.convert();
+	}catch(exception &e){
+		cout << "ERROR: " << e.what() << endl;
+		return 1;
+	}
 }
 
-void LASFormatTransform3DTiles::LASFormatTransform_3DTilesPnts(LASPoint *pnts, int pntNumber, std::string pathOut) {
-    //process
-    //write binnary data
-    //gzip binnary data
-    //remove binnary pnt;
-    //rename gzip data as .pnt
-    FILE* fs=fopen(pathOut.c_str(),"wb");
+long LASTransToPotree::LASTransToPotree_Trans(const char* lasPath)
+{
+    try{
+		PotreeArguments a;
 
-    char head[4]={'p','n','t','s'};
-    unsigned  int version =1;
-    //15 byte include 3 float xyz 3 char rgb
-    unsigned int byteLength = pntNumber*15+16;
-    unsigned int numberPnts = pntNumber;
+        a.outdir = "./www/pointclouds/"+FileHelper::getFileName(lasPath)+"/";
+        a.spacing = 0.0;
+        a.storeSize = 20'000;
+        a.flushLimit= 10'000'0000;
+        a.diagonalFraction = 0.0;
+        a.levels = (-1);
+        a.outFormat = Potree::OutputFormat::LAS;
+        a.outputAttributes = { "RGB" };
+        a.scale = (0.0);
+        a.storeOption = StoreOption::ABORT_IF_EXISTS;
+        vector<string> source;
+        source.push_back(lasPath);
+        a.source=source;
 
-    //header part
-    fwrite(head,sizeof(char),4,fs);
-    fwrite(&version,sizeof(int),1,fs);
-    fwrite(&byteLength,sizeof(int),1,fs);
-    fwrite(&numberPnts,sizeof(int),1,fs);
+        PotreeConverter pc(a.executablePath, a.outdir, a.source);
+		pc.spacing = a.spacing;
+		pc.diagonalFraction = a.diagonalFraction;
+		pc.maxDepth = a.levels;
+		pc.format = a.format;
+		pc.colorRange = a.colorRange;
+		pc.intensityRange = a.intensityRange;
+		pc.scale = a.scale;
+		pc.outputFormat = a.outFormat;
+		pc.outputAttributes = a.outputAttributes;
+		pc.aabbValues = a.aabbValues;
+		pc.pageName = a.pageName;
+		pc.pageTemplatePath = a.pageTemplatePath;
+		pc.storeOption = a.storeOption;
+		pc.projection = a.projection;
+		pc.sourceListingOnly = a.sourceListingOnly;
+		pc.quality = a.conversionQuality;
+		pc.title = a.title;
+		pc.description = a.description;
+		pc.edlEnabled = a.edlEnabled;
+		pc.material = a.material;
+		pc.showSkybox = a.showSkybox;
+		pc.storeSize = a.storeSize;
+		pc.flushLimit = a.flushLimit;
 
-    //data part
-    for(int i=0;i<pntNumber;++i){
-        float x = pnts[i].m_vec3d.x;
-        float y = pnts[i].m_vec3d.y;
-        float z = pnts[i].m_vec3d.z;
-
-        fwrite(&x,sizeof(float),1,fs);
-        fwrite(&y,sizeof(float),1,fs);
-        fwrite(&z,sizeof(float),1,fs);
-    }
-    for(int i=0;i<pntNumber;++i){
-        char r = pnts[i].m_colorExt.Red;
-        char g = pnts[i].m_colorExt.Green;
-        char b = pnts[i].m_colorExt.Blue;
-
-        fwrite(&r,sizeof(char),1,fs);
-        fwrite(&g,sizeof(char),1,fs);
-        fwrite(&b,sizeof(char),1,fs);
-    }
-    fclose(fs);
-}
-
-void LASFormatTransform3DTiles::LASFormatTransform_3DTilesPntsGZip(const char* pathBin,const char* pathPnts){
-    std::string gzipFile = "gzip "+ string(pathBin) + ";mv " + string(pathBin) + ".gz " + string(pathPnts)+";";
-    std::string cmdRmRaw = "rm -rf "+string(pathBin);
-
-    system(gzipFile.c_str());
-    system(cmdRmRaw.c_str());
-}
-
-void LASFormatTransform_Tileset(const char* pathDir,const char* pathTileset,const char* jsonName) {
-    string cmd="tileset.sh "+ string(pathDir)+" "+string(jsonName);
-    system(cmd.c_str());
+		pc.convert();
+	}catch(exception &e){
+		cout << "ERROR: " << e.what() << endl;
+		return 1;
+	}
 }

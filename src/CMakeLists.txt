@@ -5,9 +5,8 @@ aux_source_directory(./LidarUnitTest DIRTESTS)
 add_definitions(-D_DEBUG)
 # Add header file include directories 
 
-include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarUtil ./LidarResearch ./LidarPotreeCvt/include)
-include_directories(./LidarPotreeCvt/lib/rapidjson/include)
-include_directories(./LidarPotreeCvt/lib/arguments)
+include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarUtil ./LidarResearch)
+
 
 # Add block directories 
 find_package(libLAS REQUIRED)
@@ -22,7 +21,7 @@ add_subdirectory(LidarPotreeCvt)
 add_executable(LidarProc LidarProc.cpp ${DIRTESTS})  
 add_executable(LidarServerExample LidarServer.cpp)
 
-set(lnkLibs libgeometry libbase libalgorithm libutility libresearch libpotreecvt)
+set(lnkLibs libgeometry libbase libalgorithm libutility libresearch)
 set(exlnkLibs libgtest.so libgtest_main.so pthread)
 
 target_link_libraries(LidarProc ${lnkLibs})

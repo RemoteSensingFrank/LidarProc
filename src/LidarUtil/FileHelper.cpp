@@ -280,3 +280,24 @@ long FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 	std::sort(files.begin(), files.end());
 	return 0;
 }
+
+string FileHelper::getFileName(string filePath,bool isExt/* =false */)
+{
+	int pos1 = -1;
+#ifdef LINUX
+	pos1 = filePath.find_last_of('/');
+#else 
+	pos1 = filePath.find_last_of('\\');
+#endif
+
+	string nameExt = filePath.substr(pos1 + 1);
+	if (isExt)
+	{
+		return nameExt;
+	}
+	else {
+		int pos2 = nameExt.find('.');
+		string name = nameExt.substr(0, pos2);
+		return name;
+	}
+}

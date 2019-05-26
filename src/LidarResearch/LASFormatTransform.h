@@ -1,45 +1,51 @@
 //
 // Created by wuwei on 18-3-13.
+// Convert LAS Dataset into Potree format
+// Then Copy the Converted data into 
+// build directory and trans to exhibit
 //
 
 #ifndef LIDARPROC_LASFORMATTRANSFORM_H
 #define LIDARPROC_LASFORMATTRANSFORM_H
 
 #include <string>
-#include "../LidarGeometry/Geometry.h"
-#include "../LidarBase/LASPoint.h"
+#include <AABB.h>
+#include <PotreeConverter.h>
+#include <experimental/filesystem>
 
-class LASFormatTransform3DTiles {
+namespace fs = std::experimental::filesystem;
+
+using Potree::PotreeConverter;
+using Potree::StoreOption;
+using Potree::ConversionQuality;
+using std::exception;
+
+/**
+ * @brief  convert las to potree format
+ *         using potree lib rely on liblas and laszip
+ *         so pls install liblas and laszip first 
+ * @note   
+ * @retval None
+ */
+class LASTransToPotree{
 public:
     /**
-     * 3D tiles pre json
-     * @param center xyz coordinate
-     * @param pathOut
-     */
-    void LASFormatTransform_3DTilesJson(Point3D *center,std::string pathOut);
+    * @brief trans las data to the user trans directory  
+    * @note   
+    * @param  lasPath:  path of the las points data
+    * @param  transdir: path of the transformed data directory
+    * @retval success 0 failed other values
+    */
+    long LASTransToPotree_Trans(const char* lasPath,const char* transdir);
 
     /**
-     * 3D tiles points
-     * @param pnts  //centered points xyz coordinate
-     * @param pntNumber
-     * @param pathOut
-     */
-    void LASFormatTransform_3DTilesPnts(LASPoint* pnts,int pntNumber,std::string pathOut);
+    * @brief trans las data to the server directory  
+    * @note   
+    * @param  lasPath: 
+    * @retval 
+    */
+    long LASTransToPotree_Trans(const char* lasPath);
 
-    /**
-     * zip point and remove raw binnary file
-     * @param pathBin
-     * @param pathPnts
-     */
-    void LASFormatTransform_3DTilesPntsGZip(const char* pathBin,const char* pathPnts);
-
-    /**
-     * trans to tile set
-     * @param pathDir
-     * @param pathTileset
-     */
-    void LASFormatTransform_Tileset(const char* pathDir,const char* pathTileset,const char* jsonName);
 };
-
 
 #endif //LIDARPROC_LASFORMATTRANSFORM_H
