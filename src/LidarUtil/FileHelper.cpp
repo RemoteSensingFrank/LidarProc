@@ -301,3 +301,38 @@ string FileHelper::getFileName(string filePath,bool isExt/* =false */)
 		return name;
 	}
 }
+
+long FileHelper::listDirNames(string dirPath,vector<string> &dirNames)
+{
+#ifdef LINUX
+	DIR *dir;
+	struct dirent *ptr;
+	char base[1000];
+
+	if ((dir = opendir(dirPath.c_str())) == NULL)
+	{
+		perror("Open dir error...");
+		return -2;
+	}
+
+	while ((ptr = readdir(dir)) != NULL)
+	{
+		if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0)    ///current dir OR parrent dir
+			continue;
+		else if (ptr->d_type == 8)    ///file
+			continue;
+		else if (ptr->d_type == 10)    ///link file
+									   //printf("d_name:%s/%s\n",basePath,ptr->d_name);
+			continue;
+		else if (ptr->d_type == 4)    ///dir
+		{
+			dirNames.push_back(string(ptr->d_name));
+		}
+	}
+	closedir(dir);
+#else
+	return -1;
+#endif
+	std::sort(dirNames.begin(), dirNames.end());
+	return 0;
+}

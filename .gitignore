@@ -35,5 +35,10 @@
 *.pptx
 
 #building files
-/build
+/build/CMake*
+/build/Lidar*
+/build/cmake*
+/build/Makefile
+/build/data
+/build/www/pointclouds/
 /data

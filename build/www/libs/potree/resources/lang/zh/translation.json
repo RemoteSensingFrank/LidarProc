@@ -1,0 +1,66 @@
+{
+    "tb": {
+        "navigation_opt": "导航",
+        "rendering_opt": "外观",
+        "tools_opt": "工具",
+        "measurments_opt": "测量结果",
+        "annotations_opt": "注释",
+        "materials_opt": "材料",
+        "scene_opt": "场景",
+        "classification_filter_opt": "分类",
+        "parameters_opt": "其他参数",
+        "about_opt": "关于"
+    },
+    "tt": {
+        "angle_measurement": "角度测量",
+        "distance_measurement": "距离测量",
+        "height_measurement": "高度测量",
+        "area_measurement": "面积测量",
+        "volume_measurement": "提及测量",
+        "height_profile": "断面图",
+        "clip_volume": "卷裁剪",
+        "remove_all_measurement": "移除所有测量结果",
+        "left_view_control": "左视图",
+        "front_view_control": "前视图",
+        "top_view_control": "上视图",
+        "focus_control": "焦点控制",
+        "orbit_control": " 轨道控制",
+        "flight_control": "方向控制",
+        "earth_control": "旋转控制"
+    },
+    "appearance": {
+        "nb_max_pts": "设置要显示的点数", 
+        "point_size": "设置点尺寸",
+        "point_opacity": "不透明度",
+        "field_view": "视野",
+        "point_size_type": "点类型",
+        "point_material": "点材质",
+        "elevation_range": "高程范围",
+        "point_quality": "显示质量",
+        "edl_radius": "点集半径",
+        "edl_strength": "点集强度",
+        "edl_enable": "激活",
+        "min_node_size": "最小节点大小",
+        "clip_mode": "剪辑模式",
+        "move_speed": "移动速度",
+        "skybox": "天空",
+        "bottom_lock": "固定地面",
+        "box": "包围盒",
+        "freeze": "固定视图",
+        "language": "语言"
+    },
+    "profile": {
+        "nb_points": "点集版本",
+        "title": "高度剖面",
+        "save_las": "保存为LAS文件",
+        "save_ortho": "保存为CSV文件",
+        "save": "保存"
+    },
+	"scene": {
+		"camera_position": "相机位置n",
+		"camera_target": "相机朝向"
+	},
+    "settings": {
+        "language": "语言"
+    }
+}

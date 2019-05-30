@@ -42,5 +42,12 @@ public:
 		@param isExt：是否添加后缀
 	*/
 	static string getFileName(string filePath,bool isExt=false);
+
+	/**
+		列出文件夹下所有文件夹名称
+		@param dirPath：文件夹路径
+		@param dirNames: 文件夹名称
+	*/
+	static long listDirNames(string dirPath,vector<string> &dirNames);
 };
 

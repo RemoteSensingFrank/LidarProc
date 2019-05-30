@@ -5,10 +5,10 @@ if(ZLIB_FOUND)
 	#include(${ZLIB_INCLUDE_DIR})
 endif()
 
-include_directories(../../library  ../LidarPotreeCvt/include)
+include_directories(../../library)
+include_directories(../LidarPotreeCvt/include)
 include_directories(../LidarPotreeCvt/lib/rapidjson/include)
 include_directories(../LidarPotreeCvt/lib/arguments)
-
 
 add_library(libresearch ${RESEARCH_DIR_SRCS})
 target_link_libraries(libresearch libalgorithm libutility libpotreecvt)

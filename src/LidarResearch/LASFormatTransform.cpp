@@ -6,6 +6,41 @@
 #include "../LidarUtil/FileHelper.h"
 #include "../LidarBase/LASPoint.h"
 
+struct PotreeArguments {
+	bool help = false;
+	StoreOption storeOption = StoreOption::ABORT_IF_EXISTS;
+	vector<string> source;
+	string outdir;
+	float spacing;
+	int levels;
+	string format;
+	double scale;
+	int diagonalFraction;
+	Potree::OutputFormat outFormat;
+	vector<double> colorRange;
+	vector<double> intensityRange;
+	vector<string> outputAttributes;
+	bool generatePage;
+	bool pageTemplate;
+	string pageTemplatePath = "";
+	vector<double> aabbValues;
+	string pageName = "";
+	string projection = "";
+	bool sourceListingOnly = false;
+	string listOfFiles = "";
+	ConversionQuality conversionQuality = ConversionQuality::DEFAULT;
+	string conversionQualityString = "";
+	string title = "PotreeViewer";
+	string description = "";
+	bool edlEnabled = false;
+	bool showSkybox = false;
+	string material = "RGB";
+    string executablePath;
+	int storeSize;
+	int flushLimit;
+};
+
+
 long LASTransToPotree::LASTransToPotree_Trans(const char* lasPath,const char* transdir)
 {
     try{
