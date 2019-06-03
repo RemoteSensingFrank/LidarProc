@@ -243,10 +243,9 @@ long FileHelper::listNames(string cate_dir, vector<string> &files, string ext)
 	DIR *dir;
 	struct dirent *ptr;
 	char base[1000];
-
 	if ((dir = opendir(cate_dir.c_str())) == NULL)
 	{
-		perror("Open dir error...");
+		perror("Open dir error...\n");
 		return -2;
 	}
 

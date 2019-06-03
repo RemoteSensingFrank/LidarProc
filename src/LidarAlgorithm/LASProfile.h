@@ -52,7 +52,7 @@ private:
 											float resolution, cv::Mat &img, ProfileDecorate *decorateParams= nullptr, bool order = false);
 #else
 	/*
-	get image size according to points range using opencv
+		get image size according to points range using opencv
 	*/
 	void LASProfile_ImageFillHorizontal(ILASDataset* dataset, Rect2D rect, Eigen::MatrixXd rotMat,
 		float resolution, unsigned char* ucImageData,double xmin,double ymin,double xmax,double ymax,
@@ -122,6 +122,7 @@ private:
 	double	resolution;		//
 	bool   towerOrder;	    //
 	Point2D towerPnt[2];
+	
 public:
 	double vspan_dis;		//required
 	double hspan_dis;		//required

@@ -1,4 +1,11 @@
 /**
+ * 这个文件主要是初始化操作，完成初始化后就不太需要这个文件了
+ * Author：Frank.Wu
+ * Date:2019-05-28
+ * Version 1.0
+ */
+
+/**
  * 
  * @param {ima} imgurl 
  */

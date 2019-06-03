@@ -1,3 +1,8 @@
+/**
+ * Frank.Wu 针对需求进行了一些定制化的开发以满足我的项目的需求，主要修改内容见博客
+ * Blog: http://wuweiBlog.com
+ */
+
 Potree.KeyCodes = {
 	DELETE: 46
 };
@@ -22363,6 +22368,36 @@ initSidebar = (viewer) => {
 			elClassificationList.append(element);
 		};
 
+		//从后台获取分类然后展示分类信息,修改以前写死的那种分类类别的方法
+		$.ajax({
+			type: "GET",
+			url:"http://localhost:1234/dataclasstype",
+			dataType: "text",
+			async:true,
+			beforeSend:function(XMLHttpRequest){ 
+				$("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+				$("#loading").show();
+			}, 
+			success: function(data){
+				$("#loading").empty(); //ajax返回成功，清除loading图标
+				$("#loading").hide();
+				var strs= new Array();
+				strs=data.split(";");
+				for(var i=0;i<strs.length ;i++){
+					if(strs[i]!=""){
+						var items = new Array();
+						items=strs[i].split(",");
+						addClassificationItem(items[0], items[1]);
+					}
+				}
+
+			},     
+			error:function(data){
+				console.log(data)
+			}
+		});
+
+		/*
 		addClassificationItem(0, 'never classified');
 		addClassificationItem(1, 'unclassified');
 		addClassificationItem(2, 'ground');
@@ -22374,6 +22409,7 @@ initSidebar = (viewer) => {
 		addClassificationItem(8, 'key-point');
 		addClassificationItem(9, 'water');
 		addClassificationItem(12, 'overlap');
+		*/
 	}
 
 	function initAccordion () {

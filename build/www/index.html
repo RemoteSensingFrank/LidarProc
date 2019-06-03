@@ -47,7 +47,7 @@
 	<script src="javascript/interaction.js"></script>
 
 
-	<!--文件选择模态对话框-->
+	<!--待展示的文件选择模态对话框-->
 	<div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectModal">  
 		<div class="modal-dialog" role="document">  
 			<div class="modal-content">  
@@ -70,34 +70,148 @@
 		</div>  
 	</div> 
 
+	<!--将数据转换为展示数据模态对话框-->
+	<div class="modal fade" id="transModal" tabindex="-1" role="dialog" aria-labelledby="transSelectModal">  
+		<div class="modal-dialog" role="document">  
+			<div class="modal-content">  
+				<div class="modal-header">  
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">  
+						<span aria-hidden="true">×</span>  
+					</button>  
+					<h4 class="modal-title" id="transModalTitle">选择待转换的数据</h4>  
+				</div>  
+				<div class="modal-body">  
+					<div style=" overflow:scroll;width:100%; height:200px;float:center">
+						<div id="treeTrans"></div>
+					</div>
+				</div>  
+				<div class="modal-footer">  
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
+					<button type="button" class="btn btn-primary" onclick="transData();">转换</button>  
+				</div>  
+			</div>  
+		</div>  
+	</div> 
+
+	<!--数据文件删除，包括删除展示数据和原始数据-->
+	<div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="delSelectModal">  
+		<div class="modal-dialog" role="document">  
+			<div class="modal-content">  
+				<div class="modal-header">  
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">  
+						<span aria-hidden="true">×</span>  
+					</button>  
+					<h4 class="modal-title" id="delModalTitle">数据删除</h4>  
+				</div>  
+				<div class="modal-body">  
+					<div style=" overflow:scroll;width:100%; height:200px;float:center">
+						<div id="treeDelete"></div>
+					</div>
+				</div>  
+				<div class="modal-footer">  
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
+					<button type="button" class="btn btn-primary" onclick="deleteData();">删除</button>  
+				</div>  
+			</div>  
+		</div>  
+	</div>
+
+	<!--文件上传，包括上传远程文件和本地文件-->
+	<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadSelectModal">  
+		<div class="modal-dialog" role="document">  
+			<div class="modal-content">  
+				<div class="modal-header">  
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">  
+						<span aria-hidden="true">×</span>  
+					</button>  
+					<h4 class="modal-title" id="uploadModalTitle">文件上传</h4>  
+				</div>  
+				<div class="modal-body">  
+					<form class="form-inline" role="form">
+						<div class="form-group">
+							<label class="sr-only" for="name">名称</label>
+							<input type="text" class="form-control" id="name" placeholder="文件名">
+						</div>
+						<div class="form-group">
+							<label class="sr-only" for="inputfile">选择文件</label>
+							<input type="file" id="inputfile">
+						</div>
+						<div class="checkbox">
+							<label>
+							<input type="checkbox">确认
+							</label>
+						</div>
+					</form>
+				</div>  
+				<div class="modal-footer">  
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
+					<button type="button" class="btn btn-primary" onclick="uploadData();">上传</button>  
+				</div>  
+			</div>  
+		</div>  
+	</div>
 	
-	<div id="navbar" class="navbar navbar-dark" role="navigation" style="position: absolute; width: 100%;height:45px left: 0px; top: 0px; background:#032e59;">
+
+    <div class="modal fade" id="msgModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title" id="deleteModalLabel">确认框</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label  class="control-label">请先选取杆塔坐标</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">确认</button>
+                </div>
+        	</div>
+		</div>
+    </div>
+
+	<div id="navbar" class="navbar navbar-dark" role="navigation" style="position: absolute; width: 100%;height:45px left: 0px; top: 0px; background:#032e59; z-index: 2;">
 		<div class="navbar-header">
 			<a class="navbar-brand" href="#">LidarProc</a>
 		</div>
 		<ul class="nav navbar-nav">
 			<li class="dropdown">
-				<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color:##FFFAF0;">选择操作 <span class="caret"></span></a>
+				<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color:##FFFAF0;">文件操作 <span class="caret"></span></a>
 				<ul class="dropdown-menu">
 					<li><a href="#" onclick="initFileModal();" style="color:##FFFAF0">文件查看</a></li>
-					<li role="separator" class="divider"></li>
-					<li><a href="#" style="color:##FFFAF0">导线提取</a></li>
-					<li><a href="#" style="color:##FFFAF0">杆塔提取</a></li>
-					<li><a href="#" style="color:##FFFAF0">地面点提取</a></li>
-					<li role="separator" class="divider"></li>
-					<li><a href="#" style="color:##FFFAF0">植被提取</a></li>
+					<li><a href="#" onclick="initDataTransModal();" style="color:##FFFAF0">文件转换为Potree格式</a></li>
+					<li><a href="#" onclick="initDataDeleteModal();" style="color:##FFFAF0">删除文件</a></li>
+					<li><a href="#" onclick="initDataUploadModal();" style="color:##FFFAF0">文件上传到服务器</a></li>
+					<li><a href="#" onclick="addLASClassify();" style="color:##FFFAF0">添加文件分类</a></li>
 				</ul>
 			</li>
+			<li class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color:##FFFAF0;">点云处理 <span class="caret"></span></a>
+				<ul class="dropdown-menu">
+					<li><a href="#" onclick="extractTower();" style="color:##FFFAF0">杆塔提取</a></li>
+					<li><a href="#" onclick="extractGround();" style="color:##FFFAF0">地面点提取</a></li>
+					<li><a href="#" onclick="extractVegetation();" style="color:##FFFAF0">植被提取</a></li>
+					<li><a href="#" onclick="extractLines();" style="color:##FFFAF0">导线提取</a></li>
+				</ul>
+			</li>
+
 		</ul>
 	</div>
 
-	<div class="potree_container" style="position: absolute; width: 100%; left: 0px; top: 45px; bottom:10px;">
+	
+	<div id="loading" style=" position: absolute;  position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%); z-index: 3;display:none;">
+	</div>
+
+	<div class="potree_container" style="position: absolute; width: 100%; left: 0px; top: 45px; bottom:10px; z-index: 1;">
 		<div id="potree_render_area">
 			<div id="cesiumContainer" style="position: absolute; width: 100%; height: 100%; background-color:green"></div>
 		</div>
 		<div id="potree_sidebar_container"> </div>
 	</div>
-	
 	<script>
 		Initial();
 	</script>

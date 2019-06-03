@@ -22,7 +22,7 @@ add_subdirectory(LidarResearch)
 
 # Target 
 add_executable(LidarProc LidarProc.cpp ${DIRTESTS})  
-add_executable(LidarServerExample LidarServer.cpp)
+add_executable(LidarServer LidarServer.cpp)
 
 set(lnkLibs libgeometry libbase libalgorithm libutility libresearch libpotreecvt)
 set(exlnkLibs libgtest.so libgtest_main.so pthread)
@@ -30,6 +30,6 @@ set(exlnkLibs libgtest.so libgtest_main.so pthread)
 target_link_libraries(LidarProc ${lnkLibs})
 target_link_libraries(LidarProc ${exlnkLibs})
 
-target_link_libraries(LidarServerExample ${lnkLibs})
-target_link_libraries(LidarServerExample ${exlnkLibs} laszip)
+target_link_libraries(LidarServer ${lnkLibs})
+target_link_libraries(LidarServer ${exlnkLibs} laszip)
 
