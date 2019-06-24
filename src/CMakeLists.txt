@@ -3,8 +3,16 @@ project(LidarProc)
 # Add the source in project root directory 
 aux_source_directory(./LidarUnitTest DIRTESTS)
 add_definitions(-D_DEBUG)
+find_package(OpenCV)
+if(OpenCV_FOUND)
+	add_definitions(-D_USE_OPENCV_)
+else()
+    message("compile without openCV\n")
+endif()
+
 # Add header file include directories 
 
+include_directories("../../library/")
 include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarUtil ./LidarResearch)
 include_directories(./LidarPotreeCvt/include)
 include_directories(./LidarPotreeCvt/lib/rapidjson/include)

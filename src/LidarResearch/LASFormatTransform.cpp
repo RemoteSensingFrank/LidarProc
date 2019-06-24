@@ -41,17 +41,19 @@ struct PotreeArguments {
 };
 
 
+
+
 long LASTransToPotree::LASTransToPotree_Trans(const char* lasPath,const char* transdir)
 {
     try{
 		PotreeArguments a;
         a.outdir = transdir;
         a.spacing = 0.0;
-        a.storeSize = 20'000;
-        a.flushLimit= 10'000'0000;
-        a.diagonalFraction = 0.0;
+        a.storeSize = 200'000;
+        a.flushLimit= 10'000'000;
+        a.diagonalFraction = 300;
         a.levels = (-1);
-        a.outFormat = Potree::OutputFormat::LAS;
+        a.outFormat = Potree::OutputFormat::BINARY;
         a.outputAttributes = { "RGB" };
         a.scale = (0.0);
         a.storeOption = StoreOption::ABORT_IF_EXISTS;
@@ -98,9 +100,9 @@ long LASTransToPotree::LASTransToPotree_Trans(const char* lasPath)
 
         a.outdir = "./www/pointclouds/"+FileHelper::getFileName(lasPath)+"/";
         a.spacing = 0.0;
-        a.storeSize = 20'000;
+        a.storeSize = 200'000;
         a.flushLimit= 10'000'0000;
-        a.diagonalFraction = 0.0;
+        a.diagonalFraction = 300.0;
         a.levels = (-1);
         a.outFormat = Potree::OutputFormat::LAS;
         a.outputAttributes = { "RGB" };

@@ -123,6 +123,8 @@ function getDataTransTree(callback){
  * @param {*} callback 
  */
 function getDataDeleteTree(callback){
+
+    //数据文件删除文件列表
     var treedata=[];
     $.ajax({
         type: "GET",
@@ -168,7 +170,7 @@ function getDataDeleteTree(callback){
                 }
             }
             treedata.push(item);
-            $('#treeDelete').treeview({
+            $('#treeDeleteData').treeview({
                 data: treedata,         // data is not optional
                 levels: 2,
                 backColor:'white'
@@ -180,10 +182,54 @@ function getDataDeleteTree(callback){
             console.log(data)
         }
     });
+
+    //展示数据文件删除文件列表
+    var treeexhibit=[];
+    $.ajax({
+        type: "GET",
+        url: ip+"/exhibitlist",
+        dataType: "text",
+        async:true,
+        beforeSend:function(XMLHttpRequest){ 
+            $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+            $("#loading").show()
+        }, 
+
+        success: function(data){
+            $("#loading").empty(); //ajax返回成功，清除loading图标
+            $("#loading").hide();
+
+            var strs= new Array();
+            strs=data.split(";");
+            var item={};
+            item["text"]="展示文件";
+            item["icon"]="glyphicon glyphicon-th-list",
+            item["nodes"]=[];
+            for(i=0;i<strs.length ;i++){
+                if(strs[i]!=""){
+                    var subitem={};
+                    subitem["text"]=strs[i];
+                    subitem["selectedIcon"]="glyphicon glyphicon-ok",
+                    item["nodes"].push(subitem);
+                }
+            }
+            treeexhibit.push(item);
+            $('#treeDeleteExhibit').treeview({
+                data: treeexhibit,         // data is not optional
+                levels: 2,
+                backColor:'white'
+              });
+            callback();
+        },     
+        error:function(data){
+            console.log(data)
+        }
+    });
+
 }
 
 /**
- * 删除文件
+ * 删除数据文件
  * @param {待删除文件文件名} filename 
  */
 function deleteDataFile(filename){
@@ -205,6 +251,14 @@ function deleteDataFile(filename){
             console.log(data)
         }
     });
+}
+
+/**
+ * 删除展示数据文件
+ * @param {待删除的文件夹名称} dir 
+ */
+function deleteExhibitDirectory(dir){
+
 }
 
 /**

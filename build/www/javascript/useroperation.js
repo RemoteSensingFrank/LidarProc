@@ -108,8 +108,8 @@ function transData(){
 function deleteData(){
     var res = confirm("确认删除所选文件？");
     if(res == true){
-        var selectedNodes = $("#treeDelete").treeview("getSelected");
-        var parentNodes = $("#treeDelete").treeview('getParent', selectedNodes[0]);
+        var selectedNodes = $("#treeDeleteData").treeview("getSelected");
+        var parentNodes = $("#treeDeleteData").treeview('getParent', selectedNodes[0]);
         var filename=parentNodes.text+"/"+selectedNodes[0].text;
         deleteDataFile(filename);
     }

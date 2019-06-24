@@ -274,7 +274,8 @@ public:
 };
 
 /**
-* 点云数据集
+* 点云数据集,点云数据集分为两个部分，首先对点云数据集以KD树进行分块，其中每一块文件为LASRectBlock
+* 获取点云数据将点云数据分配到LASRectBlock中，每一个Block构建kd树，构建双重索引
 */
 class ILASDataset {
 

@@ -15,6 +15,7 @@
 #include "LidarResearch/LASFormatTransform.h"
 
 using namespace rapidjson;
+string apiDoc="";
 
 /**
 * 字符串分割
@@ -65,6 +66,10 @@ int main(int argc, char **argv)
 {
     using namespace httplib;
     Server svr;
+
+	string pageInfo="";
+	//查看系统信息
+	string apiInfo="Api:http://localhost:1234/info\nParams:null\nParamType:null\nRequestType:GET\nDesc:查看系统信息\n\n";
     svr.Get("/info", [](const Request& req, Response& res) {
 		ifstream incpu("/proc/cpuinfo");
 		istreambuf_iterator<char> cpu_begin(incpu);
@@ -80,7 +85,10 @@ int main(int argc, char **argv)
 
         res.set_content(info, "text/plain");
     });
+	pageInfo+=apiInfo;
 
+	//查看所有可以展示的点云数据
+	string apiExhibitlist="Api:http://localhost:1234/exhibitlist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可展示数据文件夹\n\n";
 	svr.Get("/exhibitlist", [](const Request& req, Response& res){
 		string dirNameList="";
 		vector<string> namelist;
@@ -90,7 +98,10 @@ int main(int argc, char **argv)
 		res.set_content(dirNameList, "text/plain");
 		res.status=200;
 	});
+	pageInfo+=apiExhibitlist;
 
+	//列出所有可处理数据
+	string apiDatalist="Api:http://localhost:1234/datalist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可处理数据\n\n";
 	svr.Get("/datalist", [](const Request& req, Response& res){
 		string jstr="";
 		vector<string> dirs;
@@ -108,14 +119,30 @@ int main(int argc, char **argv)
 		res.set_content(jstr, "text/plain");
 		res.status=200;
 	});
+	pageInfo+=apiDatalist;
 
+	//删除处理数据
+	string apiDatadelete="Api:http://localhost:1234/datadelete\nParams:待删除数据文件名（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除处理数据\n\n";
 	svr.Get(R"(/datadelete/(.*?))",[](const Request& req, Response& res){
 		string path="../data/"+string(req.matches[1]);
 		remove(path.c_str());
         res.set_content("deleted", "text/plain");
 		res.status=200;
 	});
+	pageInfo+=apiDatadelete;
 
+	//删除展示数据
+	string apiExhibitdelete="Api:http://localhost:1234/exhibitdelete\nParams:待删除数据文件夹（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除展示数据\n\n";
+	svr.Get(R"(/exhibitdelete/(.*?))",[](const Request& req, Response& res){
+		string path="../data/"+string(req.matches[1]);
+		remove(path.c_str());
+        res.set_content("deleted", "text/plain");
+		res.status=200;
+	});
+	pageInfo+=apiExhibitdelete;
+
+	//处理数据转换为展示数据
+	string apiDatatrans="Api:http://localhost:1234/datatrans\nParams:待转换数据文件名\nParamType:url参数\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
 	svr.Get(R"(/datatrans/(.*?))",[](const Request& req, Response& res){
 		string path="../data/"+string(req.matches[1]);
 		LASTransToPotree lasTrans;
@@ -123,7 +150,10 @@ int main(int argc, char **argv)
         res.set_content("transed", "text/plain");
 		res.status=200;
 	});
+	pageInfo+=apiDatatrans;
 
+	//获取点云分类类型
+	string apiDataclasstype="Api:http://localhost:1234/dataclasstype\nParams:null\nParamType:\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
 	svr.Get("/dataclasstype",[](const Request& req, Response& res){
 		FILE *fs = fopen("./config/classtype.conf","r+");
 		char line[2048];
@@ -139,8 +169,22 @@ int main(int argc, char **argv)
 		res.status=200;
 	});
 
+
+	//查看doc文档
+	pageInfo+=apiDataclasstype;
+	apiDoc=pageInfo;
+	svr.Get("/apidoc",[](const Request& req, Response& res){
+		string doc=apiDoc;
+		res.set_content(apiDoc, "text/plain;charset=utf-8");
+		res.status=200;
+	});
+	int port=1234;
+
+	printf("localhost:%d\n",port);
+
 	//the max parallel connection count
 	svr.set_keep_alive_max_count(500);
 	svr.set_base_dir("./www");
-    svr.listen("localhost", 1234);
+    svr.listen("localhost", port);
+
 }

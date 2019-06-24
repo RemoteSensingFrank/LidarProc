@@ -106,29 +106,29 @@ typedef std::vector<LASIndexDis> LASIndexDisList;
 class classifyElectricPatrolFast {
 public:
 	/*
-	extract tower points set from las data
-	the algorithm decscribed as follows:
-	1. get the tower point range and find all the points in the range;
-	2. for the tower points is higher than the vegetation points use precentage to extract point higher than 40%
-	3. some vegetation points will mixed inevitable so we use dbscan algorthm to remove vegetation points
-	ILASDataset* dataset:las dataset
-	Point2D towerPnt:tower position
-	double range:tower range
-	LASColorExt color: the tower color
+		extract tower points set from las data
+		the algorithm decscribed as follows:
+		1. get the tower point range and find all the points in the range;
+		2. for the tower points is higher than the vegetation points use precentage to extract point higher than 40%
+		3. some vegetation points will mixed inevitable so we use dbscan algorthm to remove vegetation points
+		ILASDataset* dataset:las dataset
+		Point2D towerPnt:tower position
+		double range:tower range
+		LASColorExt color: the tower color
 	*/
 	long ElectricPatrolFast_Tower(ILASDataset* dataset, Point2D towerPnt, double range, LASColorExt color);
 
 	/*
-	extract line point set from las data
-	the algorithm decscribed as follows:
-	1. get the tower point range and find all the points in the range and the the base height;
-	2. caculate the plane and the points above the plane will be considerd as line point(if not classified)
-	3. use region grow up algoritm to get all the points
-	ILASDataset* dataset:las dataset
-	Point2D *towerPnt:tower position
-	double range:tower range
-	double height:height threshold
-	LASColorExt color: the tower color
+		extract line point set from las data
+		the algorithm decscribed as follows:
+		1. get the tower point range and find all the points in the range and the the base height;
+		2. caculate the plane and the points above the plane will be considerd as line point(if not classified)
+		3. use region grow up algoritm to get all the points
+		ILASDataset* dataset:las dataset
+		Point2D *towerPnt:tower position
+		double range:tower range
+		double height:height threshold
+		LASColorExt color: the tower color
 	*/
 	long ElectricPatrolFast_Lines(ILASDataset* dataset, Point2D* towerPnt, double range, double height, LASColorExt color);
 
@@ -184,21 +184,21 @@ private:
 	//GDALTriangulation* ElectricPatrolFast_Triangle(Point3Ds localMinPts);
 
 	/*
-	tower segment algorithm
-	ILASDataset* dataset:las dataset
-	LASIndexDisList idxDisLists:las data index
-	LASColorExt color: the tower color
-	double distance:scan distance
+		tower segment algorithm
+		ILASDataset* dataset:las dataset
+		LASIndexDisList idxDisLists:las data index
+		LASColorExt color: the tower color
+		double distance:scan distance
 	*/
 	long ElectrixPatrolFast_Seg(ILASDataset* dataset, LASIndexDisList idxDisLists, LASColorExt color, double distance);
 
 
 	/*
-	seed grow up algorithm
-	ILASDataset* dataset:las dataset
-	Point3Ds seedPoints:seed points
-	double range:seed distance
-	LASColorExt color:color
+		seed grow up algorithm
+		ILASDataset* dataset:las dataset
+		Point3Ds seedPoints:seed points
+		double range:seed distance
+		LASColorExt color:color
 	*/
 	long ElectrixPatrolFast_Seed(ILASDataset* dataset, Point3Ds seedPoints, double range, LASColorExt color);
 };

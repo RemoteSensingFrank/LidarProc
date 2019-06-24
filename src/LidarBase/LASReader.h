@@ -11,6 +11,7 @@
 #include "LASHeader.h"
 #include "LASPoint.h"
 
+
 class ILASDataset;
 
 /*读写lidar文件基类*/
@@ -41,6 +42,8 @@ public:
 	bool m_isDatasetOpen;
 	//GDALProcessBase		*m_Progress;
 };
+
+
 
 //version 1.2
 //author: Frank.Wu

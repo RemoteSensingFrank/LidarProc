@@ -12,12 +12,13 @@
 	#include<opencv2/imgproc.hpp>  
 	#include<opencv2/highgui.hpp>  
 	#include<opencv2/core.hpp>
-#ifdef _DEBUG
-	#pragma  comment(lib, "opencv_world400d.lib")
-#else
-	#pragma  comment(lib, "opencv_world400.lib")
-#endif // DEBUG
-
+	#ifdef win32
+		#ifdef _DEBUG
+			#pragma  comment(lib, "opencv_world400d.lib")
+		#else
+			#pragma  comment(lib, "opencv_world400.lib")
+		#endif // DEBUG
+	#endif
 #endif
 
 #define TOWER_ORDER
@@ -31,10 +32,6 @@
 #define min a>b?b:a
 #endif
 
-
-/*
-��ȡPCA�任����ת����
-*/
 void  LASProfile::LASProfile_GetPCARotMat(Point2D pntTowers[2], Eigen::MatrixXd &rotMat)
 {
 	double theta = 0;
@@ -410,8 +407,9 @@ void LASProfile::LASProfile_ImageFillFront(ILASDataset* dataset, Rect2D rect, Ei
 	if (decorateParams != nullptr)
 	{
 		decorateParams->range_rect = Rect2D(xmin, zmin, xmax, zmax);
-		cv::Mat axisImg;
-		img = axisImg;
+		//TODO:
+		//cv::Mat axisImg;
+		//img = axisImg;
 	}
 
 	for (int i = 0; i < 3; ++i)
@@ -1067,7 +1065,25 @@ void ProfileDecorate::ProfileDecorate_TowerHeightSpan(cv::Mat &axisImg)
 	for (int i = 0; i <= 30; i += 2)
 	{
 		cv::line(axisImg, cv::Point(origin.x + text_size.width+i*per, axisImg.rows - 80), cv::Point(origin.x + text_size.width + (i+1)*per, axisImg.rows - 80), cv::Scalar(0, 0, 0));
-
 	}
 }
+
+void ProfileDecorate::ProfileDecorate_TowerLabelPos(cv::Mat &axisImg)
+{
+/* 	Eigen::MatrixXd p1(1, 2), p2(1, 2);
+	p1(0, 0) = towerPnt[0].x; p1(0, 1) = towerPnt[0].y;
+	p2(0, 0) = towerPnt[1].x; p2(0, 1) = towerPnt[1].y;
+	Eigen::MatrixXd rp1 = p1 * rotMat;
+	Eigen::MatrixXd rp2 = p2 * rotMat;
+
+	int font_face = cv::FONT_HERSHEY_COMPLEX;
+	double font_scale = 0.5;
+	int thickness = 1;
+	int baseline;
+	string txt = cv::format("span distance=%0.4lf meters", span);
+	cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
+ */
+
+}
+
 #endif

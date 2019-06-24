@@ -2,13 +2,15 @@
 
 #include"../LidarBase/LASPoint.h"
 #include"../LidarGeometry/Geometry.h"
-#include <Eigen/Dense>
+#include "./Eigen/Dense"
 #include <string>
 #ifdef _USE_OPENCV_
-
 	#include<opencv2/opencv.hpp>
 #endif
 class ProfileDecorate;
+
+void test();
+
 
 class LASProfile
 {
@@ -68,6 +70,8 @@ private:
 #endif
 };
 
+
+
 #ifdef _USE_OPENCV_
 
 enum ProfileDecorateLabelType {
@@ -101,8 +105,6 @@ private:
 	*/
 	void ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &axisImg);
 
-
-
 	/*
 		add tower height and span in the picture	
 	*/
@@ -132,9 +134,4 @@ public:
 	double towerHeight[2];				//
 	std::string towerName[2];			//
 };
-
-
-
-
 #endif
-

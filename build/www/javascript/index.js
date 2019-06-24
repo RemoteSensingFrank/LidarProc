@@ -5,8 +5,12 @@
  * Version 1.0
  */
 
+ //当前展示的文件路径
+currentViewerFilePath='';
+
+
 /**
- * 
+ * Cesium 初始化
  * @param {ima} imgurl 
  */
 function CesiumInitial(imgurl)
@@ -24,9 +28,15 @@ function CesiumInitial(imgurl)
 		timeline: false,
 		navigationHelpButton: false,
 		imageryProvider : new Cesium.ArcGisMapServerImageryProvider({url:imgurl}),
-		terrainShadows: Cesium.ShadowMode.DISABLED,
+        terrainShadows: Cesium.ShadowMode.DISABLED,
+/*         terrainProvider:new Cesium.CesiumTerrainProvider({
+            url : 'https://assets.agi.com/stk-terrain/v1/tilesets/world/tiles', // 默认立体地表
+            requestVertexNormals: true,
+            requestWaterMask: true
+        }), */
     });
 }
+
 
 /**
  * load potree las file
@@ -34,14 +44,14 @@ function CesiumInitial(imgurl)
  */
 function LoadLASDataViewer(path,projec_def)
 {
-    
+    currentViewerFilePath = path;
     Potree.loadPointCloud(path, "data1", e => {
         let pointcloud = e.pointcloud;
         pointcloud.projection = projec_def;     //affect the overview
         let material = pointcloud.material;
         viewer.scene.addPointCloud(pointcloud);
         material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX 
-        material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+        material.pointSizeType  = Potree.PointSizeType.ADAPTIVE;
         
         //定义的投影带为50度带
         let pointcloudProjection = projec_def;
