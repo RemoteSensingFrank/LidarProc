@@ -134,8 +134,8 @@ int main(int argc, char **argv)
 	//删除展示数据
 	string apiExhibitdelete="Api:http://localhost:1234/exhibitdelete\nParams:待删除数据文件夹（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除展示数据\n\n";
 	svr.Get(R"(/exhibitdelete/(.*?))",[](const Request& req, Response& res){
-		string path="../data/"+string(req.matches[1]);
-		remove(path.c_str());
+		string path="rm -rf ./www/pointclouds/"+string(req.matches[1])+"/";
+		system(path.c_str());
         res.set_content("deleted", "text/plain");
 		res.status=200;
 	});
@@ -178,13 +178,12 @@ int main(int argc, char **argv)
 		res.set_content(apiDoc, "text/plain;charset=utf-8");
 		res.status=200;
 	});
+	
 	int port=1234;
-
 	printf("localhost:%d\n",port);
 
 	//the max parallel connection count
 	svr.set_keep_alive_max_count(500);
 	svr.set_base_dir("./www");
     svr.listen("localhost", port);
-
 }

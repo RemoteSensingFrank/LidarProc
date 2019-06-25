@@ -108,10 +108,22 @@ function transData(){
 function deleteData(){
     var res = confirm("确认删除所选文件？");
     if(res == true){
-        var selectedNodes = $("#treeDeleteData").treeview("getSelected");
-        var parentNodes = $("#treeDeleteData").treeview('getParent', selectedNodes[0]);
-        var filename=parentNodes.text+"/"+selectedNodes[0].text;
-        deleteDataFile(filename);
+
+        //删除数据文件
+        var selecteddataNodes = $("#treeDeleteData").treeview("getSelected");
+        if(selecteddataNodes.length>0){
+            var parentdataNodes = $("#treeDeleteData").treeview('getParent', selectedNodes[0]);
+            var filename=parentNodes.text+"/"+selectedNodes[0].text;
+            deleteDataFile(filename);
+        }
+
+        //删除展示文件
+        var selectedexihibitNodes = $("#treeDeleteExhibit").treeview("getSelected");
+        if(selectedexihibitNodes.length>0){
+            var dirname = selectedexihibitNodes[0].text;
+            deleteExhibitDirectory(dirname);
+        }
+
     }
 }
 

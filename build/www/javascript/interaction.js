@@ -219,7 +219,8 @@ function getDataDeleteTree(callback){
                 levels: 2,
                 backColor:'white'
               });
-            callback();
+            if(callback!=null)
+              callback();
         },     
         error:function(data){
             console.log(data)
@@ -258,7 +259,24 @@ function deleteDataFile(filename){
  * @param {待删除的文件夹名称} dir 
  */
 function deleteExhibitDirectory(dir){
-
+    $.ajax({
+        type: "GET",
+        url: ip+"/exhibitdelete/"+dir,
+        dataType: "text",
+        async:true,
+        beforeSend:function(XMLHttpRequest){ 
+            $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+            $("#loading").show();
+        }, 
+        success: function(data){
+            $("#loading").empty(); //ajax返回成功，清除loading图标
+            $("#loading").hide();
+            getDataDeleteTree(null);
+        },     
+        error:function(data){
+            console.log(data)
+        }
+    });
 }
 
 /**
