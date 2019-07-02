@@ -1,3 +1,4 @@
+
 #include "LASProfile.h"
 
 #include<iostream>
@@ -164,9 +165,11 @@ void LASProfile::LASProfile_ImageFillHorizontal(ILASDataset* dataset, Rect2D rec
 	vec_mat.clear();
 	if (decorateParams != nullptr)
 	{	
-		decorateParams->range_rect = Rect2D(xmin, ymin, xmax, ymax);
 		cv::Mat axisImg;
+		decorateParams->range_rect = Rect2D(xmin, ymin, xmax, ymax);
 		decorateParams->ProfileDecorate_AxisHorizontal(img, axisImg);
+		decorateParams->ProfileDecorate_TowerHeightSpan(axisImg);
+		decorateParams->ProfileDecorate_TowerLabelPos(axisImg);
 		img = axisImg;
 	}
 	for (int i = 0; i < 3; ++i)
@@ -238,8 +241,6 @@ void LASProfile::LASProfile_ImageFillVertical(ILASDataset* dataset, Rect2D rect,
 		memset(imageData[i], 255, sizeof(unsigned char)*xsize*ysize);
 	}
 
-
-
 	//fill image
 	for (int i = 0; i < rectIds.size(); ++i)
 	{
@@ -258,8 +259,6 @@ void LASProfile::LASProfile_ImageFillVertical(ILASDataset* dataset, Rect2D rect,
 			if (GeometryRelation::IsPointInRect(x, y,
 				rect.minx, rect.miny, rect.maxx, rect.maxy))
 			{
-
-
 				int pixelx = (x - xmin) / resolution;
 				int pixely = (lasPnt.m_vec3d.z - zmin) / resolution;
 				if (order) {
@@ -290,6 +289,7 @@ void LASProfile::LASProfile_ImageFillVertical(ILASDataset* dataset, Rect2D rect,
 		decorateParams->range_rect = Rect2D(xmin, zmin, xmax, zmax);
 		decorateParams->ProfileDecorate_AxisVertical(img, axisImg);
 		decorateParams->ProfileDecorate_TowerHeightSpan(axisImg);
+		decorateParams->ProfileDecorate_PointsLabel(axisImg);
 		img = axisImg;
 	}
 
@@ -622,6 +622,8 @@ void LASProfile::LASProfile_Horizontal(const char* strLasDataset, Point2D pntTow
 	{
 		decorateParams->resolution = fResolution;
 		decorateParams->rotMat = rotMat;
+		decorateParams->towerOrder = order;
+		memcpy(decorateParams->towerPnt, pntTowers, 2 * sizeof(Point2D));
 	}
 	LASProfile_ImageFillHorizontal(dataset, rect, rotMat, fResolution, img, decorateParams, order);
 	cv::imwrite(strOutImg, img);
@@ -661,8 +663,6 @@ void LASProfile::LASProfile_Horizontal(const char* strLasDataset, Point2D pntTow
 			if (GeometryRelation::IsPointInRect(rotPnt(0,0), rotPnt(0,1),
 				rect.minx, rect.miny, rect.maxx, rect.maxy))
 			{
-
-
 				xmax = max(xmax, rotPnt(0, 0));
 				xmin = min(xmin, rotPnt(0, 0));
 				ymax = max(ymax, rotPnt(0, 1));
@@ -973,7 +973,7 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &axisImg)
 {
 	cv::Scalar bValue(255, 255, 255);
-	cv::copyMakeBorder(srcImg, axisImg, 130, 80, 80, 10, cv::BORDER_CONSTANT, bValue);
+	cv::copyMakeBorder(srcImg, axisImg, 80, 130, 80, 10, cv::BORDER_CONSTANT, bValue);
 	cv::Size imgsizeSrc(srcImg.cols, srcImg.rows);
 
 #ifdef _DEBUG
@@ -987,8 +987,8 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 	double widthpix = hspan_dis / resolutionx;
 	double heighpix = vspan_dis / resolutiony;
 
-	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 160), cv::Point(70 + imgsizeSrc.width + 10, imgsizeSrc.height + 160), cv::Scalar(0, 0, 0));//x axis
-	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 160), cv::Point(70, 20), cv::Scalar(0, 0, 0));//y axis
+	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 180), cv::Point(70 + imgsizeSrc.width + 10, imgsizeSrc.height + 180), cv::Scalar(0, 0, 0));//x axis
+	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 180), cv::Point(70, 20), cv::Scalar(0, 0, 0));//y axis
 
 	int font_face = cv::FONT_HERSHEY_COMPLEX;
 	double font_scale = 0.5;
@@ -998,14 +998,13 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 	for (int i = 0; i *widthpix<(imgsizeSrc.width + 10); ++i)
 	{
 		string txt = cv::format("%d", int(i*hspan_dis));
-		cv::line(axisImg, cv::Point(80 + i*widthpix, imgsizeSrc.height + 160), cv::Point(80 + i*widthpix, imgsizeSrc.height + 155), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(80 + i*widthpix, imgsizeSrc.height + 180), cv::Point(80 + i*widthpix, imgsizeSrc.height + 175), cv::Scalar(0, 0, 0));
 		txt = cv::format("%d", int(i*this->hspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
-		//���ı�����л���
 		cv::Point origin;
 		origin.x = 80 + i*widthpix - text_size.width / 2;
-		origin.y = imgsizeSrc.height + 170 + 5 + text_size.height;
+		origin.y = imgsizeSrc.height + 190 + 5 + text_size.height;
 		cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
 	}
 
@@ -1016,7 +1015,6 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 		string txt = cv::format("%d", int(i*this->vspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
-		//���ı�����л���
 		cv::Point origin;
 		origin.x = 50 - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 130 - i*heighpix + text_size.height / 2;
@@ -1037,7 +1035,6 @@ void ProfileDecorate::ProfileDecorate_TowerHeightSpan(cv::Mat &axisImg)
 	Eigen::MatrixXd rp2 = p2 * rotMat;
 	double span = fabs(rp2(0, 0) - rp1(0, 0));
 
-
 	int font_face = cv::FONT_HERSHEY_COMPLEX;
 	double font_scale = 0.5;
 	int thickness = 1;
@@ -1046,23 +1043,24 @@ void ProfileDecorate::ProfileDecorate_TowerHeightSpan(cv::Mat &axisImg)
 	cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
 	cv::Point origin;
-	origin.x = axisImg.cols/2+35  - text_size.width / 2;
+	int xleft  = (min(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+80;
+	int xright = (max(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+80;
+
+	origin.x = (xleft+xright)/2  - text_size.width / 2;
 	origin.y = axisImg.rows - 80 + text_size.height / 2;
 	cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
-
-	int xleft  = (min(rp2(0, 0), rp1(0, 0)) - range_rect.minx) /resolution+80;
-	int xright = (max(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+80;
 
 	cv::line(axisImg, cv::Point(xleft, axisImg.rows - 70), cv::Point(xleft, axisImg.rows - 90), cv::Scalar(0, 0, 0));
 	cv::line(axisImg, cv::Point(xright, axisImg.rows - 70), cv::Point(xright, axisImg.rows - 90), cv::Scalar(0, 0, 0));
 
+	//虚线
 	int per = (origin.x - xleft) / 30;
 	for (int i = 0; i <= 30; i+=2)
 	{
 		cv::line(axisImg, cv::Point(xleft+i*per, axisImg.rows - 80), cv::Point(xleft+(i+1)*per, axisImg.rows - 80), cv::Scalar(0, 0, 0));
 	}
-	per = (xright - (origin.x + text_size.width)) / 30;
-	for (int i = 0; i <= 30; i += 2)
+	int count = (xright - (origin.x + text_size.width))/per;
+	for (int i = 0; i <= count; i += 2)
 	{
 		cv::line(axisImg, cv::Point(origin.x + text_size.width+i*per, axisImg.rows - 80), cv::Point(origin.x + text_size.width + (i+1)*per, axisImg.rows - 80), cv::Scalar(0, 0, 0));
 	}
@@ -1070,20 +1068,72 @@ void ProfileDecorate::ProfileDecorate_TowerHeightSpan(cv::Mat &axisImg)
 
 void ProfileDecorate::ProfileDecorate_TowerLabelPos(cv::Mat &axisImg)
 {
-/* 	Eigen::MatrixXd p1(1, 2), p2(1, 2);
+ 	Eigen::MatrixXd p1(1, 2), p2(1, 2);
 	p1(0, 0) = towerPnt[0].x; p1(0, 1) = towerPnt[0].y;
 	p2(0, 0) = towerPnt[1].x; p2(0, 1) = towerPnt[1].y;
 	Eigen::MatrixXd rp1 = p1 * rotMat;
 	Eigen::MatrixXd rp2 = p2 * rotMat;
 
-	int font_face = cv::FONT_HERSHEY_COMPLEX;
-	double font_scale = 0.5;
-	int thickness = 1;
-	int baseline;
-	string txt = cv::format("span distance=%0.4lf meters", span);
-	cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
- */
+	int x1 = (rp1(0,0)-range_rect.minx)/resolution;
+	int x2 = (rp2(0,0)-range_rect.minx)/resolution;
 
+	int y1 = (rp1(0,1)-range_rect.miny)/resolution;
+	int y2 = (rp2(0,1)-range_rect.miny)/resolution;
+
+	switch(lbType){
+		case LABEL_CIRCLE:
+			{
+				cv::Point c1(x1+80,y1+80);
+				cv::Point c2(x2+80,y2+80);
+				cv::circle(axisImg,c1,2/resolution,cv::Scalar(0, 0, 255),2);
+				cv::circle(axisImg,c2,2/resolution,cv::Scalar(0, 0, 255),2);
+			}
+			break;
+
+		case LABEL_SQUARE:
+			{
+				cv::Point ltpt1(x1+80-2/resolution,y1+80-2/resolution);
+				cv::Point rbpt1(x1+80+2/resolution,y1+80+2/resolution);
+				cv::rectangle(axisImg, ltpt1, rbpt1, cv::Scalar(0,0,255),2,8,0);
+
+				cv::Point ltpt2(x2+80-2/resolution,y2+80-2/resolution);
+				cv::Point rbpt2(x2+80+2/resolution,y2+80+2/resolution);
+				cv::rectangle(axisImg, ltpt2, rbpt2, cv::Scalar(0,0,255),2,8,0);	
+			}		
+			break;
+	}
+}
+
+void ProfileDecorate::ProfileDecorate_PointsLabel(cv::Mat &axisImg)
+{
+	//对每一个杆塔点计算其位置
+	for(int i=0;i<labelPnts.size();++i){
+		Eigen::MatrixXd p1(1, 2), p2(1, 2);
+		p1(0, 0) = labelPnts[0].x; p1(0, 1) = labelPnts[0].y;
+		Eigen::MatrixXd rp1 = p1 * rotMat;
+		int xsize = (range_rect.maxx - range_rect.minx) / resolution + 1;
+		int ysize = (range_rect.maxy - range_rect.miny) / resolution + 1;
+
+		int x = (rp1(0,0)-range_rect.minx)/resolution;
+		int y = (labelPnts[0].z - range_rect.miny)/resolution;
+		y = ysize - y - 1;
+
+		switch(lbType){
+			case LABEL_CIRCLE:
+				{
+					cv::Point c1(x+80,y+80);
+					cv::circle(axisImg,c1,2/resolution,cv::Scalar(0, 0, 255),2);
+				}
+				break;
+			case LABEL_SQUARE:
+				{
+					cv::Point ltpt1(x+80-2/resolution,y+80-2/resolution);
+					cv::Point rbpt1(x+80+2/resolution,y+80+2/resolution);
+					cv::rectangle(axisImg, ltpt1, rbpt1, cv::Scalar(0,0,255),2,8,0);
+				}		
+				break;
+		}
+	}
 }
 
 #endif

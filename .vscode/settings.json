@@ -1,5 +1,8 @@
+//配置新建文件注释和方法注释
 {
-    "files.associations": {
-        "dense": "cpp"
-    }
+    "Description":"" ,//文件内容描述
+    "Author":"huacong",//编辑人
+    "Date": "Do not edit",//时间
+    "LastEditTime": "Do not edit",
+    "LastEditors": "huacong",
 }

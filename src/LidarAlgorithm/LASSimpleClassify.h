@@ -118,6 +118,7 @@ public:
 	*/
 	long ElectricPatrolFast_Tower(ILASDataset* dataset, Point2D towerPnt, double range, LASColorExt color);
 
+	long ElectricPatrolFast_Tower(ILASDataset* dataset, Point2Ds towerPnt, double range, LASColorExt color);
 	/*
 		extract line point set from las data
 		the algorithm decscribed as follows:

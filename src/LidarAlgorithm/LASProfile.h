@@ -9,9 +9,6 @@
 #endif
 class ProfileDecorate;
 
-void test();
-
-
 class LASProfile
 {
 public:
@@ -112,9 +109,17 @@ private:
 
 	/*
 		add tower label and tower position(coordinate)
+		only used in the horizontal profile
 	*/
 	void ProfileDecorate_TowerLabelPos(cv::Mat &axisImg);
 
+
+	/**
+	* @brief  label the las point in the vertical profile
+	* @note   
+	* @retval None
+	*/
+	void ProfileDecorate_PointsLabel(cv::Mat &axisImg);
 
 private:
 	int    vspan_num;		//v axis span number

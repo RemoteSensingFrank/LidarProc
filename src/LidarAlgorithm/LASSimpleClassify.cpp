@@ -229,20 +229,26 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Tower(ILASDataset* dataset, 
 		int num = vecIndxDis.size()*0.7;
 		sort(vecIndxDis.begin(), vecIndxDis.end(), [](LASIndexDis a, LASIndexDis b)-> bool {return a.distance < b.distance; });
 
-
 		LASIndexDisList idxDisLists;
 		for (int i = num; i < vecIndxDis.size(); ++i)
 		{
 			idxDisLists.push_back(vecIndxDis[i]);
 		}
 		return ElectrixPatrolFast_Seg(dataset, idxDisLists, color, 1);
-
 	}
 	catch (std::bad_alloc  *e)
 	{
 		printf("%s\n", e->what());
 		return -1;
 	}
+}
+
+long classifyElectricPatrolFast::ElectricPatrolFast_Tower(ILASDataset* dataset, Point2Ds towerPnt, double range, LASColorExt color)
+{
+	for(auto tPt:towerPnt){
+		ElectricPatrolFast_Tower(dataset,towerPnt,range,color);
+	}
+	return 0;
 }
 
 long classifyElectricPatrolFast::ElectrixPatrolFast_Seg(ILASDataset* dataset, LASIndexDisList idxDisLists, LASColorExt color, double distance)
@@ -290,7 +296,7 @@ long classifyElectricPatrolFast::ElectrixPatrolFast_Seg(ILASDataset* dataset, LA
 		{
 			LASIndex idxLas = idxDisLists[j].indx;
 			dataset->m_lasRectangles[idxLas.rectangle_idx].m_lasPoints[idxLas.point_idx_inRect].m_colorExt = color;
-			dataset->m_lasRectangles[idxLas.rectangle_idx].m_lasPoints[idxLas.point_idx_inRect].m_classify = elcTowerUp;
+			dataset->m_lasRectangles[idxLas.rectangle_idx].m_lasPoints[idxLas.point_idx_inRect].m_classify = elcTowerRange;
 		}
 	}
 
@@ -874,6 +880,7 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Vegetation(ILASDataset* data
 	return 0;
 
 }
+
 //GDALTriangulation* classifyElectricPatrolFast::ElectricPatrolFast_Triangle(Point3Ds localMinPts)
 //{
 //	try

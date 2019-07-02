@@ -2,6 +2,7 @@
 #include "../LidarBase/LASReader.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarAlgorithm/LASSimpleClassify.h"
+#include "../LidarAlgorithm/LASProfile.h"
 #include <stdio.h>
 #include <vector>
 #include <string>
@@ -20,7 +21,7 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
     ILASDataset *dataset   = new ILASDataset();
     LidarMemReader *reader = new LidarMemReader();
 
-    reader->LidarReader_Open("../data/classify.las",dataset);
+    reader->LidarReader_Open("../data/default/classify.las",dataset);
     reader->LidarReader_Read(true,1,dataset); 
     LASColorExt color;
     color.Red   = 255;
@@ -30,19 +31,38 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
     //EXPECT_EQ(-1,classifyFast.ElectricPatrolFast_Tower(nullptr,pntTower[0],13,color));
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Tower(dataset,pntTower[0],13,color));
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Tower(dataset,pntTower[1],13,color));
-    reader->LidarReader_Write("../data/Tower.las",dataset,elcTowerUp);
+    reader->LidarReader_Write("../data/default/Tower.las",dataset,elcTowerUp);
 
     color.Red   = 0;
     color.Green = 0;
     color.Blue  = 255;
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Lines(dataset,pntTower,13,5,color));
-    reader->LidarReader_Write("../data/Line.las",dataset,elcLine);
+    reader->LidarReader_Write("../data/default/Line.las",dataset,elcLine);
 
     color.Red   = 218;
     color.Green = 165;
     color.Blue  = 32;
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Ground(dataset,5,0.5,10,color));
-    reader->LidarReader_Write("../data/Ground.las",dataset,elcGround);
+    reader->LidarReader_Write("../data/default/Ground.las",dataset,elcGround);
+    reader->LidarReader_Write("../data/default/classify_tower_line.las",dataset);
+}
 
-    reader->LidarReader_Write("../data/classify_tower_line.las",dataset);
+TEST(LASPROFILE,LASPROFILEProfileTestCase)
+{
+    LASProfile profile;
+    ProfileDecorate decorateParam;
+    decorateParam.hspan_dis = 10;
+    decorateParam.vspan_dis = 10;
+    decorateParam.lbType = LABEL_CIRCLE;
+
+    Point2D pntTower[2];
+    pntTower[0].x = 204742.7500;
+    pntTower[0].y = 2477649.12;
+    
+    pntTower[1].x = 204781.66;
+    pntTower[1].y = 2477626.81;
+    profile.LASProfile_Verticle("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/v.jpg",&decorateParam);
+    profile.LASProfile_Horizontal("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/h.jpg",&decorateParam);
+    profile.LASProfile_Front("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/f.jpg",&decorateParam);
+    EXPECT_EQ(0,0);
 }
