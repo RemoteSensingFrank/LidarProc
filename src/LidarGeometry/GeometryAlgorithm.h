@@ -11,24 +11,24 @@ namespace GeometryLas {
 		static int IsPointOnPolyline(double x, double y, const double* polyline, int doubleArrayCnt,
 			double tolerance, bool isClosed, int offset = sizeof(Point3D) / sizeof(double));
 		/*
-		* ÅÐ¶ÏµãÊÇ·ñÔÚÏß¶ÎÉÏ£¨¿Õ¼ä¹ØÏµ£ºline contains point£©
+		* ï¿½Ð¶Ïµï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ß¶ï¿½ï¿½Ï£ï¿½ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½line contains pointï¿½ï¿½
 		*/
 		static bool IsPointOnLine(double x, double y, double x0, double y0, double x1, double y1,
 			double tolerance);
 		/*
-		* ÅÐ¶ÏµãÊÇ·ñÔÚÖ±ÏßÉÏ£¨¿Õ¼ä¹ØÏµ£ºline contains point£©
+		* ï¿½Ð¶Ïµï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½Ï£ï¿½ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½line contains pointï¿½ï¿½
 		*/
 		static bool IsPointOnBeeline(double x, double y, double x0, double y0, double x1, double y1,
 			double tolerance);
 		/*
-		* ÅÐ¶ÏµãÊÇ·ñÔÚ¶à±ßÐÎÀï£¬°üÀ¨ÔÚ±ß½çÉÏ£¨¿Õ¼ä¹ØÏµ£ºregion contains point£©
-		* Ë³Ê±Õë¼ÆËãÃ¿¸ö±ß
-		* @param allowonisin : ÊÇ·ñÈÏÎªÔÚ±ß½çÉÏÒ²ËãÔÚ±ß½çÄÚ£¬Îªtrue£¬ÔòtoleranceÓÐÐ§£¬·ñÔòÎÞÐ§
+		* ï¿½Ð¶Ïµï¿½ï¿½Ç·ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½ï£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ú±ß½ï¿½ï¿½Ï£ï¿½ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½region contains pointï¿½ï¿½
+		* Ë³Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½
+		* @param allowonisin : ï¿½Ç·ï¿½ï¿½ï¿½Îªï¿½Ú±ß½ï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½Ú±ß½ï¿½ï¿½Ú£ï¿½Îªtrueï¿½ï¿½ï¿½ï¿½toleranceï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§
 		*/
 		static bool IsPointInPolygon(double x, double y, const double* polygon, double doubleArrayCnt,
 			bool allowonisin, double tolerance, int offset = sizeof(Point3D) / sizeof(double));
 		/*
-		* ÅÐ¶ÏµãÊÇ·ñÔÚ¶à±ßÐÎÀï
+		* ï¿½Ð¶Ïµï¿½ï¿½Ç·ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		*/
 		static bool IsPointInPolygon(double x, double y, const double* polygon,
 			int doubleArrayCnt, int offset = sizeof(Point3D) / sizeof(double));
@@ -38,22 +38,22 @@ namespace GeometryLas {
 		*/
 		static double IsLeft(double startx, double starty, double endx, double endy, double x, double y);
 		/*
-		* µãÊÇ·ñÔÚ¾ØÐÎ±ß½çÉÏ£¨¿Õ¼ä¹ØÏµ£ºlines contains point£©
+		* ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ú¾ï¿½ï¿½Î±ß½ï¿½ï¿½Ï£ï¿½ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½lines contains pointï¿½ï¿½
 		*/
 		static bool IsPointOnRect(double x, double y, double minx, double miny,
 			double maxx, double maxy, double tolerance);
 		/*
-		* ÅÐ¶ÏÕÛÏß¡¢¶à±ßÐÎÊÇ·ñÔÚ¾ØÐÎÀï£¬°üÀ¨¶¥µãÔÚ¾ØÐÎ±ß½çÉÏ£¨¿Õ¼ä¹ØÏµ£ºregion contains region, region contains lines£©
+		* ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ß¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ú¾ï¿½ï¿½ï¿½ï¿½ï£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¾ï¿½ï¿½Î±ß½ï¿½ï¿½Ï£ï¿½ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½region contains region, region contains linesï¿½ï¿½
 		*/
 		static bool IsPolylineInRect(const double* polyline, int doubleArrayCnt, double minx,
 			double miny, double maxx, double maxy, int offset = sizeof(Point3D) / sizeof(double));
 		/*
-		* ÅÐ¶ÏÏß¶ÎÓë¾ØÐÎ±ß½çÊÇ·ñÏà½»£¬°üÀ¨±ß½çµã£¨¿Õ¼ä¹ØÏµ£ºline crosses line£©
+		* ï¿½Ð¶ï¿½ï¿½ß¶ï¿½ï¿½ï¿½ï¿½ï¿½Î±ß½ï¿½ï¿½Ç·ï¿½ï¿½à½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ã£¨ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½line crosses lineï¿½ï¿½
 		*/
 		static bool IsLineIntersectRect(double x0, double y0, double x1, double y1, double xmin,
 			double ymin, double xmax, double ymax);
 		/*
-		* ÅÐ¶Ï¾ØÐÎ±ß½çÓëÕÛÏßÊÇ·ñÏà½»£¬°üÀ¨±ß½çµã£¨¿Õ¼ä¹ØÏµ£ºline crosses line£©
+		* ï¿½Ð¶Ï¾ï¿½ï¿½Î±ß½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½à½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ã£¨ï¿½Õ¼ï¿½ï¿½Ïµï¿½ï¿½line crosses lineï¿½ï¿½
 		*/
 		static bool IsRectIntersectPolyline(double xmin, double ymin, double xmax,
 			double ymax, const double* polyline, int doubleArrayCnt, bool isClosed,
@@ -61,7 +61,7 @@ namespace GeometryLas {
 		static bool IsPointInRect(int x, int y, int rect_x1, int rect_y1, int rect_x2, int rect_y2);
 		static bool IsPointInRect(double x, double y, double rect_x1, double rect_y1, double rect_x2, double rect_y2);
 		/*
-		* ÅÐ¶ÏÕý¾ØÐÎÓëÐ±¾ØÐÎÊÇ·ñÏà½»
+		* ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½à½»
 		*/
 		static bool IsRectIntersectRect(const Rect2D& rect1, const Rect2D& rect2);
 		static bool IsRectIntersectSlantingRect(const Rect2D& rect, const Point2Ds& pts);
@@ -69,69 +69,69 @@ namespace GeometryLas {
 			const Rect2D& slantingRect);
 
 		/*
-		* ÇóÁ½¸öÏòÁ¿µÄ¼Ð½Ç
+		* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼Ð½ï¿½
 		*/
 		static double VectorAngle(const Point3D vec1, const Point3D vec2);
 	};
 
-	/*¾àÀë¼ÆËãº¯Êý*/
+	/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ãº¯ï¿½ï¿½*/
 	class  DistanceComputation
 	{
 	public:
 		/*
-		* µãµ½Ö±ÏßµÄ¾àÀëµÄÆ½·½
+		* ï¿½ãµ½Ö±ï¿½ßµÄ¾ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½
 		*/
 		static double SquarePointToBeeline(double x, double y, double x0, double y0, double x1, double y1);
 		/*
-		* ¼ÆËãµã¼¯ÖÐËùÓÐµã¼äµÄ¾àÀëÖ®ºÍ£¬Å·ÊÏ¾àÀë
+		* ï¿½ï¿½ï¿½ï¿½ã¼¯ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½Ä¾ï¿½ï¿½ï¿½Ö®ï¿½Í£ï¿½Å·ï¿½Ï¾ï¿½ï¿½ï¿½
 		*/
 		static double Distance(Point2Ds& pts, bool isclosed);
 
 		/*
-		* ¼ÆËãÁ½µã¼äµÄ¾àÀë
+		* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
 		*/
 		static double Distance(Point3D pt1, Point3D pt2);
 
 		/*
-		* ¼ÆËãµãµ½ÃæÖ®¼äµÄ¾àÀë
+		* ï¿½ï¿½ï¿½ï¿½ãµ½ï¿½ï¿½Ö®ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
 		*/
 		static double Distance(Point3D pt1, Point3D pl1, Point3D pl2, Point3D pl3);
 
 	};
 
-	/*µãÏßÏà½»º¯Êý*/
+	/*ï¿½ï¿½ï¿½ï¿½ï¿½à½»ï¿½ï¿½ï¿½ï¿½*/
 	class  PointJointComputation
 	{
 	public:
 		/*
-		* µã(x, y)µ½Ö±Ïß(bln0x, bln0y)(bln1x, bln1y)µÄ´¹×ãÕ¼Ïß¶ÎµÄ±ÈÀý
+		* ï¿½ï¿½(x, y)ï¿½ï¿½Ö±ï¿½ï¿½(bln0x, bln0y)(bln1x, bln1y)ï¿½Ä´ï¿½ï¿½ï¿½Õ¼ï¿½ß¶ÎµÄ±ï¿½ï¿½ï¿½
 		*/
 		static void PointJointBeeline(double x, double y, double bln0x, double bln0y, double bln1x,
 			double bln1y, double& ratio);
 		/*
-		* µã(x, y)µ½Ö±Ïß(bln0x, bln0y)(bln1x, bln1y)µÄ´¹×ã
+		* ï¿½ï¿½(x, y)ï¿½ï¿½Ö±ï¿½ï¿½(bln0x, bln0y)(bln1x, bln1y)ï¿½Ä´ï¿½ï¿½ï¿½
 		*/
 		static Point2D PointJointBeeline(double x, double y, double bln0x, double bln0y, double bln1x,
 			double bln1y);
 	};
 
-	/*Í¶Ó°×ø±ê×ª»»*/
+	/*Í¶Ó°ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½*/
 	class  PointProjection
 	{
 	public:
-		/*¾­Î³¶È×ø±ê×ª»»µ½Í¶Ó°×ø±ê*/
+		/*ï¿½ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Í¶Ó°ï¿½ï¿½ï¿½ï¿½*/
 		static void PointProjectLatLngToUTM(double lat, double lng, int nZone, double &x, double &y);
 	};
 
-	/*¼¸ºÎ¼ÆËã*/
+	/*ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½*/
 	class  GeometryComputation
 	{
 	public:
 		/**
-		* ×îÐ¡¶þ³ËÇúÏßÄâºÏ£¨¶þÎ¬XY£©
-		* @param point  Ïà¶Ô×ø±êÏµÆ½Ãæ×ø±êµã¼¯
-		* @param maxPower  ¶àÏîÊ½×î´ó½×Êý£¨ÃÝ£©
-		* @return ¶àÏîÊ½ÏµÊý£¬´ÓµÍµ½¸ß£¨½×Êý´Ó0¿ªÊ¼£©
+		* ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï£ï¿½ï¿½ï¿½Î¬XYï¿½ï¿½
+		* @param point  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÆ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¯
+		* @param maxPower  ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½
+		* @return ï¿½ï¿½ï¿½ï¿½Ê½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ÓµÍµï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê¼ï¿½ï¿½
 		*/
 		//template <typename T, typename T1>
 		//static vector <double> LeastSquare(T point, T1 maxPower);
@@ -160,11 +160,11 @@ namespace GeometryLas {
 
 
 		/**
-		* ¿¹²îÕûÌå×îÐ¡¶þ³ËÇúÏßÄâºÏ£¨¶þÎ¬XY£©(È¥³ý´Ö²îµãµÄÓ°Ïì)
-		* @param points    Ïà¶Ô×ø±êÏµÆ½Ãæ×ø±êµã¼¯(·µ»Ø½á¹ûÖÐ»áÈ¥³ý´Ö²îµã)
-		* @param residual  ÊäÈëÎªµü´úÖÕÖ¹ãÐÖµ£¬·µ»ØÎªÆ½¾ù²Ð²î
-		* @param maxPower  ¶àÏîÊ½×î´ó½×Êý£¨ÃÝ£©
-		* @return ¶àÏîÊ½ÏµÊý£¬´ÓµÍµ½¸ß£¨½×Êý´Ó0¿ªÊ¼£©
+		* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï£ï¿½ï¿½ï¿½Î¬XYï¿½ï¿½(È¥ï¿½ï¿½ï¿½Ö²ï¿½ï¿½ï¿½Ó°ï¿½ï¿½)
+		* @param points    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÆ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¯(ï¿½ï¿½ï¿½Ø½ï¿½ï¿½ï¿½Ð»ï¿½È¥ï¿½ï¿½ï¿½Ö²ï¿½ï¿½)
+		* @param residual  ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÆ½ï¿½ï¿½ï¿½Ð²ï¿½
+		* @param maxPower  ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½
+		* @return ï¿½ï¿½ï¿½ï¿½Ê½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ÓµÍµï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê¼ï¿½ï¿½
 		*/
 		//template <typename T, typename T1, typename T2>
 		//static vector <double> RobustLeastSquare(vector <T> &points, T1 &residual, T2 maxPower);
@@ -228,32 +228,32 @@ namespace GeometryLas {
 		}
 
 		/**
-		* Í¶Ó°µ½XOYÆ½Ãæ
-		* @param pntCloud  ÈýÎ¬µãÔÆ
-		* @return ¶þÎ¬µÄXOY×ø±êÏµÆ½Ãæ×ø±êµã¼¯
+		* Í¶Ó°ï¿½ï¿½XOYÆ½ï¿½ï¿½
+		* @param pntCloud  ï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½
+		* @return ï¿½ï¿½Î¬ï¿½ï¿½XOYï¿½ï¿½ï¿½ï¿½ÏµÆ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¯
 		*/
 		static vector <Point2D> ProjectToXOY(vector<Point3D> pntCloud);
 
 		/**
-		* Í¶Ó°µ½XOYÆ½Ãæ
-		* @param pntCloud  ÈýÎ¬µãÔÆ
-		* @param Opoint    ½¨Á¢×ø±êÏµµÄ×ø±êÔ­µã
-		* @return ¶ÏÃæ×ø±êÏµÆ½Ãæ×ø±êµã¼¯
+		* Í¶Ó°ï¿½ï¿½XOYÆ½ï¿½ï¿½
+		* @param pntCloud  ï¿½ï¿½Î¬ï¿½ï¿½ï¿½ï¿½
+		* @param Opoint    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½
+		* @return ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÆ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¼¯
 		*/
-		static vector <Point2D> ProjectToSection(vector<Point3D> pntCloud, Point3D Opoint);//ÔÝÊ±Ã»ÓÃµ½
+		static vector <Point2D> ProjectToSection(vector<Point3D> pntCloud, Point3D Opoint);//ï¿½ï¿½Ê±Ã»ï¿½Ãµï¿½
 
 																						   /**
-																						   * ÒÑÖªÖ±ÏßµÄÐ±ÂÊ·½³Ì£¬Çó½âµãµ½Ö±ÏßµÄ´¹×ã
-																						   * @param lineFactors Ö±Ïß·½³Ì²ÎÊý£¬´ÓµÍ½×µ½¸ß½×
-																						   * @param knownPoint  ÒÑÖªµã
+																						   * ï¿½ï¿½ÖªÖ±ï¿½ßµï¿½Ð±ï¿½Ê·ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ãµ½Ö±ï¿½ßµÄ´ï¿½ï¿½ï¿½
+																						   * @param lineFactors Ö±ï¿½ß·ï¿½ï¿½Ì²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÓµÍ½×µï¿½ï¿½ß½ï¿½
+																						   * @param knownPoint  ï¿½ï¿½Öªï¿½ï¿½
 																						   * @return
 																						   */
 		static Point2D GetFootOfPerpendicular(vector <double> lineFactors, Point2D knownPoint);
 
 		/**
-		* ÒÑÖªÖ±ÏßµÄÐ±ÂÊ·½³Ì£¬Çó½âµãµ½Ö±ÏßµÄ´¹¾à
-		* @param lineFactors Ö±Ïß·½³Ì²ÎÊý£¬´ÓµÍ½×µ½¸ß½×
-		* @param knownPoint  ÒÑÖªµã
+		* ï¿½ï¿½ÖªÖ±ï¿½ßµï¿½Ð±ï¿½Ê·ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ãµ½Ö±ï¿½ßµÄ´ï¿½ï¿½ï¿½
+		* @param lineFactors Ö±ï¿½ß·ï¿½ï¿½Ì²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÓµÍ½×µï¿½ï¿½ß½ï¿½
+		* @param knownPoint  ï¿½ï¿½Öªï¿½ï¿½
 		* @return
 		*/
 		//template <typename T, typename T1>
@@ -271,21 +271,21 @@ namespace GeometryLas {
 		}
 
 		/**
-		* ÒÑÖª¶àÏîÊ½·½³ÌºÍXÇóY
-		* @param lineFactors ¶àÏîÊ½·½³Ì£¬´ÓµÍ½×µ½¸ß½×
+		* ï¿½ï¿½Öªï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Ìºï¿½Xï¿½ï¿½Y
+		* @param lineFactors ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ÓµÍ½×µï¿½ï¿½ß½ï¿½
 		* @param x
 		* @return
 		*/
 		static double GetYByLineFactors(vector <double> lineFactors, double x);
 
 		/**
-		* ÒÑÖª¶àÏîÊ½·½³Ì¡¢ÒÑÖªx×ø±êºÍXYÆ«ÒÆ×ø±êÇóY×ø±ê
-		* @param x  ÒÑÖªx×ø±ê
-		* @param lineFactors ¶àÏîÊ½·½³Ì£¬´ÓµÍ½×µ½¸ß½×
-		* @param offsetPoint Æ«ÒÆ×ø±ê
+		* ï¿½ï¿½Öªï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Ì¡ï¿½ï¿½ï¿½Öªxï¿½ï¿½ï¿½ï¿½ï¿½XYÆ«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Yï¿½ï¿½ï¿½ï¿½
+		* @param x  ï¿½ï¿½Öªxï¿½ï¿½ï¿½ï¿½
+		* @param lineFactors ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ÓµÍ½×µï¿½ï¿½ß½ï¿½
+		* @param offsetPoint Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		* @return
 		*/
-		static Point2D GetXYByFactorsOffset(double x, vector <double> lineFactors, Point2D offsetPoint);//ÔÝÊ±Ã»ÓÃµ½
+		static Point2D GetXYByFactorsOffset(double x, vector <double> lineFactors, Point2D offsetPoint);//ï¿½ï¿½Ê±Ã»ï¿½Ãµï¿½
 	};
 
 #endif

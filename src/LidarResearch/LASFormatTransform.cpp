@@ -6,6 +6,8 @@
 #include "../LidarUtil/FileHelper.h"
 #include "../LidarBase/LASPoint.h"
 
+//#ifdef _USE_POTREE_
+
 struct PotreeArguments {
 	bool help = false;
 	StoreOption storeOption = StoreOption::ABORT_IF_EXISTS;
@@ -143,3 +145,54 @@ long LASTransToPotree::LASTransToPotree_Trans(const char* lasPath)
 		return 1;
 	}
 }
+//#endif
+
+#ifdef _USE_PCL_
+
+long LASTransToPCL::LASTransToPCL_Trans(ILASDataset* dataset, pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloud)
+{
+	//将点云数据文件从dataset转换到PCL点云数据格式
+	pclPointCloud->width = dataset->m_totalReadLasNumber;
+	pclPointCloud->height = 1;
+	pclPointCloud->is_dense = false;
+	pclPointCloud->points.resize (pclPointCloud->width*pclPointCloud->height);
+
+	//将dataset格式转换为PCL格式
+	for (int i = 0; i < dataset->m_totalReadLasNumber; ++i) {
+
+		const LASIndex &idx = dataset->m_LASPointID[i];
+		int m = idx.rectangle_idx;
+		int n = idx.point_idx_inRect;
+		const LASPoint &pt = dataset->m_lasRectangles[m].m_lasPoints[n];
+
+		pclPointCloud->points[i].x = pt.m_vec3d.x;
+		pclPointCloud->points[i].y = pt.m_vec3d.y;
+		pclPointCloud->points[i].z = pt.m_vec3d.z;
+	}
+}
+
+long LASTransToPCL::LASTransToPCL_Trans(ILASDataset* dataset, pcl::PointCloud<pcl::PointXYZ> &pclPointCloud)
+{
+	//将点云数据文件从dataset转换到PCL点云数据格式
+	pclPointCloud.width = dataset->m_totalReadLasNumber;
+	pclPointCloud.height = 1;
+	pclPointCloud.is_dense = false;
+	pclPointCloud.points.resize (pclPointCloud.width*pclPointCloud.height);
+	printf("%d\n",pclPointCloud.width);
+	printf("%d\n",pclPointCloud.points.size());
+	
+	//将dataset格式转换为PCL格式
+	for (int i = 0; i < dataset->m_totalReadLasNumber; ++i) {
+
+		const LASIndex &idx = dataset->m_LASPointID[i];
+ 		int m = idx.rectangle_idx;
+		int n = idx.point_idx_inRect;
+		const LASPoint &pt = dataset->m_lasRectangles[m].m_lasPoints[n];
+
+		pclPointCloud.points[i].x = pt.m_vec3d.x;
+		pclPointCloud.points[i].y = pt.m_vec3d.y;
+		pclPointCloud.points[i].z = pt.m_vec3d.z; 
+	}
+}
+
+#endif

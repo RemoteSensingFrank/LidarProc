@@ -33,6 +33,10 @@
 #define min a>b?b:a
 #endif
 
+const int bordersize1  	 = 80;
+const int bordersize2 	 = 130;
+const int bordersize3    = 10;
+
 void  LASProfile::LASProfile_GetPCARotMat(Point2D pntTowers[2], Eigen::MatrixXd &rotMat)
 {
 	double theta = 0;
@@ -230,7 +234,7 @@ void LASProfile::LASProfile_ImageFillVertical(ILASDataset* dataset, Rect2D rect,
 			}
 		}
 	}
-	zmax += 10;
+	zmax += bordersize3;
 	
 	int xsize = (xmax - xmin) / resolution + 1;
 	int ysize = (zmax - zmin) / resolution + 1;
@@ -350,7 +354,7 @@ void LASProfile::LASProfile_ImageFillFront(ILASDataset* dataset, Rect2D rect, Ei
 			}
 		}
 	}
-	zmax += 10;
+	zmax += bordersize3;
 	int xsize = (xmax - xmin) / resolution + 1;
 	int ysize = (zmax - zmin) / resolution + 1;
 	unsigned char* imageData[3];
@@ -915,7 +919,7 @@ void LASProfile::LASProfile_Front(const char* strLasDataset, Point2D pntTowers[2
 void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axisImg)
 {
 	cv::Scalar bValue(255, 255, 255);
-	cv::copyMakeBorder(srcImg, axisImg, 80, 130, 80, 10, cv::BORDER_CONSTANT, bValue);
+	cv::copyMakeBorder(srcImg, axisImg, bordersize1, bordersize2, bordersize1, bordersize3, cv::BORDER_CONSTANT, bValue);
 	cv::Size imgsizeSrc(srcImg.cols,srcImg.rows);
 
 #ifdef _DEBUG
@@ -929,7 +933,7 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 	double widthpix = hspan_dis / resolutionx;
 	double heighpix = vspan_dis / resolutiony;
 		
-	cv::line(axisImg,cv::Point(70,imgsizeSrc.height+170), cv::Point(70+imgsizeSrc.width+10, imgsizeSrc.height + 170),cv::Scalar(0,0,0));//x axis
+	cv::line(axisImg,cv::Point(70,imgsizeSrc.height+170), cv::Point(70+imgsizeSrc.width+bordersize3, imgsizeSrc.height + 170),cv::Scalar(0,0,0));//x axis
 	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 170), cv::Point(70,20), cv::Scalar(0, 0, 0));//y axis
 
 	int font_face = cv::FONT_HERSHEY_COMPLEX;
@@ -937,23 +941,23 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 	int thickness = 1;
 	int baseline;
 
-	for (int i = 0; i *widthpix<(imgsizeSrc.width+10); ++i)
+	for (int i = 0; i *widthpix<(imgsizeSrc.width+bordersize3); ++i)
 	{
 		string txt = cv::format("%d", int(i*hspan_dis));
-		cv::line(axisImg, cv::Point(80 + i*widthpix, imgsizeSrc.height + 170), cv::Point(80 + i*widthpix, imgsizeSrc.height+ 165), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(bordersize1 + i*widthpix, imgsizeSrc.height + 170), cv::Point(bordersize1 + i*widthpix, imgsizeSrc.height+ 165), cv::Scalar(0, 0, 0));
 		txt= cv::format("%d", int(i*this->hspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
 		//���ı�����л���
 		cv::Point origin;
-		origin.x = 80 + i*widthpix - text_size.width / 2;
+		origin.x = bordersize1 + i*widthpix - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 170 + 5 + text_size.height;
 		cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
 	}
 
 	for (int i = 0; i*heighpix < (imgsizeSrc.height + 50); ++i)
 	{
-		cv::line(axisImg, cv::Point(70, imgsizeSrc.height+80-i*heighpix), cv::Point(75, imgsizeSrc.height + 80 - i*heighpix), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(70, imgsizeSrc.height+bordersize1-i*heighpix), cv::Point(75, imgsizeSrc.height + bordersize1 - i*heighpix), cv::Scalar(0, 0, 0));
 
 		string txt = cv::format("%d", int(i*this->vspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
@@ -961,7 +965,7 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 		//���ı�����л���
 		cv::Point origin;
 		origin.x = 50 - text_size.width / 2;
-		origin.y = imgsizeSrc.height + 80 - i*heighpix + text_size.height/2;
+		origin.y = imgsizeSrc.height + bordersize1 - i*heighpix + text_size.height/2;
 		cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
 	}
 
@@ -973,7 +977,7 @@ void ProfileDecorate::ProfileDecorate_AxisVertical(cv::Mat srcImg, cv::Mat &axis
 void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &axisImg)
 {
 	cv::Scalar bValue(255, 255, 255);
-	cv::copyMakeBorder(srcImg, axisImg, 80, 130, 80, 10, cv::BORDER_CONSTANT, bValue);
+	cv::copyMakeBorder(srcImg, axisImg, bordersize1, bordersize2, bordersize1, bordersize3, cv::BORDER_CONSTANT, bValue);
 	cv::Size imgsizeSrc(srcImg.cols, srcImg.rows);
 
 #ifdef _DEBUG
@@ -987,7 +991,7 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 	double widthpix = hspan_dis / resolutionx;
 	double heighpix = vspan_dis / resolutiony;
 
-	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 180), cv::Point(70 + imgsizeSrc.width + 10, imgsizeSrc.height + 180), cv::Scalar(0, 0, 0));//x axis
+	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 180), cv::Point(70 + imgsizeSrc.width + bordersize3, imgsizeSrc.height + 180), cv::Scalar(0, 0, 0));//x axis
 	cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 180), cv::Point(70, 20), cv::Scalar(0, 0, 0));//y axis
 
 	int font_face = cv::FONT_HERSHEY_COMPLEX;
@@ -995,29 +999,29 @@ void ProfileDecorate::ProfileDecorate_AxisHorizontal(cv::Mat srcImg, cv::Mat &ax
 	int thickness = 1;
 	int baseline;
 
-	for (int i = 0; i *widthpix<(imgsizeSrc.width + 10); ++i)
+	for (int i = 0; i *widthpix<(imgsizeSrc.width + bordersize3); ++i)
 	{
 		string txt = cv::format("%d", int(i*hspan_dis));
-		cv::line(axisImg, cv::Point(80 + i*widthpix, imgsizeSrc.height + 180), cv::Point(80 + i*widthpix, imgsizeSrc.height + 175), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(bordersize1 + i*widthpix, imgsizeSrc.height + 180), cv::Point(bordersize1 + i*widthpix, imgsizeSrc.height + 175), cv::Scalar(0, 0, 0));
 		txt = cv::format("%d", int(i*this->hspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
 		cv::Point origin;
-		origin.x = 80 + i*widthpix - text_size.width / 2;
+		origin.x = bordersize1 + i*widthpix - text_size.width / 2;
 		origin.y = imgsizeSrc.height + 190 + 5 + text_size.height;
 		cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
 	}
 
 	for (int i = 0; i*heighpix < (imgsizeSrc.height + 50); ++i)
 	{
-		cv::line(axisImg, cv::Point(70, imgsizeSrc.height + 130 - i*heighpix), cv::Point(75, imgsizeSrc.height + 130 - i*heighpix), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(70, imgsizeSrc.height + bordersize2 - i*heighpix), cv::Point(75, imgsizeSrc.height + bordersize2 - i*heighpix), cv::Scalar(0, 0, 0));
 
 		string txt = cv::format("%d", int(i*this->vspan_dis));
 		cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
 		cv::Point origin;
 		origin.x = 50 - text_size.width / 2;
-		origin.y = imgsizeSrc.height + 130 - i*heighpix + text_size.height / 2;
+		origin.y = imgsizeSrc.height + bordersize2 - i*heighpix + text_size.height / 2;
 		cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
 	}
 
@@ -1043,11 +1047,11 @@ void ProfileDecorate::ProfileDecorate_TowerHeightSpan(cv::Mat &axisImg)
 	cv::Size text_size = cv::getTextSize(txt, font_face, font_scale, thickness, &baseline);
 
 	cv::Point origin;
-	int xleft  = (min(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+80;
-	int xright = (max(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+80;
+	int xleft  = (min(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+bordersize1;
+	int xright = (max(rp2(0, 0), rp1(0, 0)) - range_rect.minx) / resolution+bordersize1;
 
 	origin.x = (xleft+xright)/2  - text_size.width / 2;
-	origin.y = axisImg.rows - 80 + text_size.height / 2;
+	origin.y = axisImg.rows - bordersize1 + text_size.height / 2;
 	cv::putText(axisImg, txt, origin, font_face, font_scale, cv::Scalar(0, 0, 0), thickness);
 
 	cv::line(axisImg, cv::Point(xleft, axisImg.rows - 70), cv::Point(xleft, axisImg.rows - 90), cv::Scalar(0, 0, 0));
@@ -1057,12 +1061,12 @@ void ProfileDecorate::ProfileDecorate_TowerHeightSpan(cv::Mat &axisImg)
 	int per = (origin.x - xleft) / 30;
 	for (int i = 0; i <= 30; i+=2)
 	{
-		cv::line(axisImg, cv::Point(xleft+i*per, axisImg.rows - 80), cv::Point(xleft+(i+1)*per, axisImg.rows - 80), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(xleft+i*per, axisImg.rows - bordersize1), cv::Point(xleft+(i+1)*per, axisImg.rows - bordersize1), cv::Scalar(0, 0, 0));
 	}
 	int count = (xright - (origin.x + text_size.width))/per;
 	for (int i = 0; i <= count; i += 2)
 	{
-		cv::line(axisImg, cv::Point(origin.x + text_size.width+i*per, axisImg.rows - 80), cv::Point(origin.x + text_size.width + (i+1)*per, axisImg.rows - 80), cv::Scalar(0, 0, 0));
+		cv::line(axisImg, cv::Point(origin.x + text_size.width+i*per, axisImg.rows - bordersize1), cv::Point(origin.x + text_size.width + (i+1)*per, axisImg.rows - bordersize1), cv::Scalar(0, 0, 0));
 	}
 }
 
@@ -1083,8 +1087,8 @@ void ProfileDecorate::ProfileDecorate_TowerLabelPos(cv::Mat &axisImg)
 	switch(lbType){
 		case LABEL_CIRCLE:
 			{
-				cv::Point c1(x1+80,y1+80);
-				cv::Point c2(x2+80,y2+80);
+				cv::Point c1(x1+bordersize1,y1+bordersize1);
+				cv::Point c2(x2+bordersize1,y2+bordersize1);
 				cv::circle(axisImg,c1,2/resolution,cv::Scalar(0, 0, 255),2);
 				cv::circle(axisImg,c2,2/resolution,cv::Scalar(0, 0, 255),2);
 			}
@@ -1092,12 +1096,12 @@ void ProfileDecorate::ProfileDecorate_TowerLabelPos(cv::Mat &axisImg)
 
 		case LABEL_SQUARE:
 			{
-				cv::Point ltpt1(x1+80-2/resolution,y1+80-2/resolution);
-				cv::Point rbpt1(x1+80+2/resolution,y1+80+2/resolution);
+				cv::Point ltpt1(x1+bordersize1-2/resolution,y1+bordersize1-2/resolution);
+				cv::Point rbpt1(x1+bordersize1+2/resolution,y1+bordersize1+2/resolution);
 				cv::rectangle(axisImg, ltpt1, rbpt1, cv::Scalar(0,0,255),2,8,0);
 
-				cv::Point ltpt2(x2+80-2/resolution,y2+80-2/resolution);
-				cv::Point rbpt2(x2+80+2/resolution,y2+80+2/resolution);
+				cv::Point ltpt2(x2+bordersize1-2/resolution,y2+bordersize1-2/resolution);
+				cv::Point rbpt2(x2+bordersize1+2/resolution,y2+bordersize1+2/resolution);
 				cv::rectangle(axisImg, ltpt2, rbpt2, cv::Scalar(0,0,255),2,8,0);	
 			}		
 			break;
@@ -1121,14 +1125,14 @@ void ProfileDecorate::ProfileDecorate_PointsLabel(cv::Mat &axisImg)
 		switch(lbType){
 			case LABEL_CIRCLE:
 				{
-					cv::Point c1(x+80,y+80);
+					cv::Point c1(x+bordersize1,y+bordersize1);
 					cv::circle(axisImg,c1,2/resolution,cv::Scalar(0, 0, 255),2);
 				}
 				break;
 			case LABEL_SQUARE:
 				{
-					cv::Point ltpt1(x+80-2/resolution,y+80-2/resolution);
-					cv::Point rbpt1(x+80+2/resolution,y+80+2/resolution);
+					cv::Point ltpt1(x+bordersize1-2/resolution,y+bordersize1-2/resolution);
+					cv::Point rbpt1(x+bordersize1+2/resolution,y+bordersize1+2/resolution);
 					cv::rectangle(axisImg, ltpt1, rbpt1, cv::Scalar(0,0,255),2,8,0);
 				}		
 				break;

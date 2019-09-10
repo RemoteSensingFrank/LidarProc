@@ -12,6 +12,7 @@
 
 #include "LidarUtil/FileHelper.h"
 #include "LidarBase/LASReceive.h"
+#include "./LidarBase/LASReader.h"
 #include "LidarResearch/LASFormatTransform.h"
 
 using namespace rapidjson;
@@ -168,8 +169,7 @@ int main(int argc, char **argv)
 		res.set_content(jstr, "text/plain");
 		res.status=200;
 	});
-
-
+	
 	//查看doc文档
 	pageInfo+=apiDataclasstype;
 	apiDoc=pageInfo;
