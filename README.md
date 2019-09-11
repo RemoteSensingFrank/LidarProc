@@ -1,3 +1,8 @@
+![](https://img.shields.io/github/issues/RemoteSensingFrank/LidarProc)
+![](https://img.shields.io/github/forks/RemoteSensingFrank/LidarProc)
+![](https://img.shields.io/github/stars/RemoteSensingFrank/LidarProc)
+![](https://img.shields.io/github/license/RemoteSensingFrank/LidarProc)
+![](https://www.travis-ci.org/RemoteSensingFrank/LidarProc.svg?branch=master)
 # LidarProc
 ## LAS Data Format:
 .las format is the standard data format for lidar data. And a .las dataset can be divided into 3 part: **1.PUBLIC HEADER BLOCK**,**2.VARIABLE LENGTH RECORDS** and **3.POINT DATA RECORD**, in **PUBLIC HEADER BLOCK** part the descriptions of the dataset is recorded. The descriptions included number of points, length of each point, las dataset type and so on. So this part should be processed carefully to get the informations of the dataset; and in **VARIABLE LENGTH RECORDS** this part do not needed necessarily and in most dataset this part does not exist; the final part is **POINT DATA RECORD**. This part recorded all points informations.  

@@ -15,7 +15,13 @@ addons:
       - cmake
 before_script: 
   - sudo chmod +777 enviroment.bash
-  - travis_wait ./enviroment.bash
+  - ./enviroment.bash
+  - cd pcl-trunk 
+  - sudo mkdir buildpcl && cd buildpcl
+  - sudo cmake -DCMAKE_BUILD_TYPE=Release ../
+  - travis_wait sudo make -j8
+  - sudo make install
+  - cd home
   - cd build
   - cmake ../src/
 

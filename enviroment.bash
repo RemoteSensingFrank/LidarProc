@@ -79,11 +79,12 @@ sudo apt-get install libeigen3-dev
 sudo ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 sudo ln -s /usr/include/eigen3/unsupported/ /usr/include/unsupported
 sudo git clone https://github.com/PointCloudLibrary/pcl pcl-trunk
-cd pcl-trunk 
-sudo mkdir buildpcl && cd buildpcl
-sudo cmake -DCMAKE_BUILD_TYPE=Release ../
-sudo make -j8
-sudo make install
-cd home
+#脚本超时在travis中，因此在外构建，在本机上不存在问题
+#cd pcl-trunk 
+#sudo mkdir buildpcl && cd buildpcl
+#sudo cmake -DCMAKE_BUILD_TYPE=Release ../
+#sudo make -j8
+#sudo make install
+#cd home
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
