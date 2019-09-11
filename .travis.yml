@@ -9,13 +9,14 @@ matrix:
 
 addons:
   apt:
-    sources:
-      - libglfw3-dev
     packages:
       - git
       - mercurial
       - cmake
 before_script: 
+  - sudo chmod +777 enviroment.bash
+  - ./enviroment.bash
+
   - cd build
   - cmake ../src/
 
