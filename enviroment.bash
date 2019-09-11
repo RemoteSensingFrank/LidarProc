@@ -33,7 +33,7 @@ cd /usr/src/gtest
 sudo mkdir build
 cd build
 sudo cmake ../
-sudo make
+sudo make -j8
 sudo cp libgtest*.a /usr/local/lib
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
@@ -47,7 +47,7 @@ sudo git clone https://github.com/libLAS/libLAS.git
 sudo mkdir buildliblas
 cd buildliblas
 sudo cmake ../libLAS/
-sudo make
+sudo make -j8
 sudo make install
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
@@ -61,7 +61,7 @@ sudo git clone https://github.com/LASzip/LASzip.git
 sudo mkdir buildlaszip
 cd buildlaszip
 sudo cmake ../LASzip/
-sudo make
+sudo make -j8
 sudo make install
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
@@ -82,7 +82,7 @@ sudo git clone https://github.com/PointCloudLibrary/pcl pcl-trunk
 cd pcl-trunk 
 sudo mkdir buildpcl && cd buildpcl
 sudo cmake -DCMAKE_BUILD_TYPE=Release ../
-sudo make 
+sudo make -j8
 sudo make install
 cd home
 endTime=$(date +"%Y-%m-%d %T")
