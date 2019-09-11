@@ -4,7 +4,7 @@ sudo: required
 matrix:
   include:
     - os: linux
-      dist:Bionic
+      dist: Bionic
       compiler: gcc
 
 addons:
@@ -12,6 +12,7 @@ addons:
     packages:
       - git
       - mercurial
+      - cmake
 before_script: 
   - sudo chmod +777 enviroment.bash
   - ./enviroment.bash
