@@ -83,7 +83,7 @@ sudo git clone https://github.com/PointCloudLibrary/pcl pcl-trunk
 cd pcl-trunk 
 sudo mkdir buildpcl && cd buildpcl
 sudo cmake -DCMAKE_BUILD_TYPE=Release ../
-sudo make -j4 &
+sudo make -j4
 sudo make install
 cd /home
 endTime=$(date +"%Y-%m-%d %T")
