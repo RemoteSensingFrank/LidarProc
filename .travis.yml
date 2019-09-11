@@ -4,7 +4,7 @@ sudo: required
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist:Bionic
       compiler: gcc
 
 addons:
