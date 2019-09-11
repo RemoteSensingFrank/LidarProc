@@ -68,6 +68,7 @@ echo $endTime
 #PCL
 echo "install PCL library"  
 stTime=$(date +"%Y-%m-%d %T")
+cd /home
 echo $stTime
 sudo apt-get install libflann-dev
 sudo apt-get install libgl1-mesa-dev
@@ -77,7 +78,7 @@ sudo apt-get install libeigen3-dev
 sudo ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 sudo ln -s /usr/include/eigen3/unsupported/ /usr/include/unsupported
 sudo git clone https://github.com/PointCloudLibrary/pcl pcl-trunk
-cd pcl-pcl-1.7.2 
+cd pcl-trunk 
 sudo mkdir buildpcl && cd buildpcl
 sudo cmake -DCMAKE_BUILD_TYPE=Release ../
 sudo make 
