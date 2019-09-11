@@ -20,7 +20,7 @@ before_script:
   - cd pcl-trunk 
   - sudo mkdir buildpcl && cd buildpcl
   - sudo cmake -DCMAKE_BUILD_TYPE=Release ../
-  - travis_wait sudo make -j8
+  - travis_wait make -j8
   - sudo make install
   - cd home
   - cd build
