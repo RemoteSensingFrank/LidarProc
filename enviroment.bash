@@ -33,7 +33,7 @@ cd /usr/src/gtest
 sudo mkdir build
 cd build
 sudo cmake ../
-sudo make -j8
+sudo make -j4
 sudo cp libgtest*.a /usr/local/lib
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
@@ -47,7 +47,7 @@ sudo git clone https://github.com/libLAS/libLAS.git
 sudo mkdir buildliblas
 cd buildliblas
 sudo cmake ../libLAS/
-sudo make -j8
+sudo make -j4
 sudo make install
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
@@ -61,7 +61,7 @@ sudo git clone https://github.com/LASzip/LASzip.git
 sudo mkdir buildlaszip
 cd buildlaszip
 sudo cmake ../LASzip/
-sudo make -j8
+sudo make -j4
 sudo make install
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
@@ -78,13 +78,12 @@ sudo apt-get install libpcap0.8-dev
 sudo apt-get install libeigen3-dev
 sudo ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 sudo ln -s /usr/include/eigen3/unsupported/ /usr/include/unsupported
-sudo git clone https://github.com/PointCloudLibrary/pcl pcl-trunk
 #脚本超时在travis中，因此在外构建，在本机上不存在问题
-#cd pcl-trunk 
-#sudo mkdir buildpcl && cd buildpcl
-#sudo cmake -DCMAKE_BUILD_TYPE=Release ../
-#sudo make -j8
-#sudo make install
-#cd home
+cd pcl-trunk 
+sudo mkdir buildpcl && cd buildpcl
+sudo cmake -DCMAKE_BUILD_TYPE=Release ../
+sudo make -j4
+sudo make install
+cd home
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
