@@ -16,6 +16,7 @@ addons:
 before_script: 
   - sudo chmod +777 enviroment.bash
   - ./enviroment.bash
+  - sudo git clone https://github.com/PointCloudLibrary/pcl pcl-trunk
   - cd pcl-trunk 
   - sudo mkdir buildpcl && cd buildpcl
   - sudo cmake -DCMAKE_BUILD_TYPE=Release ../
