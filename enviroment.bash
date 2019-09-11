@@ -1,3 +1,11 @@
+echo "install cmake"
+stTime=$(date +"%Y-%m-%d %T")
+echo $stTime
+wget https://cmake.org/files/v3.12/cmake-3.12.2-Linux-x86_64.tar.gz
+sudo tar zxvf cmake-3.12.2-Linux-x86_64.tar.gz
+sudo mv cmake-3.12.2-Linux-x86_64 /opt/cmake-3.12.2
+sudo ln -sf /opt/cmake-3.12.2/bin/*  /usr/bin/
+
 #boost library
 echo "install boost library:"  
 stTime=$(date +"%Y-%m-%d %T")

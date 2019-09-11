@@ -12,7 +12,6 @@ addons:
     packages:
       - git
       - mercurial
-      - cmake-3.6
 before_script: 
   - sudo chmod +777 enviroment.bash
   - ./enviroment.bash
