@@ -1,0 +1,23 @@
+language: cpp
+sudo: required
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      compiler: gcc
+
+addons:
+  apt:
+    sources:
+      - libglfw3-dev
+    packages:
+      - git
+      - mercurial
+      - cmake
+before_script: 
+  - cd build
+  - cmake ../src/
+
+script:
+- make -j4 
