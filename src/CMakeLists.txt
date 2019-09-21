@@ -21,10 +21,10 @@ endif()
 
 # Add header file include directories 
 include_directories("../../library/")
-include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarUtil ./LidarResearch)
 include_directories(./LidarPotreeCvt/include)
 include_directories(./LidarPotreeCvt/lib/rapidjson/include)
 include_directories(./LidarPotreeCvt/lib/arguments)
+include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarUtil ./LidarResearch)
 
 # Add block directories 
 find_package(libLAS REQUIRED)
@@ -39,6 +39,7 @@ add_subdirectory(LidarPCLAlgorithm)
 # Target 
 add_executable(LidarProc LidarProc.cpp)  
 add_executable(LidarServer LidarServer.cpp)
+add_executable(LidarUnitTest LidarUnitTest.cpp ${DIRTESTS})
 
 set(lnkLibs libgeometry libbase libalgorithm libutility libresearch libpotreecvt libAlgPCL)
 set(exlnkLibs libgtest.so libgtest_main.so pthread)
@@ -49,8 +50,14 @@ target_link_libraries(LidarServer ${exlnkLibs} laszip )
 target_link_libraries(LidarProc ${lnkLibs})
 target_link_libraries(LidarProc ${exlnkLibs} laszip)
 
+
+target_link_libraries(LidarUnitTest ${lnkLibs})
+target_link_libraries(LidarUnitTest ${exlnkLibs} laszip)
+
 if(PCL_FOUND)
     add_definitions(-D_USE_PCL_)
     file(GLOB PCLLIBS "${PCL_LIBRARY_DIRS}/libpcl_*.so")
     target_link_libraries(LidarProc ${PCLLIBS})
+    target_link_libraries(LidarServer ${PCLLIBS})
+    target_link_libraries(LidarUnitTest ${PCLLIBS})
 endif()

@@ -32,16 +32,16 @@ TEST_F(FileHelperTest,ListFiles)
 {
 	vector<string> filenameLists;
 	EXPECT_EQ(0 ,FileHelper::listFiles("../src/LidarBase/",filenameLists));
-	EXPECT_EQ(7 ,filenameLists.size());
+	EXPECT_EQ(9 ,filenameLists.size());
 	EXPECT_EQ(-2 ,FileHelper::listFiles("../LidarFault/",filenameLists));
-	EXPECT_EQ(7 ,filenameLists.size());
+	EXPECT_EQ(9 ,filenameLists.size());
 }
 
 TEST_F(FileHelperTest,ListFilesExt)
 {
 	vector<string> filenameLists;
 	EXPECT_EQ(0 ,FileHelper::listFiles("../src/LidarBase/",filenameLists,"h"));
-	EXPECT_EQ(3 ,filenameLists.size());
+	EXPECT_EQ(4 ,filenameLists.size());
 	EXPECT_EQ(-2 ,FileHelper::listFiles("../LidarFault/",filenameLists,"h"));
-	EXPECT_EQ(3 ,filenameLists.size());
+	EXPECT_EQ(4 ,filenameLists.size());
 }
