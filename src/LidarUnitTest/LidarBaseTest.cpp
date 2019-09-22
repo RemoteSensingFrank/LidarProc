@@ -64,7 +64,8 @@ protected:
             fwrite(buffer, 1, sizeBuff, fLasOut);
             delete[]buffer; buffer = NULL;
         }
-
+        
+        //产生随机数引擎C++11 标准
         default_random_engine e; 
         uniform_int_distribution<unsigned> u(0, 100); 
         //写数据
@@ -167,60 +168,3 @@ TEST_F(LidarBaseTest,LasHeaderTestCase4)
     EXPECT_EQ(0,reader4->LidarReader_Read(false,1,lasdst));
     delete lasdst;lasdst=nullptr;
 }
-
-
-/* 
-TEST(LASHEADER,LasHeaderTestCase)
-{
-    LASHeader lasHd;
-    EXPECT_EQ(0, lasHd.number_of_point_records);
-    LASHeader *ptrLasHd = new LASHeader();
-    EXPECT_EQ(0, lasHd.number_of_point_records);
-}
-
-TEST(LASREADER, LasPointReaderCase1)
-{
-    ILASDataset *lasdst = new ILASDataset();
-    LASReader *reader1 = new LidarMemReader();
-    EXPECT_EQ(-1,reader1->LidarReader_Open("",lasdst));
-    EXPECT_EQ(-1,reader1->LidarReader_Read(true,1,lasdst));
-    EXPECT_EQ(-1,reader1->LidarReader_Write("",lasdst));
-    EXPECT_EQ(-1,reader1->LidarReader_Write("/home/frank/test.las",lasdst));
-    delete lasdst;lasdst=nullptr;
-}
-
-TEST(LASREADER, LasPointReaderCase2)
-{
-    ILASDataset *lasdst = new ILASDataset();
-    LidarMemReader *reader2 = new LidarMemReader();
-    EXPECT_EQ(0,reader2->LidarReader_Open("../data/default/CEDD_Building.las",lasdst));
-    EXPECT_EQ(0,reader2->LidarReader_Read(true,1,lasdst));
-    EXPECT_EQ(-1,reader2->LidarReader_Write("",lasdst));
-    EXPECT_EQ(0,reader2->LidarReader_Write("../data/default/test.las",lasdst));
-    EXPECT_EQ(0,reader2->LidarReader_Write("../data/default/testclassify.las",lasdst,elcCreated));
-    LASColorExt colorExt;
-    colorExt.Red=255;
-    colorExt.Green=0;
-    colorExt.Blue=0;
-    EXPECT_EQ(0,reader2->LidarReader_WriteWithColor("../data/default/testclassifycolor.las",lasdst,colorExt));
-    EXPECT_EQ(0,reader2->LidarReader_Export("../data/default/test.txt",lasdst,0));
-    delete lasdst;lasdst=nullptr;
-}
-
-TEST(LASREADER, LasPointReaderCase3)
-{
-    ILASDataset *lasdst = new ILASDataset();
-    LASReader *reader3 = new LidarMemReader();
-    EXPECT_EQ(-1,reader3->LidarReader_Open("",lasdst));
-    EXPECT_EQ(-1,reader3->LidarReader_Read(false,1,lasdst));
-    delete lasdst;lasdst=nullptr;
-}
-
-TEST(LASREADER, LasPointReaderCase4)
-{
-    ILASDataset *lasdst = new ILASDataset();
-    LASReader *reader4 = new LidarMemReader();
-    EXPECT_EQ(0,reader4->LidarReader_Open("../data/default/CEDD_Building.las",lasdst));
-    EXPECT_EQ(0,reader4->LidarReader_Read(false,1,lasdst));
-    delete lasdst;lasdst=nullptr;
-} */

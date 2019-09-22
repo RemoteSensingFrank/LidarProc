@@ -9,6 +9,41 @@
 #include <gtest/gtest.h>
 using namespace std;
 
+//define secret id and key
+string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor"；
+string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf"；
+
+class LidarBaseTest : public testing::Test
+{
+protected:
+	static void SetUpTestCase()
+	{
+		printf("file helper function class test start\n");
+		//首先检查网络是否通畅
+	}
+
+	static void TearDownTestCase()
+	{
+		printf("file helper function class test end\n");
+        
+	}
+
+    /**
+    * check network if connected network then download test data
+    * else do not run the unit test
+    **/
+    static bool CheckNetwork()
+    {
+        
+    }
+
+    virtual void SetUp() {}
+    virtual void TearDown() {}
+
+    static string m_UrlTestFilePath;
+};
+
+
 TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
 {
     Point2D pntTower[2];
