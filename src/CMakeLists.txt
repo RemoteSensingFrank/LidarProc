@@ -24,7 +24,7 @@ include_directories("../../library/")
 include_directories(./LidarPotreeCvt/include)
 include_directories(./LidarPotreeCvt/lib/rapidjson/include)
 include_directories(./LidarPotreeCvt/lib/arguments)
-include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarUtil ./LidarResearch)
+include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarService ./LidarUtil ./LidarResearch)
 
 # Add block directories 
 find_package(libLAS REQUIRED)
@@ -35,13 +35,14 @@ add_subdirectory(LidarUtil)
 add_subdirectory(LidarPotreeCvt)
 add_subdirectory(LidarResearch)
 add_subdirectory(LidarPCLAlgorithm)
+add_subdirectory(LidarService)
 
 # Target 
 add_executable(LidarProc LidarProc.cpp)  
 add_executable(LidarServer LidarServer.cpp)
 add_executable(LidarUnitTest LidarUnitTest.cpp ${DIRTESTS})
 
-set(lnkLibs libgeometry libbase libalgorithm libutility libresearch libpotreecvt libAlgPCL)
+set(lnkLibs libgeometry libbase libalgorithm libutility libservice libresearch libpotreecvt libAlgPCL)
 set(exlnkLibs libgtest.so libgtest_main.so pthread)
 
 target_link_libraries(LidarServer ${lnkLibs})

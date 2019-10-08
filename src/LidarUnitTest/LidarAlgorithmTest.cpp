@@ -10,8 +10,8 @@
 using namespace std;
 
 //define secret id and key
-string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor"；
-string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf"；
+string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
+string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
 
 class LidarBaseTest : public testing::Test
 {

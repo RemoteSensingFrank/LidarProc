@@ -91,6 +91,7 @@ public:
 	数据集ID
 	*/
 	inline unsigned short GetFile_Source_ID() { return (version_minor == 1 && version_minor == 1) ? reserved >> 16 : 0; }
+	
 	/*
 	数据集保留位
 	*/
