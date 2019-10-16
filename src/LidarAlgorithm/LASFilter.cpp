@@ -277,7 +277,6 @@ namespace LasAlgorithm{
         for (int i = 0; i < pointSet.size(); ++i)
 		{
             double pnt[3] = { pointSet[i].x,pointSet[i].y,pointSet[i].z };
-            preparePntSet.pop_back();
             std::vector<std::pair<size_t, double> > indices_dists;
             size_t ret_index[num_results];
             double out_dist_sqr[num_results];
@@ -298,11 +297,11 @@ namespace LasAlgorithm{
 
 
         }
-
+        return 0;
 
     }
 
     long PointCloudFilterNoise::PointCloudFilter_RGBOutlier(ILASDataset *lasDataset,int r,int g,int b){
-        
+        return 0;
     }
 }

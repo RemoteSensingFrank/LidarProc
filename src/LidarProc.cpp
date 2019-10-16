@@ -45,7 +45,7 @@ int main(int argc ,char* argv[])
     LASTransToPCL transPCL;
     transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
     LidarFilterPCL filterPcl;
-    filterPcl.LidarFilterPCL_StatisticalOutlierRemoval(pclPointCloudI,20,0.2,"../data/default/more.pcd");
+    filterPcl.LidarFilterPCL_VoxelGrid(pclPointCloudI,0.5,0.5,0.5,"../data/default/more.pcd");
 
     delete lasdst1;
     delete reader4;

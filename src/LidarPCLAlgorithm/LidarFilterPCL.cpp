@@ -1,5 +1,6 @@
 #include "LidarFilterPCL.h"
-
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/voxel_grid.h>
 long LidarFilterPCL::LidarFilterPCL_StatisticalOutlierRemoval(pcl::PointCloud<pcl::PointXYZ>::Ptr input,int minNum,double thresDis,const char* pathOut)
 {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
@@ -17,4 +18,15 @@ long LidarFilterPCL::LidarFilterPCL_StatisticalOutlierRemoval(pcl::PointCloud<pc
 
 	pcl::PCDWriter writer;
 	writer.write<pcl::PointXYZ>(pathOut, *cloud_filtered2, false);
+}
+
+long LidarFilterPCL::LidarFilterPCL_VoxelGrid(pcl::PointCloud<pcl::PointXYZ>::Ptr input,double gridsizeX,double gridsizeY,double gridsizeZ,const char* pathOut)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::VoxelGrid<pcl::PointXYZ> sor;
+	sor.setInputCloud(input);
+	sor.setLeafSize(gridsizeX, gridsizeY, gridsizeZ);
+	sor.filter(*cloud_filtered);
+    pcl::PCDWriter writer;
+	writer.write<pcl::PointXYZ>(pathOut, *cloud_filtered, false);
 }
