@@ -69,26 +69,6 @@ namespace LasAlgorithm {
 
 		Point3Ds PointCloudSegmentDirect_CalDirectVec(Point3Ds pointSet);
 	};
-	/*
-	point cloud filter algorithm
-	*/
-	class PointCloudFilter
-	{
-	public:
-		/*
-
-		*/
-		long PointCloudFilter_Point2DEM(ILASDataset *lasDataset, float resolution, const char* pathChr, int filterTimes = 0);
-
-		/*
-		P.S. when the problem of search all the data and no range;
-		the data tree should be constructed once more
-		*/
-		long PointCloudFilter_Point2DEMFlann(ILASDataset *lasDataset, float resolution, const char* pathChr);
-	private:
-		long PointCloudFilter_DEMFilter(float *dataDEM, int xsize, int ysize);
-	};
-
 #endif // !_POINTPROCALG_H_
 
 }
