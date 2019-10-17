@@ -75,7 +75,7 @@ public:
 	*/
 	long LidarReader_Write(const char* pathLidar, ILASDataset* dataset);
 
-	//4.将某一类las文件写入
+	//4.将某一类las文件写入，写入文件中为LAS格式
 	/*
 		将某一类的数据集写入文件中
 		@param pathLidar:文件路径
@@ -101,7 +101,14 @@ public:
 	*/
 	long LidarReader_ReadMerge(std::vector<string> lasFiles, _OUT_ ILASDataset* dataset);
 
-	//7.根据分类情况导出数据
+	/**
+	* @brief  7.根据分类情况导出数据，这里的导出是导出为txt的点云格式
+	* @note   
+	* @param  pathLidar: 
+	* @param  dataset: 
+	* @param  classType: 
+	* @retval 
+	*/
 	long LidarReader_Export(const char* pathLidar, ILASDataset* dataset, int classType);
 
 protected:

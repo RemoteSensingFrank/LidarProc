@@ -4,10 +4,12 @@
 //#include<gtest/gtest.h>
 #include "./LidarBase/LASReader.h"
 #include "./LidarAlgorithm/LASProfile.h"
+#include "./LidarAlgorithm/LASFilter.h"
 #include "./LidarResearch/LASFormatTransform.h"
 #include "./LidarPCLAlgorithm/LidarFeaturePoints.h"
 #include "./LidarPCLAlgorithm/LidarRegistration.h"
 #include "./LidarPCLAlgorithm/LidarFilterPCL.h"
+
 int main(int argc ,char* argv[])
 {
 
@@ -42,11 +44,17 @@ int main(int argc ,char* argv[])
     LASReader *reader4 = new LidarMemReader();
     reader4->LidarReader_Open("../data/default/more.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
+
+    LasAlgorithm::PointCloudFilterNoise lidarfilter;
+    lidarfilter.PointCloudFilter_Outlier(lasdst1,30,0.07);
+    reader4->LidarReader_Write("../data/default/morenoise.las",lasdst1,elcDeletedPoint);
+
+/*  
     LASTransToPCL transPCL;
     transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
     LidarFilterPCL filterPcl;
     filterPcl.LidarFilterPCL_VoxelGrid(pclPointCloudI,0.5,0.5,0.5,"../data/default/more.pcd");
-
+ */
     delete lasdst1;
     delete reader4;
 

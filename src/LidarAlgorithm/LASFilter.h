@@ -1,6 +1,6 @@
 #pragma once
 //
-// Created by Frank.Wu on 18-07-10.
+// Created by Frank.Wu on 19-10-17.
 // 点云滤波算法，针对杆塔数据的噪声进行滤除，获取
 // 较为准确的杆塔部分点云数据，主要思路有两个
 // 1:根据点云数据的密度滤除噪声，这个是主流思路，但是要考虑到密度的计算方式；
@@ -56,12 +56,12 @@ namespace LasAlgorithm
         /**
         * @brief  离群点去除
         * @note   
-        * @param  *lasDataset: 输入点云数据集
+        * @param  *lasDataset: 输入点云数据集,将噪声点标记为已删除
         * @param  ptNumerThreshod: 点云数量阈值
         * @param  rangeThreshod: 点云范围阈值
         * @retval 
         */
-        long PointCloudFilter_Outlier(Point3Ds pointSet,int ptNumerThreshod,double rangeThreshod);
+        long PointCloudFilter_Outlier(ILASDataset *lasDataset,int ptNumerThreshod,double rangeThreshod);
 
         /**
         * @brief  滤除对应RGB颜色的点

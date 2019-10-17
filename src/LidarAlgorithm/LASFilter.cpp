@@ -1,6 +1,10 @@
 #include "LASFilter.h"
+#include "../LidarBase/LASPoint.h"
+#include "../LidarBase/LASReader.h"
+
 #include"GeometryAlgorithm.h"
 #include"GeometryFlann.h"
+
 #include<gdal_priv.h>
 using namespace GeometryLas;
 namespace LasAlgorithm{
@@ -262,8 +266,16 @@ namespace LasAlgorithm{
 	}
 
     
-    long PointCloudFilterNoise::PointCloudFilter_Outlier(Point3Ds pointSet,int ptNumerThreshod,double rangeThreshod)
+    long PointCloudFilterNoise::PointCloudFilter_Outlier(ILASDataset *lasDataset,int ptNumerThreshod,double rangeThreshod)
     {
+		Point3Ds pointSet;
+		for (int i = 0; i < lasDataset->m_totalReadLasNumber; ++i)
+		{
+			LASIndex &idx = lasDataset->m_LASPointID[i];
+			LASPoint &pnt = lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect];
+			pointSet.push_back(pnt.m_vec3d);
+		}
+
         //构建kdTree
         typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 		const PCAdaptor pcAdaptorPnts(pointSet);
@@ -276,8 +288,11 @@ namespace LasAlgorithm{
         const int num_results=ptNumerThreshod+1;
         for (int i = 0; i < pointSet.size(); ++i)
 		{
+			LASIndex &idx = lasDataset->m_LASPointID[i];
+			LASPoint &pt  = lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect];
+
             double pnt[3] = { pointSet[i].x,pointSet[i].y,pointSet[i].z };
-            std::vector<std::pair<size_t, double> > indices_dists;
+            std::vector<std::pair<size_t, double>> indices_dists;
             size_t ret_index[num_results];
             double out_dist_sqr[num_results];
             KNNResultSet<double> resultSet(num_results);
@@ -287,21 +302,34 @@ namespace LasAlgorithm{
             //计算是否为噪声点
             double disMean = 0;
             for(int j=0;j<num_results;++j){
-                disMean+=DistanceComputation::Distance(pointSet[i],pointSet[ret_index[j]])/10.0;
+                disMean+=out_dist_sqr[j];//DistanceComputation::Distance(pointSet[i],pointSet[ret_index[j]]);
             }
             
-            if(disMean>rangeThreshod)
+			//printf("%lf   %lf\n",disMean,rangeThreshod);
+            if(disMean>(num_results+1)*rangeThreshod)
             {
                 //标记为噪声点
+				pt.m_classify=elcDeletedPoint;
             }
-
-
         }
+		pointSet.clear();
         return 0;
-
     }
 
-    long PointCloudFilterNoise::PointCloudFilter_RGBOutlier(ILASDataset *lasDataset,int r,int g,int b){
-        return 0;
+    long PointCloudFilterNoise::PointCloudFilter_RGBOutlier(ILASDataset *lasDataset,int r,int g,int b)
+	{
+		for (int i = 0; i < lasDataset->m_totalReadLasNumber; ++i)
+		{
+			LASIndex &idx = lasDataset->m_LASPointID[i];
+			LASPoint &pnt = lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect];
+			//直接根据RGB颜色去判断是否为噪声点，如果为噪声点则标记为删除
+			//不能确认RGB的完全匹配，差一点都会存在问题
+			if(pnt.m_colorExt.Red==r&&pnt.m_colorExt.Green==g&&pnt.m_colorExt.Blue==b)
+			{
+				pnt.m_classify=elcDeletedPoint;
+			}
+		}
+		
+		return 0;
     }
 }
