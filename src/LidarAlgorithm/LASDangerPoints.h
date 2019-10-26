@@ -93,6 +93,24 @@ protected:
 class LASDangerPointsFlann:public LASDangerPoints
 {
 public:
+
+	/**
+	* detect danger points from the single las dataset
+	* 想的简单，但是具体实现需要考虑是否重新集成回原来的
+	* 数据集中，如果集成回去应该如何处理？
+	* param distance: distance thresthold
+	* param dataset: dataset las dataset
+	* return 
+	**/
+	virtual long LASDangerPoints_Detect(float distance,ILASDataset* dataset);
+
+	/**
+	* danger level according distance
+	* param: distance array
+	* param: dangerScetionNum
+	**/
+	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset);
+
 	/**
 	* ���ݾ����ȡ��·Σ�յ����?
 	* @param distance
@@ -111,6 +129,14 @@ public:
 	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
 private:
+	/**
+	* 判断每一个点是不是危险点
+	* distance : distance
+	* pnt :  line point
+	* treeVege : vegetation point kdtree
+	**/
+	long LASDangerPoints_PerPoint(float distance, const Point3D* pnt,kd_tree &treeVege,vector<int> mapper, ILASDataset* dataset);
+
 	/**
 	* ���ĳһ���㷶�?
 	* @param distance
