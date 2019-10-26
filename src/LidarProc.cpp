@@ -4,9 +4,12 @@
 //#include<gtest/gtest.h>
 #include "./LidarBase/LASReader.h"
 #include "./LidarAlgorithm/LASProfile.h"
+#include "./LidarAlgorithm/LASFilter.h"
 #include "./LidarResearch/LASFormatTransform.h"
 #include "./LidarPCLAlgorithm/LidarFeaturePoints.h"
 #include "./LidarPCLAlgorithm/LidarRegistration.h"
+#include "./LidarPCLAlgorithm/LidarFilterPCL.h"
+
 int main(int argc ,char* argv[])
 {
 
@@ -37,6 +40,25 @@ int main(int argc ,char* argv[])
  */
 #ifdef _USE_PCL_
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
+    ILASDataset *lasdst1 = new ILASDataset();
+    LASReader *reader4 = new LidarMemReader();
+    reader4->LidarReader_Open("../data/default/more.las",lasdst1);
+    reader4->LidarReader_Read(true,1,lasdst1);
+
+    LasAlgorithm::PointCloudFilterNoise lidarfilter;
+    lidarfilter.PointCloudFilter_Outlier(lasdst1,30,0.07);
+    reader4->LidarReader_Write("../data/default/morenoise.las",lasdst1,elcDeletedPoint);
+
+/*  
+    LASTransToPCL transPCL;
+    transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
+    LidarFilterPCL filterPcl;
+    filterPcl.LidarFilterPCL_VoxelGrid(pclPointCloudI,0.5,0.5,0.5,"../data/default/more.pcd");
+ */
+    delete lasdst1;
+    delete reader4;
+
+/*    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
@@ -54,6 +76,7 @@ int main(int argc ,char* argv[])
 
     LidarRegistration lidarReg;
     lidarReg.LidarRegistration_FPFH(pclPointCloudI,pclPointCloudO,"../data/default/reg.pcd");
+*/    
     //lidarReg.LidarRegistration_ICP(pclPointCloudI,pclPointCloudO,"../data/default/reg.pcd");
     
 /*     LidarFeaturePoints lidarFeatures;
@@ -65,11 +88,12 @@ int main(int argc ,char* argv[])
     //pcl::PointCloud<pcl::Narf36> narfDesc;
     //lidarFeatures.LidarFeature_NARF(pclPointCloudI,narfIndex,narfDesc);
 
-    delete lasdst1;
+/*  delete lasdst1;
     delete reader4;
     delete lasdst2;
     delete reader5;
-#endif
+ */
+ #endif
 
 
 /*  testing::InitGoogleTest(&argc,argv);
