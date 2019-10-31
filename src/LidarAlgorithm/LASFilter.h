@@ -54,7 +54,7 @@ namespace LasAlgorithm
     {
     public:
         /**
-        * @brief  离群点去除
+        * @brief  离群点去除，通过密度滤波的方法剔除
         * @note   
         * @param  *lasDataset: 输入点云数据集,将噪声点标记为已删除
         * @param  ptNumerThreshod: 点云数量阈值
