@@ -247,6 +247,19 @@ function deleteDataFile(filename){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
             getDataDeleteTree(null);
+
+            //插入操作记录
+            var operation = window.AV.Object.extend('operation');
+            var op = new operation();
+            op.save({
+                operation_type:"delete data:"+filename,
+                operation_ip:returnCitySN['cip']
+            }).then(function(op) {
+                // 成功
+            }, function(error) {
+                // 失败
+                console.log(error);
+            });
         },     
         error:function(data){
             console.log(data)
@@ -271,6 +284,20 @@ function deleteExhibitDirectory(dir){
         success: function(data){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
+
+            //插入操作记录
+            var operation = window.AV.Object.extend('operation');
+            var op = new operation();
+            op.save({
+                operation_type:"delete exhibit:"+dir,
+                operation_ip:returnCitySN['cip']
+            }).then(function(op) {
+                // 成功
+            }, function(error) {
+                // 失败
+                console.log(error);
+            });
+
             getDataDeleteTree(null);
         },     
         error:function(data){
@@ -292,10 +319,23 @@ function transDataFile(filename){
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
             $("#loading").show();
+
         }, 
         success: function(data){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
+            //插入操作记录
+            var operation = window.AV.Object.extend('operation');
+            var op = new operation();
+            op.save({
+                operation_type:"trans to exhibit:"+filename,
+                operation_ip:returnCitySN['cip']
+            }).then(function(op) {
+                // 成功
+            }, function(error) {
+                // 失败
+                console.log(error);
+            });            
         },     
         error:function(data){
             console.log(data)
