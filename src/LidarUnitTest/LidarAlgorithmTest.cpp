@@ -3,12 +3,13 @@
 #include "../LidarBase/LASPoint.h"
 #include "../LidarAlgorithm/LASSimpleClassify.h"
 #include "../LidarAlgorithm/LASProfile.h"
+#include "../LidarAlgorithm/LASSkeleton.h"
 #include <stdio.h>
 #include <vector>
 #include <string>
 #include <gtest/gtest.h>
 using namespace std;
-
+using namespace LasAlgorithm;
 //define secret id and key
 string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
 string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
@@ -100,4 +101,27 @@ TEST(LASPROFILE,LASPROFILEProfileTestCase)
     profile.LASProfile_Horizontal("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/h.jpg",&decorateParam);
     profile.LASProfile_Front("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/f.jpg",&decorateParam);
     EXPECT_EQ(0,0);
+}
+
+TEST(LASSKELETON,LASSKELETONTestCase)
+{
+    ILASDataset *dataset   = new ILASDataset();
+    LidarMemReader *reader = new LidarMemReader();
+
+    reader->LidarReader_Open("../data/default/more.las",dataset);
+    reader->LidarReader_Read(true,1,dataset); 
+    Point3Ds points;
+    PointCloudShrinkSkeleton pcSkeleton;
+    points=pcSkeleton.PointCloudShrinkSkeleton_Shrink(dataset,5,3);
+    
+    FILE *fs = fopen("../data/test.txt","w+");
+    //遍历点云数据输出
+    for(int i=0;i<points.size();++i)
+    {
+        fprintf(fs,"%lf,%lf,%lf\n",points[i].x,points[i].y,points[i].z);
+    }
+    fclose(fs);
+    fs=nullptr;
+    
+    EXPECT_GT(points.size(),0);
 }

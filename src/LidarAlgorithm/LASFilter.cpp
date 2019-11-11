@@ -2,8 +2,9 @@
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
 
-#include"GeometryAlgorithm.h"
-#include"GeometryFlann.h"
+#include"../LidarGeometry/GeometryAlgorithm.h"
+#include"../LidarGeometry/GeometryFlann.h"
+#include"../LidarGeometry/tsmToUTM.h"
 
 #include<gdal_priv.h>
 using namespace GeometryLas;

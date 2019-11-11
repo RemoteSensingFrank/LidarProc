@@ -8,10 +8,11 @@
 // 
 // 
 
-#ifndef _POINTFILTER_H_
-#define _POINTFILTER_H_
+#ifndef _POINT_SKELETON_H_
+#define _POINT_SKELETON_H_
 
-#include "Geometry.h"
+#include "../LidarGeometry/Geometry.h"
+#include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
 using namespace GeometryLas;
@@ -26,6 +27,7 @@ namespace LasAlgorithm
     */
     class PointCloudShrinkSkeleton
     {
+    public:
         /**
         * @brief  通过质心收缩算法提取骨架点,判断是否包含质心点，如果包含质心点则不处理这个点簇
         * @note   
@@ -33,7 +35,7 @@ namespace LasAlgorithm
         * @param  clusterNum: 聚类簇的点云数目
         * @retval 
         */
-        int PointCloudShrinkSkeleton_Centroid(Point3Ds pointSet int* clusterIdx,int clusterNum);
+        int PointCloudShrinkSkeleton_Centroid(Point3Ds pointSet ,size_t* clusterIdx,int clusterNum);
 
         /**
         * @brief  迭代收缩算法运行一次之后的结果
@@ -56,7 +58,7 @@ namespace LasAlgorithm
         Point3Ds  PointCloudShrinkSkeleton_Shrink(Point3Ds pointSet,int nearPointNum,int iteratorNum);
         
         Point3Ds  PointCloudShrinkSkeleton_Shrink(ILASDataset* lasDataset,int nearPointNum,int iteratorNum);
-        
-        
     };
 }
+
+#endif

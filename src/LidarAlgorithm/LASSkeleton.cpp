@@ -1,17 +1,15 @@
-#include "LASSeleton.h"
+#include "LASSkeleton.h"
 #include <set>
 
-#include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
-
-#include"GeometryAlgorithm.h"
-#include"GeometryFlann.h"
+#include"../LidarGeometry/GeometryAlgorithm.h"
+#include"../LidarGeometry/GeometryFlann.h"
 
 using namespace GeometryLas;
 using namespace std;
-namespace LasAlgorithm{
-
-    int PointCloudShrinkSkeleton::PointCloudShrinkSkeleton_Centroid(Point3D pointSet int* clusterIdx,int clusterNum)
+namespace LasAlgorithm
+{
+    int PointCloudShrinkSkeleton::PointCloudShrinkSkeleton_Centroid(Point3Ds pointSet, size_t* clusterIdx,int clusterNum)
     {
         //判断重心的标准为点到点簇中所有点的距离之和最小
         double disMin=999999999;
@@ -27,7 +25,7 @@ namespace LasAlgorithm{
             disMin=disSigma<disMin?disSigma:disMin;
             idxMin=disSigma<disMin?clusterIdx[i]:clusterIdx[idxMin];
         }
-        return idxMin
+        return idxMin;
     }
 
     Point3Ds PointCloudShrinkSkeleton::PointCloudShrinkSkeleton_Once(Point3Ds pointSet,int nearPointNum)
@@ -40,26 +38,26 @@ namespace LasAlgorithm{
 		kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 		treeIndex.buildIndex();
         Point3Ds pntSkeSet;
-        
         size_t *ret_index=new size_t[nearPointNum];
         double *out_dist_sqrt = new double[nearPointNum];
-        
         set<int> idxSet;
-        
+
         for(int i=0;i<pointSet.size();++i)
         {
             double pnt[3]={pointSet[i].x,pointSet[i].y,pointSet[i].z};
             KNNResultSet<double> resultSet(nearPointNum);
-            treeIndex.findNeighbors(resultSet,&pnt[0],searchParams());
+            resultSet.init(ret_index, out_dist_sqrt);
+            treeIndex.findNeighbors(resultSet,&pnt[0],SearchParams(10));
             bool ifFind = false;
-            for(int i=0;i<nearPointNum;++i)
+            for(int j=0;j<nearPointNum;++j)
             {
-                ifFind = idxSet.find(ret_index[i]==idxSet.end()?true:false;
+                ifFind = idxSet.find(ret_index[j])==idxSet.end()?true:false;
             } 
             if(!ifFind)
             {
+                printf("find\n");
                 int idxCentId = PointCloudShrinkSkeleton_Centroid(pointSet,ret_index,nearPointNum);
-                set<int>::iterator resultIdx = find(idxSet.begin(),idxSet.end(),idxCentid);
+                set<int>::iterator resultIdx = find(idxSet.begin(),idxSet.end(),idxCentId);
                 pntSkeSet.push_back(pointSet[idxCentId]);
                 idxSet.insert(idxCentId);
             }
@@ -79,6 +77,9 @@ namespace LasAlgorithm{
         for(int i=0;i<iteratorNum;++i)
         {
             pntTmp=PointCloudShrinkSkeleton_Once(pnts,nearPointNum);
+            #ifdef _DEBUG
+            printf("iterator: %d points count: %d\n",i+1,pntTmp.size());
+            #endif
             pnts.clear();
             pnts=pntTmp;
             pntTmp.clear();
@@ -86,24 +87,16 @@ namespace LasAlgorithm{
     
         return pnts;
     }    
-    
-    
-
 
     Point3Ds  PointCloudShrinkSkeleton::PointCloudShrinkSkeleton_Shrink(ILASDataset* lasDataset,int nearPointNum,int iteratorNum)
     {
         Point3Ds pointSet;
-		for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
+		for (int i = 0; i < lasDataset->m_totalReadLasNumber; ++i)
 		{
-			const LASIndex &idx = dataset->m_LASPointID[i];
-			pointSet.push_back(dataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect].m_vec3d);
+			const LASIndex &idx = lasDataset->m_LASPointID[i];
+			pointSet.push_back(lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect].m_vec3d);
 		}
 		return PointCloudShrinkSkeleton_Shrink(pointSet,nearPointNum,iteratorNum);   
     }
-
-
-
-
-
 
 }
