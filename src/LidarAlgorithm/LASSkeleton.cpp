@@ -15,17 +15,22 @@ namespace LasAlgorithm
         double disMin=999999999;
         int idxMin=0;
         
+        printf("%lf\n",DistanceComputation::Distance(pointSet[clusterIdx[4]],pointSet[clusterIdx[0]]));
+
         for(int i=0;i<clusterNum;++i)
         {
             double disSigma=0;
             for(int j=0;j<clusterNum;++j)
             {
                 disSigma+=DistanceComputation::Distance(pointSet[clusterIdx[i]],pointSet[clusterIdx[j]]);
+                printf("%d:",j);
             }
+            printf("%d\n",i);
             disMin=disSigma<disMin?disSigma:disMin;
             idxMin=disSigma<disMin?clusterIdx[i]:clusterIdx[idxMin];
         }
-        return idxMin;
+        
+        return clusterIdx[idxMin];
     }
 
     Point3Ds PointCloudShrinkSkeleton::PointCloudShrinkSkeleton_Once(Point3Ds pointSet,int nearPointNum)
@@ -44,20 +49,27 @@ namespace LasAlgorithm
 
         for(int i=0;i<pointSet.size();++i)
         {
+            //首先找到K近邻的点
             double pnt[3]={pointSet[i].x,pointSet[i].y,pointSet[i].z};
             KNNResultSet<double> resultSet(nearPointNum);
             resultSet.init(ret_index, out_dist_sqrt);
             treeIndex.findNeighbors(resultSet,&pnt[0],SearchParams(10));
-            bool ifFind = false;
+            
+            //判断K近邻点中是否包含已有的中心点
+            bool ifNotFind = false;
             for(int j=0;j<nearPointNum;++j)
             {
-                ifFind = idxSet.find(ret_index[j])==idxSet.end()?true:false;
+                ifNotFind = idxSet.find(ret_index[j])==idxSet.end()?true:false;
+                if(!ifNotFind)
+                    break;
             } 
-            if(!ifFind)
+
+            //如果不包含已有的中心点则在K近邻的点集中确定一个中心点
+            if(ifNotFind)
             {
-                printf("find\n");
                 int idxCentId = PointCloudShrinkSkeleton_Centroid(pointSet,ret_index,nearPointNum);
-                set<int>::iterator resultIdx = find(idxSet.begin(),idxSet.end(),idxCentId);
+                //printf("%d\n",idxCentId);
+                //set<int>::iterator resultIdx = find(idxSet.begin(),idxSet.end(),idxCentId);
                 pntSkeSet.push_back(pointSet[idxCentId]);
                 idxSet.insert(idxCentId);
             }
