@@ -16,7 +16,7 @@ void LidarService::LidarService_Run()
 	//the max parallel connection count
 	set_keep_alive_max_count(500);
 	set_base_dir("./www");
-    listen("localhost", port);
+    listen("192.168.31.16", port);
 }
 
 void LidarService::LidarService_Register(LidarController* controller)
