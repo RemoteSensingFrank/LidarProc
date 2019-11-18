@@ -14,22 +14,20 @@ namespace LasAlgorithm
         //判断重心的标准为点到点簇中所有点的距离之和最小
         double disMin=999999999;
         int idxMin=0;
-        
-        printf("%lf\n",DistanceComputation::Distance(pointSet[clusterIdx[4]],pointSet[clusterIdx[0]]));
-
+        // for(int i=0;i<clusterNum;++i){
+        //     printf("(%d, %d)",pointSet.size(),clusterIdx[i]);
+        // }
         for(int i=0;i<clusterNum;++i)
         {
             double disSigma=0;
             for(int j=0;j<clusterNum;++j)
             {
                 disSigma+=DistanceComputation::Distance(pointSet[clusterIdx[i]],pointSet[clusterIdx[j]]);
-                printf("%d:",j);
             }
-            printf("%d\n",i);
+            idxMin=disSigma<disMin?i:idxMin;
             disMin=disSigma<disMin?disSigma:disMin;
-            idxMin=disSigma<disMin?clusterIdx[i]:clusterIdx[idxMin];
+            
         }
-        
         return clusterIdx[idxMin];
     }
 
@@ -38,7 +36,7 @@ namespace LasAlgorithm
         //构建kdtree
         typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 		const PCAdaptor pcAdaptorPnts(pointSet);
-
+        printf("proc1-");
 		typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor, 3> kd_tree;
 		kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 		treeIndex.buildIndex();
@@ -46,7 +44,6 @@ namespace LasAlgorithm
         size_t *ret_index=new size_t[nearPointNum];
         double *out_dist_sqrt = new double[nearPointNum];
         set<int> idxSet;
-
         for(int i=0;i<pointSet.size();++i)
         {
             //首先找到K近邻的点
@@ -54,7 +51,6 @@ namespace LasAlgorithm
             KNNResultSet<double> resultSet(nearPointNum);
             resultSet.init(ret_index, out_dist_sqrt);
             treeIndex.findNeighbors(resultSet,&pnt[0],SearchParams(10));
-            
             //判断K近邻点中是否包含已有的中心点
             bool ifNotFind = false;
             for(int j=0;j<nearPointNum;++j)
@@ -63,7 +59,6 @@ namespace LasAlgorithm
                 if(!ifNotFind)
                     break;
             } 
-
             //如果不包含已有的中心点则在K近邻的点集中确定一个中心点
             if(ifNotFind)
             {
