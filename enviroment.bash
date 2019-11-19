@@ -1,4 +1,3 @@
-
 #boost library
 echo "install boost library:"  
 stTime=$(date +"%Y-%m-%d %T")
@@ -6,7 +5,6 @@ echo $stTime
 sudo apt-get install libboost-all-dev
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
-
 #opencv instsall
 echo "install opencv library"  
 stTime=$(date +"%Y-%m-%d %T")
@@ -14,7 +12,6 @@ echo $stTime
 sudo apt-get install libopencv-dev
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
-
 #gdal install
 echo "install gdal library"  
 stTime=$(date +"%Y-%m-%d %T")
@@ -22,8 +19,6 @@ echo $stTime
 sudo apt-get install libgdal-dev
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
-
-
 #gtest install
 echo "install gtest library"  
 stTime=$(date +"%Y-%m-%d %T")
@@ -37,7 +32,6 @@ sudo make -j4
 sudo cp libgtest*.a /usr/local/lib
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
-
 #download and install liblas
 echo "install liblas library"  
 stTime=$(date +"%Y-%m-%d %T")
@@ -51,7 +45,6 @@ sudo make -j4
 sudo make install
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
-
 #download and instsall laszip
 echo "install laszip library"  
 stTime=$(date +"%Y-%m-%d %T")
@@ -65,11 +58,10 @@ sudo make -j4
 sudo make install
 endTime=$(date +"%Y-%m-%d %T")
 echo $endTime
-
 #PCL
 echo "install PCL library"  
 stTime=$(date +"%Y-%m-%d %T")
-cd /home
+cd /home/
 echo $stTime
 sudo apt-get install libflann-dev
 sudo apt-get install libgl1-mesa-dev

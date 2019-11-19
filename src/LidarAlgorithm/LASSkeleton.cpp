@@ -14,9 +14,9 @@ namespace LasAlgorithm
         //判断重心的标准为点到点簇中所有点的距离之和最小
         double disMin=999999999;
         int idxMin=0;
-        // for(int i=0;i<clusterNum;++i){
-        //     printf("(%d, %d)",pointSet.size(),clusterIdx[i]);
-        // }
+
+        //从性能上分析这个部分是可以进行优化的
+        //TODO：不知道是不是有相应的算法，需要寻找
         for(int i=0;i<clusterNum;++i)
         {
             double disSigma=0;
@@ -36,7 +36,6 @@ namespace LasAlgorithm
         //构建kdtree
         typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 		const PCAdaptor pcAdaptorPnts(pointSet);
-        printf("proc1-");
 		typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor, 3> kd_tree;
 		kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 		treeIndex.buildIndex();
@@ -44,6 +43,8 @@ namespace LasAlgorithm
         size_t *ret_index=new size_t[nearPointNum];
         double *out_dist_sqrt = new double[nearPointNum];
         set<int> idxSet;
+
+        //看起来整个算法是串行算法，没法进行优化
         for(int i=0;i<pointSet.size();++i)
         {
             //首先找到K近邻的点
@@ -51,6 +52,7 @@ namespace LasAlgorithm
             KNNResultSet<double> resultSet(nearPointNum);
             resultSet.init(ret_index, out_dist_sqrt);
             treeIndex.findNeighbors(resultSet,&pnt[0],SearchParams(10));
+
             //判断K近邻点中是否包含已有的中心点
             bool ifNotFind = false;
             for(int j=0;j<nearPointNum;++j)
@@ -63,8 +65,6 @@ namespace LasAlgorithm
             if(ifNotFind)
             {
                 int idxCentId = PointCloudShrinkSkeleton_Centroid(pointSet,ret_index,nearPointNum);
-                //printf("%d\n",idxCentId);
-                //set<int>::iterator resultIdx = find(idxSet.begin(),idxSet.end(),idxCentId);
                 pntSkeSet.push_back(pointSet[idxCentId]);
                 idxSet.insert(idxCentId);
             }
@@ -84,9 +84,9 @@ namespace LasAlgorithm
         for(int i=0;i<iteratorNum;++i)
         {
             pntTmp=PointCloudShrinkSkeleton_Once(pnts,nearPointNum);
-            #ifdef _DEBUG
+#ifdef _DEBUG
             printf("iterator: %d points count: %d\n",i+1,pntTmp.size());
-            #endif
+#endif
             pnts.clear();
             pnts=pntTmp;
             pntTmp.clear();
