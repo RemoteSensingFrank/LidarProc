@@ -332,3 +332,34 @@ public:
         });  
     }   
 };
+
+/**
+ * @brief  文件分块上传接口的文件传输部分
+ * @note   
+ * @retval None
+ */
+class LidarControllerUpload:public LidarController
+{
+    LidarControllerUpload(LidarService* tService):LidarController(tService){}
+
+    virtual void LidarController_Run()
+    {
+        service->Post("/upload",[](const Request& req, Response& res){
+
+        });  
+    }   
+};
+
+//完成文件上传（必须从开始到完成一整个流程才算结束）
+class LidarControllerUploadFinished:public LidarController
+{
+    LidarControllerUploadFinished(LidarService* tService):LidarController(tService){}
+
+    virtual void LidarController_Run()
+    {
+        service->Post("/upload-finish",[](const Request& req, Response& res){
+
+        });  
+    }   
+};
+

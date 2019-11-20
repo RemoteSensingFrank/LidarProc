@@ -342,3 +342,10 @@ function transDataFile(filename){
         }
     });
 }
+
+/**
+ * 点击上传按钮实现文件上传
+ */
+function uploadData(){
+    
+}

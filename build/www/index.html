@@ -21,6 +21,7 @@
 	<script type="text/javascript" src="http://pv.sohu.com/cityjson?ie=utf-8" charset="gb2312"></script>
 	<link rel="stylesheet" type="text/css" href="../css/bootstrap-treeview.css">
 
+	<link rel="stylesheet" href="../css/webuploader.css">
 </head>
 
 <body>
@@ -40,14 +41,16 @@
 	<script src="../libs/potree/potree.js"></script>
 	<script src="../libs/plasio/js/laslaz.js"></script>
 	<script src="../libs/Cesium/Cesium.js"></script>
-
+	
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+	<script src="javascript/uilib/webuploader.nolog.min.js"></script>
 
 	<script src="javascript/index.js"></script>
 	<script src="javascript/useroperation.js"></script>
 	<script src="javascript/uilib/bootstrap-treeview.js"></script>
 	<script src="javascript/interaction.js"></script>
 
+	<script src="javascript/upload.js"></script>
 
 	<!--待展示的文件选择模态对话框-->
 	<div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectModal">  
@@ -135,21 +138,21 @@
 				</div>  
 				<div class="modal-body">  
 					<form class="form-inline" role="form">
-						<div class="form-group">
+						<!-- <div class="form-group">
 							<label class="sr-only" for="name">名称</label>
 							<input type="text" class="form-control" id="name" placeholder="文件名">
-						</div>
+						</div> -->
 						<div class="form-group">
-							<label class="sr-only" for="inputfile">选择文件</label>
-							<input type="file" id="inputfile">
+							<label class="sr-only" for="picker">选择文件</label>
+							<input type="file" id="picker">
 						</div>
-						<div class="checkbox">
+						<!-- <div class="checkbox">
 							<label>
 							<input type="checkbox">确认
 							</label>
-						</div>
+						</div> -->
 					</form>
-				</div>  
+				</div> 
 				<div class="modal-footer">  
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
 					<button type="button" class="btn btn-primary" onclick="uploadData();">上传</button>  
