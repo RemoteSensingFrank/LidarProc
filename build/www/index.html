@@ -14,14 +14,13 @@
 	<link rel="stylesheet" type="text/css" href="../libs/Cesium/Widgets/CesiumWidget/CesiumWidget.css">
 	<link rel="stylesheet" type="text/css" href="../libs/jquery-ui/jquery-ui.min.css">
 
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	<link rel="stylesheet" href="javascript/uilib/bootstrap/css/bootstrap.min.css">
 
 	<script src="//cdn.jsdelivr.net/npm/leancloud-storage@3.15.0/dist/av-min.js"></script>
 	<script type="text/javascript" src="http://pv.sohu.com/cityjson?ie=utf-8" charset="gb2312"></script>
 	<link rel="stylesheet" type="text/css" href="../css/bootstrap-treeview.css">
 
-	<link rel="stylesheet" href="../css/webuploader.css">
+	<link rel="stylesheet" href="javascript/uilib/webuploader/webuploader.css">
 </head>
 
 <body>
@@ -42,8 +41,9 @@
 	<script src="../libs/plasio/js/laslaz.js"></script>
 	<script src="../libs/Cesium/Cesium.js"></script>
 	
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
-	<script src="javascript/uilib/webuploader.nolog.min.js"></script>
+	<script src="javascript/uilib/jquery-1.11.1.min.js"></script>
+	<script src="javascript/uilib/bootstrap/js/bootstrap.min.js"></script>
+	<script src="javascript/uilib/webuploader/webuploader.min.js"></script>
 
 	<script src="javascript/index.js"></script>
 	<script src="javascript/useroperation.js"></script>
@@ -137,17 +137,22 @@
 					<h4 class="modal-title" id="uploadModalTitle">文件上传</h4>  
 				</div>  
 				<div class="modal-body">  
-					<form class="form-inline" role="form">
+					<div id="picker" style="float:left;">选择文件上传</div>
+					<div id="progress" class="progress" style="width:500px;float:left;margin:10px 0 0 20px;">
+						<div class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;"></div>
+					</div>
+					<div style="clear:both;"></div>
+					<!-- <form class="form-inline" role="form">
 						<div class="form-group">
 							<label class="sr-only" for="picker">选择文件</label>
 							<input type="file" id="picker">
 						</div>
-					</form>
+					</form> -->
 				</div> 
-				<div class="modal-footer">  
+				<!-- <div class="modal-footer">  
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
 					<button type="button" class="btn btn-primary" onclick="uploadData();">上传</button>  
-				</div>  
+				</div>   -->
 			</div>  
 		</div>  
 	</div>
@@ -217,6 +222,5 @@
 	<script>
 		Initial();
 	</script>
-
   </body>
 </html>

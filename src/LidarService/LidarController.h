@@ -340,12 +340,31 @@ public:
  */
 class LidarControllerUpload:public LidarController
 {
+public:
     LidarControllerUpload(LidarService* tService):LidarController(tService){}
 
     virtual void LidarController_Run()
     {
         service->Post("/upload",[](const Request& req, Response& res){
+            MultipartFile name = req.get_file_value("name");
+            string nameStr = req.body.substr(name.offset, name.length);
+            MultipartFile task = req.get_file_value("task_id"); 
+            string taskStr = req.body.substr(task.offset, task.length);   
+            MultipartFile size = req.get_file_value("size"); 
+            string sizeStr = req.body.substr(size.offset, size.length);     
+            MultipartFile file = req.get_file_value("file");
+            string fileStr = req.body.substr(file.offset, file.length);
 
+            printf("%s\n",req.body.c_str());
+            // printf("%s\n",nameStr.c_str());
+            // printf("%s\n",taskStr.c_str());
+            // printf("%s\n",sizeStr.c_str());
+
+            // FILE *f;
+            // string path="../data/default/"+nameStr;
+            // f=fopen(path.c_str(),"wb+");
+            // fwrite(fileStr.c_str(),1,name.length,f);
+            // fclose(f);
         });  
     }   
 };
@@ -353,6 +372,7 @@ class LidarControllerUpload:public LidarController
 //完成文件上传（必须从开始到完成一整个流程才算结束）
 class LidarControllerUploadFinished:public LidarController
 {
+public:    
     LidarControllerUploadFinished(LidarService* tService):LidarController(tService){}
 
     virtual void LidarController_Run()
