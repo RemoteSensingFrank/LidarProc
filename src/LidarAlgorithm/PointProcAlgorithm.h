@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-11-27 11:43:24
+ * @LastEditTime: 2019-11-27 16:51:14
  */
 
 #pragma once
@@ -86,6 +86,14 @@ namespace LasAlgorithm {
 	class PointCloudSegmentWithKMeans:public PointCloudSegment
 	{
 	public:
+		/**
+		 * @name: 
+		 * @msg: 
+		 * @param {type} 
+		 * @return: 
+		 */
+		long PointCloudSegment_KMeans(ILASDataset *lasDataset,int nType,int *type,double thresStop);
+
 		/**
 		 * @name: kmeans segment method
 		 * @msg: 

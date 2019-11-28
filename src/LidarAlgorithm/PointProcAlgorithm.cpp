@@ -349,6 +349,17 @@ namespace LasAlgorithm {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
+	long PointCloudSegmentWithKMeans::PointCloudSegment_KMeans(ILASDataset *lasDataset,int nType,int *type,double thresStop)
+	{
+		Point3Ds pointSet;
+		for (int i = 0; i < lasDataset->m_totalReadLasNumber; ++i)
+		{
+			const LASIndex &idx = lasDataset->m_LASPointID[i];
+			pointSet.push_back(lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect].m_vec3d);
+		}
+		return PointCloudSegment_KMeans(pointSet,nType,type,thresStop);
+	}
+	
 	long PointCloudSegmentWithKMeans::PointCloudSegment_KMeans(Point3Ds pointSet,int nType,int *type,double thresStop)
 	{
 		Point3Ds initCenterPoints;
@@ -377,6 +388,7 @@ namespace LasAlgorithm {
 				iterCenterPoitns.push_back(initCenterPoints[i]);
 			}
 		}
+		return 0;
 	}
 	
 	long PointCloudSegmentWithKMeans::PointCloudSegment_KMeansIterator(Point3Ds pointSet,int nType,Point3Ds &clusterCenter,int *type)
@@ -403,7 +415,7 @@ namespace LasAlgorithm {
 		}
 
 		int *numberType=new int[nType];
-		memset(numberType,0,sizeof(int),nType);
+		memset(numberType,0,sizeof(int)*nType);
 
 		for(int i=0;i<pointSet.size();++i)
 		{
@@ -419,5 +431,7 @@ namespace LasAlgorithm {
 			clusterCenter[j].z/=double(numberType[j]);;
 		}
 		delete[]numberType;numberType=nullptr;
+		
+		return 0;
 	}
 }

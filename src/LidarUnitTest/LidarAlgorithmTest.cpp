@@ -4,6 +4,7 @@
 #include "../LidarAlgorithm/LASSimpleClassify.h"
 #include "../LidarAlgorithm/LASProfile.h"
 #include "../LidarAlgorithm/LASSkeleton.h"
+#include "../LidarAlgorithm/PointProcAlgorithm.h"
 #include <stdio.h>
 #include <vector>
 #include <string>
@@ -11,8 +12,8 @@
 using namespace std;
 using namespace LasAlgorithm;
 //define secret id and key
-string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
-string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
+// string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
+// string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
 
 class LidarBaseTest : public testing::Test
 {
@@ -85,6 +86,7 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
 
 TEST(LASPROFILE,LASPROFILEProfileTestCase)
 {
+#ifdef _USE_OPENCV_
     LASProfile profile;
     ProfileDecorate decorateParam;
     decorateParam.hspan_dis = 10;
@@ -100,6 +102,7 @@ TEST(LASPROFILE,LASPROFILEProfileTestCase)
     profile.LASProfile_Verticle("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/v.jpg",&decorateParam);
     profile.LASProfile_Horizontal("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/h.jpg",&decorateParam);
     profile.LASProfile_Front("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/f.jpg",&decorateParam);
+#endif  
     EXPECT_EQ(0,0);
 }
 
@@ -112,9 +115,9 @@ TEST(LASSKELETON,LASSKELETONTestCase)
     reader->LidarReader_Read(true,1,dataset); 
     Point3Ds points;
     PointCloudShrinkSkeleton pcSkeleton;
-    points=pcSkeleton.PointCloudShrinkSkeleton_Shrink(dataset,5,3);
+    points=pcSkeleton.PointCloudShrinkSkeleton_Shrink(dataset,5,5);
     
-    FILE *fs = fopen("../data/test.txt","w+");
+    FILE *fs = fopen("../data/testSkeleton.txt","w+");
     //遍历点云数据输出
     for(int i=0;i<points.size();++i)
     {
@@ -124,4 +127,48 @@ TEST(LASSKELETON,LASSKELETONTestCase)
     fs=nullptr;
     
     EXPECT_GT(points.size(),0);
+}
+
+TEST(LASKMEANS,LASKMEANSTestCase)
+{
+    ILASDataset *dataset   = new ILASDataset();
+    LidarMemReader *reader = new LidarMemReader();
+
+    reader->LidarReader_Open("../data/default/more.las",dataset);
+    reader->LidarReader_Read(true,1,dataset); 
+    int *iTypes = new int[dataset->m_totalReadLasNumber];
+    memset(iTypes,0,sizeof(int)*dataset->m_totalReadLasNumber);
+    PointCloudSegmentWithKMeans pointSegKMeans;
+    long kmeans = pointSegKMeans.PointCloudSegment_KMeans(dataset,100,iTypes,0.5);
+    EXPECT_EQ(kmeans,0);
+
+
+    FILE *fs = fopen("../data/testSegmentKMeans.txt","w+");
+    //遍历点云数据输出
+    for(int i=0;i<dataset->m_totalReadLasNumber;++i)
+    {
+        const LASIndex &ind = dataset->m_LASPointID[i];
+        const Point3D &pt = dataset->m_lasRectangles[ind.rectangle_idx].m_lasPoints[ind.point_idx_inRect].m_vec3d;
+        //if(iTypes[i]==0){
+            fprintf(fs,"%lf,%lf,%lf,%d\n",pt.x,pt.y,pt.z,iTypes[i]);
+        //}
+    }
+    fclose(fs);
+    fs=nullptr;
+    delete[]iTypes;iTypes=nullptr;
+
+    //Point3Ds points;
+    //PointCloudShrinkSkeleton pcSkeleton;
+    //points=pcSkeleton.PointCloudShrinkSkeleton_Shrink(dataset,5,3);
+    
+    // FILE *fs = fopen("../data/test.txt","w+");
+    // //遍历点云数据输出
+    // for(int i=0;i<points.size();++i)
+    // {
+    //     fprintf(fs,"%lf,%lf,%lf\n",points[i].x,points[i].y,points[i].z);
+    // }
+    // fclose(fs);
+    // fs=nullptr;
+    
+    // EXPECT_GT(points.size(),0);
 }
