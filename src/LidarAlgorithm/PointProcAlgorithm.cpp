@@ -337,7 +337,7 @@ namespace LasAlgorithm {
 		memset(segNum, 0, sizeof(int)*dataset->m_totalReadLasNumber);
 		int typeNum = PointCloudSegmentDirect_SegmentPoly(pointSet, segNum, 0.866, 15);
 
-#pragma omp parallel for
+		#pragma omp parallel for
 		for (int i = 0; i < typeNum; ++i)
 		{
 			PointCoudSegment_TypeExport(pointSet, segNum, i + 1, "E:\\test\\");
@@ -346,5 +346,92 @@ namespace LasAlgorithm {
 		delete[]segNum;
 		delete dataset;
 		delete reader;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////
+	long PointCloudSegmentWithKMeans::PointCloudSegment_KMeans(ILASDataset *lasDataset,int nType,int *type,double thresStop)
+	{
+		Point3Ds pointSet;
+		for (int i = 0; i < lasDataset->m_totalReadLasNumber; ++i)
+		{
+			const LASIndex &idx = lasDataset->m_LASPointID[i];
+			pointSet.push_back(lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect].m_vec3d);
+		}
+		return PointCloudSegment_KMeans(pointSet,nType,type,thresStop);
+	}
+	
+	long PointCloudSegmentWithKMeans::PointCloudSegment_KMeans(Point3Ds pointSet,int nType,int *type,double thresStop)
+	{
+		Point3Ds initCenterPoints;
+		Point3Ds iterCenterPoitns;
+
+		//init center points
+		for(int i=0;i<nType;++i)
+		{
+			initCenterPoints.push_back(pointSet[i]);
+			iterCenterPoitns.push_back(pointSet[i]);
+		}
+
+		double iteratorDis=100;
+		while (iteratorDis>thresStop)
+		{
+			printf("center point move distance:%lf\n",iteratorDis);
+			PointCloudSegment_KMeansIterator(pointSet,nType,initCenterPoints,type);
+			iteratorDis=0;
+			for(int i=0;i<nType;++i)
+			{
+				iteratorDis+=DistanceComputation::Distance(iterCenterPoitns[i],initCenterPoints[i]);
+			}
+			iterCenterPoitns.clear();
+			for(int i=0;i<nType;++i)
+			{
+				iterCenterPoitns.push_back(initCenterPoints[i]);
+			}
+		}
+		return 0;
+	}
+	
+	long PointCloudSegmentWithKMeans::PointCloudSegment_KMeansIterator(Point3Ds pointSet,int nType,Point3Ds &clusterCenter,int *type)
+	{
+		//calculate the classify of each point and recalculate the center point
+		for(int i=0;i<pointSet.size();++i)
+		{
+			double minDis = _MAX_LIMIT_;
+			int    minCls = 0;
+			for(int j=0;j<nType;++j)
+			{
+				double dis=DistanceComputation::Distance(clusterCenter[j],pointSet[i]);
+				minDis=minDis<dis?minDis:dis;
+				minCls=minDis<dis?minCls:j;
+			}
+			type[i]=minCls;
+		}
+
+
+		//update center point
+		for(int j=0;j<nType;++j)
+		{
+			clusterCenter[j].x=clusterCenter[j].y=clusterCenter[j].z=0;
+		}
+
+		int *numberType=new int[nType];
+		memset(numberType,0,sizeof(int)*nType);
+
+		for(int i=0;i<pointSet.size();++i)
+		{
+			clusterCenter[type[i]].x+=pointSet[i].x;
+			clusterCenter[type[i]].y+=pointSet[i].y;
+			clusterCenter[type[i]].z+=pointSet[i].z;
+			numberType[type[i]]++;
+		}
+		for(int j=0;j<nType;++j)
+		{
+			clusterCenter[j].x/=double(numberType[j]);
+			clusterCenter[j].y/=double(numberType[j]);
+			clusterCenter[j].z/=double(numberType[j]);;
+		}
+		delete[]numberType;numberType=nullptr;
+		
+		return 0;
 	}
 }

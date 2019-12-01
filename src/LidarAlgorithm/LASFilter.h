@@ -33,6 +33,7 @@ namespace LasAlgorithm
             the data tree should be constructed once more
 		*/
 		long PointCloudFilter_Point2DEMFlann(ILASDataset *lasDataset, float resolution, const char* pathChr);
+
 	private:
         /**
         * @brief  dem filter core
@@ -74,6 +75,7 @@ namespace LasAlgorithm
         */
         long PointCloudFilter_RGBOutlier(ILASDataset *lasDataset,int r,int g,int b);
     };
+
 
 }
 #endif

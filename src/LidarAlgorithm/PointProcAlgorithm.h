@@ -1,3 +1,12 @@
+/*
+ * @Descripttion: point cloud process algorithm segment method
+ * @version: v1.1 add kmeans segment method
+ * @Author: Frank.Wu
+ * @Date: 2019-11-18 21:31:07
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2019-11-27 16:51:14
+ */
+
 #pragma once
 //
 // Created by Frank.Wu on 18-07-10.
@@ -69,6 +78,48 @@ namespace LasAlgorithm {
 
 		Point3Ds PointCloudSegmentDirect_CalDirectVec(Point3Ds pointSet);
 	};
+
+	/**
+	 * @name: 
+	 * @msg: using kmeans method to segment the point cloud data
+	 */
+	class PointCloudSegmentWithKMeans:public PointCloudSegment
+	{
+	public:
+		/**
+		 * @name: 
+		 * @msg: 
+		 * @param {type} 
+		 * @return: 
+		 */
+		long PointCloudSegment_KMeans(ILASDataset *lasDataset,int nType,int *type,double thresStop);
+
+		/**
+		 * @name: kmeans segment method
+		 * @msg: 
+		 * @param 
+		 * Point3Ds pointSet: point cloud set
+		 * int nType: : types
+		 * int *type: type of each point
+		 * double thresStop: stop iterator condition
+		 * @return: 
+		 */
+		long PointCloudSegment_KMeans(Point3Ds pointSet,int nType,int *type,double thresStop);
+
+	protected:
+		/**
+		 * @name: kmeans segment iteration process
+		 * @msg: 
+		 * @param 
+		 * Point3Ds pointSet: point cloud set
+		 * int nType: types
+		 * Point3Ds clusterCenter: cluster center point
+		 * int *type: type of each point
+		 * @return: error code
+		 */
+		long PointCloudSegment_KMeansIterator(Point3Ds pointSet,int nType,Point3Ds &clusterCenter,int *type);
+	};
+
 #endif // !_POINTPROCALG_H_
 
 }
