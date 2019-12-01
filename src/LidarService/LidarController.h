@@ -3,7 +3,6 @@
 #include <map>
 #include <string>
 #include <exception>
-#include <fstream>
 #include <iterator>
 
 #include "httplib.h"
@@ -15,9 +14,7 @@
 using namespace std;
 using namespace httplib;
 
-
 class LidarService;
-
 
 /**
 * 字符串分割
@@ -346,25 +343,35 @@ public:
     virtual void LidarController_Run()
     {
         service->Post("/upload",[](const Request& req, Response& res){
-            MultipartFile name = req.get_file_value("name");
+            auto name = req.get_file_value("name");
             string nameStr = req.body.substr(name.offset, name.length);
-            MultipartFile task = req.get_file_value("task_id"); 
+            auto task = req.get_file_value("task_id"); 
             string taskStr = req.body.substr(task.offset, task.length);   
-            MultipartFile size = req.get_file_value("size"); 
+            auto size = req.get_file_value("size"); 
             string sizeStr = req.body.substr(size.offset, size.length);     
-            MultipartFile file = req.get_file_value("file");
+            auto file = req.get_file_value("file");
+
+            int chunk=0;
+            string chunkStr="0";
+            if(req.has_file("chunk"))
+            {
+                auto chunks = req.get_file_value("chunk");
+                chunkStr = req.body.substr(chunks.offset, chunks.length);  
+                chunk = atoi(chunkStr.c_str());
+            }
             string fileStr = req.body.substr(file.offset, file.length);
+            FILE *f;
+            
+            //创建文件夹
+            string createdir="mkdir ../data/tmp/"+taskStr;
+            system(createdir.c_str());
 
-            printf("%s\n",req.body.c_str());
-            // printf("%s\n",nameStr.c_str());
-            // printf("%s\n",taskStr.c_str());
-            // printf("%s\n",sizeStr.c_str());
-
-            // FILE *f;
-            // string path="../data/default/"+nameStr;
-            // f=fopen(path.c_str(),"wb+");
-            // fwrite(fileStr.c_str(),1,name.length,f);
-            // fclose(f);
+            string path="../data/tmp/"+taskStr+"/"+taskStr+"_"+chunkStr;
+            f=fopen(path.c_str(),"wb+");
+            fwrite(fileStr.c_str(),1,file.length,f);
+            fclose(f);
+            res.set_content("upload chunk success", "text/plain;charset=utf-8");
+            res.status=200;
         });  
     }   
 };
@@ -378,7 +385,39 @@ public:
     virtual void LidarController_Run()
     {
         service->Post("/upload-finish",[](const Request& req, Response& res){
-
+            vector<string> splitStr;
+            string params = req.body.c_str();
+            SplitString(params,splitStr,",");
+            FILE *f;
+            string path="../data/tmp/"+splitStr[1];
+            f=fopen(path.c_str(),"wb+");
+            int i=0;
+            bool fileExist=false;
+            do{
+                FILE *fi = fopen(string("../data/tmp/"+splitStr[0]+"/"+splitStr[0]+"_"+to_string(i)).c_str(),"rb");
+                if(fi!=nullptr)
+                {
+                    fileExist=true;
+                    fseek(fi,0,SEEK_END);
+                    int n=ftell(fi);
+                    fseek(fi,0,SEEK_SET);
+                    char* data = new char[n];
+                    fread(data,n,sizeof(char),fi);
+                    fwrite(data,n,sizeof(char),f);
+                    fflush(f);
+                    delete[]data;data=nullptr;
+                    fclose(fi);fi=nullptr;
+                    ++i;
+                }else{
+                    fileExist=false;
+                    break;
+                }
+            }while(true);
+            fclose(f);f=nullptr;
+            string cmd="rm -rf ../data/tmp/"+splitStr[0];
+            system(cmd.c_str());
+            res.set_content("upload success", "text/plain;charset=utf-8");
+            res.status=200;
         });  
     }   
 };

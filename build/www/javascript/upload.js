@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-20 16:48:01
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-11-27 09:56:04
+ * @LastEditTime: 2019-11-29 23:40:57
  */
 $(document).ready(function() {
     var task_id = WebUploader.Base.guid(); // 产生文件唯一标识符task_id
@@ -37,7 +37,13 @@ $(document).ready(function() {
     });
 
     uploader.on('uploadSuccess', function(file) { // 整个文件的所有分片都上传成功后，调用该方法
-        var data = { 'task_id': task_id, 'filename': file.source['name'] };
+        var data = task_id+","+file.source['name'];
+        $.ajax({
+            type: "POST",
+            url: ip+"/upload-finish",
+            contentType: "text/plain",
+            data:data
+        });
         //$.get('{{ url_for("upload_success") }}', data);
         $('.progress-bar').css('width', '100%');
         $('.progress-bar').text('100%');

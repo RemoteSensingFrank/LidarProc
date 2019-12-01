@@ -3,15 +3,16 @@
 #include "../LidarBase/LASPoint.h"
 #include "../LidarAlgorithm/LASSimpleClassify.h"
 #include "../LidarAlgorithm/LASProfile.h"
+#include "../LidarAlgorithm/PointProcAlgorithm.h"
 #include <stdio.h>
 #include <vector>
 #include <string>
 #include <gtest/gtest.h>
 using namespace std;
-
+using namespace LasAlgorithm;
 //define secret id and key
-string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
-string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
+// string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
+// string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
 
 class LidarBaseTest : public testing::Test
 {
@@ -84,6 +85,7 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
 
 TEST(LASPROFILE,LASPROFILEProfileTestCase)
 {
+#ifdef _USE_OPENCV_
     LASProfile profile;
     ProfileDecorate decorateParam;
     decorateParam.hspan_dis = 10;
@@ -99,5 +101,6 @@ TEST(LASPROFILE,LASPROFILEProfileTestCase)
     profile.LASProfile_Verticle("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/v.jpg",&decorateParam);
     profile.LASProfile_Horizontal("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/h.jpg",&decorateParam);
     profile.LASProfile_Front("../data/default/colorLasFile.las",pntTower,20,0.5,"../data/profile/f.jpg",&decorateParam);
+#endif  
     EXPECT_EQ(0,0);
 }
