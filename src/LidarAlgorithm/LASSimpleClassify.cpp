@@ -207,7 +207,6 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Tower(ILASDataset* dataset, 
 		vector<int> searchRect;
 		int idPoint = 0;
 		dataset->LASDataset_Search(idPoint, towerRect, searchRect);
-
 		//if the height lower than the last 5% the point will be removed
 		LASIndexDisList vecIndxDis;
 		for (int j = 0; j < searchRect.size(); ++j)
@@ -246,7 +245,7 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Tower(ILASDataset* dataset, 
 long classifyElectricPatrolFast::ElectricPatrolFast_Tower(ILASDataset* dataset, Point2Ds towerPnt, double range, LASColorExt color)
 {
 	for(auto tPt:towerPnt){
-		ElectricPatrolFast_Tower(dataset,towerPnt,range,color);
+		ElectricPatrolFast_Tower(dataset,tPt,range,color);
 	}
 	return 0;
 }
@@ -306,7 +305,7 @@ long classifyElectricPatrolFast::ElectrixPatrolFast_Seg(ILASDataset* dataset, LA
 	return 0;
 }
 
-long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, Point2D* towerPnt, double range, double height, LASColorExt color)
+long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, Point2Ds towerPnt, double range, double height, LASColorExt color)
 {
 	Eigen::MatrixXd rotMat;
 	double theta = 0;
@@ -329,18 +328,19 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, 
 	pnt2(0, 1) = towerPnt[1].y;
 	Eigen::MatrixXd rotPnt2 = pnt2 * rotMat;
 	double avgHeight[2] = { 0,0 };
+	Rect2D towerRect[2];
+
 	for (int i = 0; i < 2; ++i)
 	{
 		int num = 0;
-		Rect2D towerRect;
-		towerRect.minx = towerPnt[i].x - range;
-		towerRect.maxx = towerPnt[i].x + range;
-		towerRect.miny = towerPnt[i].y - range;
-		towerRect.maxy = towerPnt[i].y + range;
+		towerRect[i].minx = towerPnt[i].x - range;
+		towerRect[i].maxx = towerPnt[i].x + range;
+		towerRect[i].miny = towerPnt[i].y - range;
+		towerRect[i].maxy = towerPnt[i].y + range;
 
 		vector<int> searchRect;
 		int idPoint = 0;
-		dataset->LASDataset_Search(idPoint, towerRect, searchRect);
+		dataset->LASDataset_Search(idPoint, towerRect[i], searchRect);
 
 		LASIndexDisList vecIndxDis;
 		for (int j = 0; j < searchRect.size(); ++j)
@@ -359,9 +359,9 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, 
 	}
 
 	//line func
-	double axisk = (avgHeight[1] - avgHeight[0]) / (rotPnt1(0, 0) - rotPnt2(0, 0));
+	double axisk = (avgHeight[1] - avgHeight[0]) / (rotPnt2(0, 0) - rotPnt1(0, 0));
 	double axisb = avgHeight[0] - axisk*rotPnt1(0, 0);
-
+	
 	Rect2D rect;
 	Eigen::MatrixXd tp1(1, 2), tp2(1, 2);
 	tp1(0, 0) = towerPnt[0].x; tp1(0, 1) = towerPnt[0].y;
@@ -395,6 +395,7 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, 
 	Rect2D sRect(minx, miny, maxx, maxy);
 	dataset->LASDataset_Search(0, sRect, rectIds);
 	Point3Ds seedPnts;
+	FILE *fs=fopen("../data/test.txt","w+");
 	for (int i = 0; i < rectIds.size(); ++i)
 	{
 		LASRectBlock &lasBlock = dataset->m_lasRectangles[rectIds[i]];
@@ -406,19 +407,23 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, 
 			pnt = Eigen::MatrixXd::Zero(1, 2);
 			pnt(0, 0) = lasPnt.m_vec3d.x;
 			pnt(0, 1) = lasPnt.m_vec3d.y;
-			Eigen::MatrixXd rotPnt = pnt * rotMat;
-
-			if (GeometryRelation::IsPointInRect(rotPnt(0, 0), rotPnt(0, 1), rect.minx, rect.miny, rect.maxx, rect.maxy))
+			Eigen::MatrixXd temprotPnt = pnt * rotMat;
+			
+			if (GeometryRelation::IsPointInRect(temprotPnt(0, 0), temprotPnt(0, 1), rect.minx, rect.miny, rect.maxx, rect.maxy)&&
+			    !GeometryRelation::IsPointInRect(lasPnt.m_vec3d.x, lasPnt.m_vec3d.y, towerRect[0].minx, towerRect[0].miny, towerRect[0].maxx, towerRect[0].maxy)&&
+				!GeometryRelation::IsPointInRect(lasPnt.m_vec3d.x, lasPnt.m_vec3d.y, towerRect[1].minx, towerRect[1].miny, towerRect[1].maxx, towerRect[1].maxy))
 			{
 				double z = lasPnt.m_vec3d.z;
-				if (rotPnt(0, 0)*axisk + axisb + height < z&&lasPnt.m_classify == elcCreated)
+				if (temprotPnt(0, 0)*axisk + axisb + height < z&&lasPnt.m_classify == elcCreated)
 				{
+					fprintf(fs,"%lf,%lf,%lf\n",lasPnt.m_vec3d.x,lasPnt.m_vec3d.y,lasPnt.m_vec3d.z);
 					seedPnts.push_back(lasPnt.m_vec3d);
 				}
 			}
 		}
 	}
-	ElectrixPatrolFast_Seed(dataset, seedPnts, 0.5, color);
+	fclose(fs);
+	ElectrixPatrolFast_Seed(dataset, seedPnts, 0.1, color);
 	return 0;
 }
 
@@ -485,7 +490,6 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Ground(ILASDataset* dataset,
 		int i = pntIdxs[k].rectangle_idx;
 		int j = pntIdxs[k].point_idx_inRect;
 		LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
-		//get the las echo or the only echo
 		if(pnt.ExtractNumberOfReturns()==pnt.ExtractReturnNumber())
 		{
 			pnt.m_classify = elcGround;
@@ -530,7 +534,6 @@ long classifyElectricPatrolFast::ElectricPatrolFast_LocalMinNonMax(ILASDataset* 
 		}
 	}
 	
-
 	int xsize = (xmax - xmin) / rectRange + 1;
 	int ysize = (ymax - ymin) / rectRange + 1;
 
@@ -571,6 +574,11 @@ long classifyElectricPatrolFast::ElectricPatrolFast_LocalMinNonMax(ILASDataset* 
 		}
 	}
 
+	//if empty
+	if(localMinMax.empty())
+	{
+		return 0;
+	}
 	typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 	const PCAdaptor pcAdaptorPnts(localMinMax);
 
@@ -617,6 +625,11 @@ long classifyElectricPatrolFast::ElectricPatrolFast_GroundDis(ILASDataset* datas
 	std::vector<LASIndex> tmpPntIdx(pntIdxs);
 	pntIdxs.clear();
 	ElectricPatrolFast_LocalMinNonMax(dataset, pntIdxs, rectRange,elcCreated ,localMin);
+
+	if(localMin.empty())
+	{
+		return 0;
+	}
 
 	typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 	const PCAdaptor pcAdaptorPnts(localMin);
@@ -757,6 +770,10 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Angle(ILASDataset* dataset, 
 	std::vector<LASIndex> tmpPntIdx(pntIdxs);
 	pntIdxs.clear();
 	ElectricPatrolFast_LocalMinNonMax(dataset, pntIdxs, rectRange,elcCreated ,localMin);
+	if(localMin.empty())
+	{
+		return 0;
+	}
 
 	typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 	const PCAdaptor pcAdaptorPnts(localMin);
@@ -880,6 +897,22 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Vegetation(ILASDataset* data
 	return 0;
 
 }
+
+long classifyElectricPatrolFast::ElectricPatrolFast_VegetationLast(ILASDataset* dataset,LASColorExt color)
+{
+	//get point of vegetation and line split
+	for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
+	{
+		const LASIndex &idx = dataset->m_LASPointID[i];
+		LASPoint &pt =dataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect]; 
+		if(pt.m_classify == elcCreated)
+		{
+			pt.m_classify=elcVegetation;
+			pt.m_colorExt=color;
+		}
+	}
+}
+
 
 //GDALTriangulation* classifyElectricPatrolFast::ElectricPatrolFast_Triangle(Point3Ds localMinPts)
 //{

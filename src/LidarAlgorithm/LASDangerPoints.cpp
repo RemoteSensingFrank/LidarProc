@@ -176,7 +176,7 @@ long LASDangerPoints::LASDangerPoints_Detect(float* distance, int dangerSectionN
 }
 
 /*
-//deleted by Frank.Wu ÆúÓÃ´Ëº¯Êý
+//deleted by Frank.Wu
 long LASDangerPoints::LADDangerPoints_SplitDanger(ILASDataset *datasetVegterain, const char *pathSplit)
 {
 	LidarMemReader lidarOpt;
@@ -248,7 +248,6 @@ long LASDangerPointsFlann::LASDangerPoints_PerPoint(float* distance, int dangerS
 	//size_t ret_index[10];
 	//double out_dist_sqr[10];
 	//KNNResultSet<double> resultSet(num_results);
-	//Ä¿Ç°Ö»¿¼ÂÇÈý¸ö¶Î
 	const double radius = distance[2];
 	std::vector<std::pair<size_t, double> > indices_dists;
 	RadiusResultSet<double, size_t> resultSet(radius, indices_dists);
@@ -309,7 +308,6 @@ long LASDangerPointsFlann::LASDangerPoints_PerPoint(float* distance, int dangerS
 long LASDangerPointsFlann::LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain)
 {
 	double dis = distance * distance;
-	//¹¹ÔìÊý¾Ý½á¹¹
 	std::vector<Point3D> pntCloud;
 	for (int i = 0; i < datasetVegterain->m_totalReadLasNumber; ++i)
 	{
@@ -321,7 +319,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float distance, ILASDataset* d
 	kd_tree treeVegeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeVegeIndex.buildIndex();
 
-	//Ã¿Ò»¸öµã½øÐÐ×öFLANN
+	//FLANN
 	for (int i = 0; i < datasetLine->m_totalReadLasNumber; ++i)
 	{
 		printf("\rprocess points %d/%d", datasetLine->m_totalReadLasNumber, i + 1);
@@ -341,7 +339,6 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float* distance, int dangerSec
 	for (int i = 0; i < dangerSectionNumber; ++i)
 		dis[i] = distance[i] * distance[i];
 
-	//¹¹ÔìÊý¾Ý½á¹¹
 	std::vector<Point3D> pntCloud;
 	for (int i = 0; i < datasetVegterain->m_totalReadLasNumber; ++i)
 	{
@@ -353,7 +350,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float* distance, int dangerSec
 	kd_tree treeVegeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeVegeIndex.buildIndex();
 
-	//Ã¿Ò»¸öµã½øÐÐ×öFLANN
+	//FLANN
 	for (int i = 0; i < datasetLine->m_totalReadLasNumber; ++i)
 	{
 		printf("\rprocess points %d/%d", datasetLine->m_totalReadLasNumber, i + 1);
@@ -386,7 +383,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float distance,ILASDataset* da
 	vector<Point3D> pointLine;
 	vector<int> pointLineMapper;
 	
-	//获取植被点和导线点及其映射关系
+	//get point of vegetation and line split
 	for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
 	{
 		const LASIndex &idx = dataset->m_LASPointID[i];
@@ -403,7 +400,7 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float distance,ILASDataset* da
 		}
 	}
 	
-	//构建KDTree
+	//construct KDTree for vegetation points
 	const PCAdaptor pcAdaptorPnts(pointVegetation);
 	kd_tree treeVegeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeVegeIndex.buildIndex();
@@ -426,12 +423,10 @@ long LASDangerPointsFlann::LASDangerPoints_Detect(float distance,ILASDataset* da
 //FLANN Block Danger Detect
 long LASDangerPointsFlannBlock::LASDangerPoints_PerPoint(float distance, const Point3D* pnt, ILASDataset* datasetVegterain)
 {
-	//Ê×ÏÈ»ñÈ¡ËùÓÐBlock
+	//Block
 	vector<int> rectIdx;
 	LASDangerPoints_Range(pnt, distance, datasetVegterain, rectIdx);
 
-	//Ã¿Ò»¸öBlockÖÐÐ¡ÓÚ¾àÀëÒªÇóµÄµã
-	//¿ÉÒÔ¶àÏß³Ì²¢ÐÐ¼ÆËã
 	for (auto idx : rectIdx) 
 	{
 		double query_pt[3] = { pnt->x, pnt->y, pnt->z };
@@ -458,12 +453,10 @@ long LASDangerPointsFlannBlock::LASDangerPoints_PerPoint(float distance, const P
 
 long LASDangerPointsFlannBlock::LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D* pnt, ILASDataset* datasetVegterain)
 {
-	//Ê×ÏÈ»ñÈ¡ËùÓÐBlock
+	//Block
 	vector<int> rectIdx;
 	LASDangerPoints_Range(pnt, distance[dangerSectionNumber-1], datasetVegterain, rectIdx);
 
-	//Ã¿Ò»¸öBlockÖÐÐ¡ÓÚ¾àÀëÒªÇóµÄµã
-	//¿ÉÒÔ¶àÏß³Ì²¢ÐÐ¼ÆËã
 	for (auto idx : rectIdx)
 	{
 		double query_pt[3] = { pnt->x, pnt->y, pnt->z };
@@ -922,7 +915,6 @@ long LASDangerPointsMergeArrgegate::LASDangerExtract(ILASDataset* lasDataset, Po
 long LASDangerPointsMergeArrgegate::LASDangerExtractLinePoints(ILASDataset *lineDataset,
 	Point3Ds dangerPnts, Point3Ds &linePnts)
 {
-	//¹¹½¨Ê÷½á¹¹
 	const PCAdaptor pcAdaptorPnts(dangerPnts);
 	kd_tree treeIndex(3, pcAdaptorPnts, KDTreeSingleIndexAdaptorParams(10));
 	treeIndex.buildIndex();
@@ -965,7 +957,7 @@ long LASDangerPointsMergeArrgegate::LASDangerMerge(Point3Ds dangerPnts, int *typ
 	double *distance = new double[typeNumbers];
 	for (int i = 0; i < typeNumbers; ++i)
 	{
-		distance[i] = _MAX_LIMIT_;//³õÊ¼Öµ
+		distance[i] = _MAX_LIMIT_;
 		correspondPairs[i] = 0;
 	}
 	for (int i = 0; i < numberPnts; ++i)

@@ -201,6 +201,7 @@ long LidarMemReader::LidarReader_Write(const char *pathLidar, ILASDataset* datas
 		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_userdata, sizeof(unsigned char), 1, fLasOut);
 		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_flightID, sizeof(unsigned short), 1, fLasOut);
 		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_gpsTime, sizeof(double), 1, fLasOut);
+		//printf("%d\n",&dataset->m_lasRectangles[i].m_lasPoints[j].m_colorExt.Red);
 		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_colorExt, sizeof(LASColorExt), 1, fLasOut);
 	}
 	fclose(fLasOut);
