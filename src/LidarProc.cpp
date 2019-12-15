@@ -10,6 +10,7 @@
 #include "./LidarPCLAlgorithm/LidarRegistration.h"
 #include "./LidarPCLAlgorithm/LidarFilterPCL.h"
 #include "./LidarAlgorithm/LASSimpleClassify.h"
+#include "./LidarAlgorithm/LASDangerPoints.h"
 
 void PorfileGenerateSample()
 {
@@ -119,15 +120,26 @@ void ClassifySample()
     LASColorExt lineTower;
     lineTower.Red=lineTower.Green=0;lineTower.Blue=255;
     long err=classFast.ElectricPatrolFast_Lines(lasdst1,points,18,7,lineTower);
-    
+    //reader4->LidarReader_Write("../data/default/classifiedLine.las",lasdst1,elcLine);
+
     LASColorExt groundTower;
     groundTower.Red=groundTower.Green=255;groundTower.Blue=0;
     classFast.ElectricPatrolFast_Ground(lasdst1,5,2,20,groundTower);
     
+    
     LASColorExt vegetationTower;
     vegetationTower.Red=vegetationTower.Blue=0;vegetationTower.Green=255;
+    //classFast.ElectricPatrolFast_Vegetation(lasdst1,5,20,vegetationTower);
     classFast.ElectricPatrolFast_VegetationLast(lasdst1,vegetationTower);
+    //reader4->LidarReader_Write("../data/default/classifiedVege.las",lasdst1,elcVegetation);
+
+    LASDangerPointsFlann dangerDetect;
+    dangerDetect.LASDangerPoints_Detect(22,lasdst1);
+    //reader4->LidarReader_Write("../data/default/classifiedDanger.las",lasdst1,elcDanger);
+
     reader4->LidarReader_Write("../data/default/classified.las",lasdst1);
+
+
     delete lasdst1;
     delete reader4;
 }

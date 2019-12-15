@@ -22371,7 +22371,7 @@ initSidebar = (viewer) => {
 		//从后台获取分类然后展示分类信息,修改以前写死的那种分类类别的方法
 		$.ajax({
 			type: "GET",
-			url:"http://192.168.31.16:1234/dataclasstype",
+			url:"http://localhost:1234/dataclasstype",
 			dataType: "text",
 			async:true,
 			beforeSend:function(XMLHttpRequest){ 

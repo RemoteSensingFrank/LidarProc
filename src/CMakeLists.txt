@@ -9,6 +9,13 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 #SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 add_definitions(-D_DEBUG)
 
+find_package( OpenMP REQUIRED)
+if(OPENMP_FOUND)
+    message("OPENMP FOUND")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
 find_package(OpenCV)
 if(OpenCV_FOUND)
 	add_definitions(-D_USE_OPENCV_)

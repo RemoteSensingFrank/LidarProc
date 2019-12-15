@@ -149,3 +149,15 @@ function extractTower(){
     }
 
 }
+
+/**
+ * 加载相机信息
+ */
+function loadCamera(e){
+    if($(e).hasClass('active')){  //判断是否选中
+        unloadCameraPositions();
+     }else{
+        loadCameraPositions();
+     }
+     $(e).toggleClass('active');
+}

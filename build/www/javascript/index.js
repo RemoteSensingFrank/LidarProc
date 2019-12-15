@@ -45,6 +45,11 @@ function CesiumInitial(imgurl)
 function LoadLASDataViewer(path,projec_def)
 {
     currentViewerFilePath = path;
+    //定义的投影带为50度带
+    let pointcloudProjection = projec_def;
+    let mapProjection = proj4.defs("EPSG:4326");
+    window.toMap = proj4(pointcloudProjection, mapProjection);
+    window.toScene = proj4(mapProjection, pointcloudProjection);
     Potree.loadPointCloud(path, "data1", e => {
         let pointcloud = e.pointcloud;
         pointcloud.projection = projec_def;     //affect the overview
@@ -109,7 +114,7 @@ function InitialScene()
         viewer.setLanguage('en');
         $("#menu_appearance").next().show();
         //viewer.toggleSidebar();
-        });
+    });
 }
 
 function loop(timestamp){
