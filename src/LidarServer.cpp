@@ -2,9 +2,9 @@
  * @Descripttion: 
  * @version: 1.0版本
  * @Author: Frank.Wu
- * @Date: 2019-11-18 21:31:08
+ * @Date: 2019-12-04 15:10:02
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-11-29 16:50:30
+ * @LastEditTime: 2019-12-17 14:34:02
  */
 // LidarProc.cpp: 定义控制台应用程序的入口点。
 //
@@ -67,8 +67,7 @@ int main(int argc, char **argv)
 	LidarControllerDatatrans *lidarControllerDatatrans = new LidarControllerDatatrans(lidarService);
 	LidarControllerDataclasstype *lidarControllerDataclasstype = new LidarControllerDataclasstype(lidarService);
 	LidarControllerDoc *lidarControllerDoc = new LidarControllerDoc(lidarService);
-	LidarControllerUpload *lidarControllerUploads = new LidarControllerUpload(lidarService);
-	LidarControllerUploadFinished *lidarControllerUploadFinish = new LidarControllerUploadFinished(lidarService);
+	LidarControllerClassfication *lidarControllerClass = new LidarControllerClassfication(lidarService);
 
 	lidarService->LidarService_Register(lidarControllerInfo);
 	lidarService->LidarService_Register(lidarControllerExhibit);
@@ -78,7 +77,12 @@ int main(int argc, char **argv)
 	lidarService->LidarService_Register(lidarControllerDatatrans);
 	lidarService->LidarService_Register(lidarControllerDataclasstype);
 	lidarService->LidarService_Register(lidarControllerDoc);
+<<<<<<< HEAD
 	lidarService->LidarService_Register(lidarControllerUploads);
 	lidarService->LidarService_Register(lidarControllerUploadFinish);
+=======
+	lidarService->LidarService_Register(lidarControllerClass);
+	
+>>>>>>> fast-classify
 	lidarService->LidarService_Run();
 }

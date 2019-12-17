@@ -5,7 +5,7 @@
  * Version 1.0
  */
 
-ip = "http://192.168.31.16:1234";
+ip = "http://localhost:1234";
 
 /**
  * 文件选择对话框打开之前调用事件初始化文件树
@@ -123,7 +123,6 @@ function getDataTransTree(callback){
  * @param {*} callback 
  */
 function getDataDeleteTree(callback){
-
     //数据文件删除文件列表
     var treedata=[];
     $.ajax({
@@ -347,5 +346,189 @@ function transDataFile(filename){
  * 点击上传按钮实现文件上传
  */
 function uploadData(){
-    
+}
+
+function projected2WGS84(x,y){
+    let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
+    let mapProjection = proj4.defs("WGS84");
+
+    var lonlat = proj4(pointcloudProjection,mapProjection,[x,y]);
+
+    return [lonlat[1], lonlat[0]]
+}
+
+function projectedFromWGS84(lat,lng){
+    let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
+    let mapProjection = proj4.defs("WGS84");
+
+    var xy = proj4(mapProjection,pointcloudProjection,[lng,lat]);
+
+    return [xy[0], xy[1]]
+}
+
+function projected2UTM(lat,lng){
+    let pointcloudProjection = "+proj=utm +zone=20 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+    let mapProjection = proj4.defs("WGS84");
+
+    var xy = proj4(mapProjection,pointcloudProjection,[lng,lat]);
+
+    return [xy[0], xy[1]]
+}
+
+
+/**
+ * 根据相机情况创建相机的Frustrum并展示
+ * @param {*} Rx 相机x轴旋转角度
+ * @param {*} Ry 相机y轴旋转角度
+ * @param {*} Rz 相机z轴旋转角度
+ * @param {*} Cx 相机x方向平移距离
+ * @param {*} Cy 相机y方向平移距离
+ * @param {*} Cz 相机z方向平移距离
+ */
+function makeImageFrustrum(Rx,Ry,Rz,Cx,Cy,Cz){
+    // instantiate a loader
+    var loader = new THREE.TextureLoader();
+    loader.crossOrigin = 'anonymous';
+    //var imagetexture = loader.load(imagedir + imagename);
+
+    var pixx = camPix[0]/camFocal;
+    var pixy = camPix[1]/camFocal;
+
+    var imageplane = new THREE.PlaneGeometry(pixx, pixy, 1, 1);
+    imageplane.vertices[0].z = -1;
+    imageplane.vertices[1].z = -1;
+    imageplane.vertices[2].z = -1;
+    imageplane.vertices[3].z = -1;
+
+    var imagematerial = new THREE.MeshBasicMaterial( {
+        color:0xeeefff,
+        wireframe: true
+    });
+    var image = new THREE.Mesh(imageplane,imagematerial);
+    var pyramidgeometry = new THREE.Geometry();
+
+    pyramidgeometry.vertices = [
+        new THREE.Vector3( -pixx/2, -pixy/2, -1 ),
+        new THREE.Vector3( -pixx/2, pixy/2, -1 ),
+        new THREE.Vector3( pixx/2, pixy/2, -1 ),
+        new THREE.Vector3( pixx/2, -pixy/2, -1 ),
+        new THREE.Vector3( 0, 0, 0 )
+    ];
+
+    pyramidgeometry.faces = [
+        new THREE.Face3( 1, 0, 4 ),
+        new THREE.Face3( 2, 1, 4 ),
+        new THREE.Face3( 3, 2, 4 ),
+        new THREE.Face3( 0, 3, 4 )
+    ];
+
+    var pyramidmaterial = new THREE.MeshBasicMaterial( {   color: 0xf8f9fa,
+        wireframe: true
+    } );
+
+
+    var pyramid = new THREE.Mesh( pyramidgeometry, pyramidmaterial );
+
+    var imagepyramid  = new THREE.Object3D();
+
+    imagepyramid.add(image);
+    imagepyramid.add(pyramid);
+
+    let ptWgs84=projected2WGS84(Cx,Cy);
+    let ptUTM = projected2UTM(ptWgs84[1],ptWgs84[0])
+    imagepyramid.position.x = ptUTM[0];
+    imagepyramid.position.y = ptUTM[1];
+    imagepyramid.position.z = Cz+5000;
+
+    imagepyramid.rotation.x = Rx * Math.PI/180;
+    imagepyramid.rotation.y = Ry * Math.PI/180;
+    imagepyramid.rotation.z = Rz * Math.PI/180;
+
+    imagepyramid.scale.x = 1;
+    imagepyramid.scale.y = 1;
+    imagepyramid.scale.z = 1;
+
+    return imagepyramid
+}
+
+/**
+ * 加载或移除相机
+ */
+function loadCameraPositions(){
+    var ncams = camX.length;
+    var imageobj=Array(ncams);
+    var group = new THREE.Group();
+    group.name="camera";
+    for(var imagenum=0;imagenum<ncams;imagenum++){
+        imageobj[imagenum]=makeImageFrustrum(camRoll[imagenum],camPitch[imagenum],camYaw[imagenum],camX[imagenum],camY[imagenum],camZ[imagenum]);
+        imageobj[imagenum].myimagenum = imagenum;
+        imageobj[imagenum].isFiltered = false;
+        group.add(imageobj[imagenum]);
+    }
+    viewer.scene.scene.add(group);
+    viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z);
+}
+
+function unloadCameraPositions(){
+    var obj=viewer.scene.scene.getObjectByName("camera");
+    viewer.scene.scene.remove(obj);
+}
+
+/**
+ * 点击分类处理进行分类
+ */
+function classifiedProc(){
+    var towerRange=$("#towerRange")[0].value==""?15:$("#towerRange")[0].value;
+    var lineHeight=$("#lineHeight")[0].value==""?7:$("#lineHeight")[0].value;
+    var groundNetSize=$("#groundNetSize")[0].value==""?5:$("#groundNetSize")[0].value;
+    var groundNetDis=$("#groundNetDis")[0].value==""?5:$("#groundNetDis")[0].value;
+    var groundNetAngle=$("#groundNetAngle")[0].value==""?30:$("#groundNetAngle")[0].value;
+    var vegeDistance=$("#vegeDistance")[0].value==""?15:$("#vegeDistance")[0].value;
+    var classifiedName=$("#classifiedName")[0].value==""?"temp.las":$("#classifiedName")[0].value;
+    var selects=$("#classifiedFileList")[0];
+    var indexs = selects.selectedIndex;
+    console.log(selects.options[indexs]);
+    var srcFileName = selects.options[indexs].value+"-"+selects.options[indexs].text;
+    if(srcFileName==undefined){
+        console.log("未选择原始文件");
+        return ;
+    }
+
+    var pntCount = 0;
+    var measuresmens=viewer.scene.measurements;
+    measuresmens.forEach(function(measureItem){
+        if(measureItem.name="Point"){
+            pntCount++;
+        }
+    });
+
+    if(pntCount!=2)
+    {
+        console.log("杆塔数应该为两个表示一个档段");
+        return;
+    }
+    var pointsParam="";
+    measuresmens.forEach(function(measureItem){
+        pointsParam+=measureItem.points[0].position.x+"-"+measureItem.points[0].position.y+"-";
+    });
+    pointsParam+=towerRange+"-"+lineHeight+"-"+groundNetSize+"-"+groundNetDis+"-"+groundNetAngle+"-"+vegeDistance+"-"+classifiedName+"-"+srcFileName;
+
+    $.ajax({
+        type: "GET",
+        url: ip+"/classification/"+pointsParam,
+        dataType: "text",
+        async:true,
+        beforeSend:function(XMLHttpRequest){ 
+            $('#paramModal').modal('hide');
+            $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+            $("#loading").show();
+        }, 
+        success: function(data){
+            $("#loading").empty(); //ajax返回成功，清除loading图标
+            $("#loading").hide();
+        },     
+        error:function(data){
+            console.log(data)
+        }
+    });
 }

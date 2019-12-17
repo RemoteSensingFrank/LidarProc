@@ -79,8 +79,6 @@ public:
 	* @return
 	*/
 	long LASExportClassifiedPoints(const char* pathLas, eLASClassification type, const char* pathExport);
-
-
 };
 
 /*
@@ -131,7 +129,7 @@ public:
 		double height:height threshold
 		LASColorExt color: the tower color
 	*/
-	long ElectricPatrolFast_Lines(ILASDataset* dataset, Point2D* towerPnt, double range, double height, LASColorExt color);
+	long ElectricPatrolFast_Lines(ILASDataset* dataset, Point2Ds towerPnt, double range, double height, LASColorExt color);
 
 
 	/*
@@ -157,8 +155,14 @@ public:
 		LASColorExt color: the tower color
 	*/
 	long ElectricPatrolFast_Vegetation(ILASDataset* dataset, double rectRange, double disThres, LASColorExt color);
-private:
 
+	/**
+	 * classified the vegetation points using the calssified point
+	 * direct classified the vegetation if the point is not classified to Towers,Lines and Ground
+	 */
+	long ElectricPatrolFast_VegetationLast(ILASDataset* dataset,LASColorExt color);
+
+private:
 	/*
 		get local min points and remove the noise points
 	*/

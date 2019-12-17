@@ -3,6 +3,7 @@
 //
 
 #include "LASPoint.h"
+
 /**
 * 从输入文件中解析出点云参数
 * @param data
@@ -99,6 +100,7 @@ int LASPoint::ExtractReturnNumber()
 {
 	return m_rnseByte&0x07;
 }
+
 /*****************************************************************************
 * @brief : LAS块与LAS数据集
 * @author : W.W.Frank

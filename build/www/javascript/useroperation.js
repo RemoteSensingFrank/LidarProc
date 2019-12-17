@@ -130,7 +130,7 @@ function deleteData(){
 /**
  * 杆塔提取
  */
-function extractTower(){
+function classifiedFast(){
     var pntCount = 0;
     var measuresmens=viewer.scene.measurements;
     measuresmens.forEach(function(measureItem){
@@ -146,6 +146,56 @@ function extractTower(){
     }
     else{
         //extract 
+        //选取了杆塔点
+        //数据文件删除文件列表
+        var treedata=[];
+        $.ajax({
+            type: "GET",
+            url: ip+"/datalist",
+            dataType: "text",
+            async:true,
+            beforeSend:function(XMLHttpRequest){ 
+                $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+                $("#loading").show()
+            }, 
+
+            success: function(data){
+                $("#loading").empty(); //ajax返回成功，清除loading图标
+                $("#loading").hide();
+
+                var strs= new Array();
+                strs=data.split(",");
+                for(i=0;i<strs.length ;i++){
+                    if(strs[i]!=""){
+                        var fstr= new Array();
+                        fstr=strs[i].split(";");
+                        for(j=1;j<fstr.length; j++){
+                            $("#classifiedFileList")[0].options.add(new Option(fstr[j],fstr[0]));
+                        }               
+                    }
+                }
+            },     
+            error:function(data){
+                console.log(data)
+            }
+        });
+        $("#paramModal").modal({
+            backdrop:"static",  //点击背景不关闭
+            keyboard: false     //触发键盘esc事件时不关闭
+        });
+
     }
 
+}
+
+/**
+ * 加载相机信息
+ */
+function loadCamera(e){
+    if($(e).hasClass('active')){  //判断是否选中
+        unloadCameraPositions();
+     }else{
+        loadCameraPositions();
+     }
+     $(e).toggleClass('active');
 }

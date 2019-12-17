@@ -45,11 +45,14 @@
 	<script src="javascript/uilib/bootstrap/js/bootstrap.min.js"></script>
 	<script src="javascript/uilib/webuploader/webuploader.min.js"></script>
 
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+	<script src="javascript/camera.js"></script>
+	<script src="javascript/addCamera.js"></script>
+
 	<script src="javascript/index.js"></script>
 	<script src="javascript/useroperation.js"></script>
 	<script src="javascript/uilib/bootstrap-treeview.js"></script>
 	<script src="javascript/interaction.js"></script>
-
 	<script src="javascript/upload.js"></script>
 
 	<!--待展示的文件选择模态对话框-->
@@ -180,6 +183,31 @@
 		</div>
     </div>
 
+	
+    <div class="modal fade" id="paramModal" tabindex="-1" role="dialog" aria-labelledby="paramModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+				<div class="modal-body" style="overflow-y: scroll;">  
+					待处理文件：
+					<select class="form-control" id="classifiedFileList">
+					</select>
+					杆塔范围大小：<input type="text" class="form-control" id="towerRange" />
+					导线高于地面平均高度： <input type="text" class="form-control" id="lineHeight" />
+					地面网格大小：<input type="text" class="form-control" id="groundNetSize" />
+					地面网格距离阈值： <input type="text" class="form-control" id="groundNetDis" />
+					地面网格角度阈值： <input type="text" class="form-control" id="groundNetAngle" />
+					地面植被距离阈值： <input type="text" class="form-control" id="vegeDistance" />
+					分类后点云文件名： <input type="text" class="form-control" id="classifiedName" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="classifiedProc()">确认</button>
+                </div>
+        	</div>
+		</div>
+    </div>
+
+
 	<div id="navbar" class="navbar navbar-dark" role="navigation" style="position: absolute; width: 100%;height:45px left: 0px; top: 0px; background:#032e59; z-index: 2;">
 		<div class="navbar-header">
 			<a class="navbar-brand" href="#">LidarProc</a>
@@ -198,13 +226,12 @@
 			<li class="dropdown">
 				<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color:##FFFAF0;">点云处理 <span class="caret"></span></a>
 				<ul class="dropdown-menu">
-					<li><a href="#" onclick="extractTower();" style="color:##FFFAF0">杆塔提取</a></li>
-					<li><a href="#" onclick="extractGround();" style="color:##FFFAF0">地面点提取</a></li>
-					<li><a href="#" onclick="extractVegetation();" style="color:##FFFAF0">植被提取</a></li>
-					<li><a href="#" onclick="extractLines();" style="color:##FFFAF0">导线提取</a></li>
+					<li><a href="#" onclick="classifiedFast();" style="color:##FFFAF0">点云快速分类</a></li>
 				</ul>
 			</li>
-
+		</ul>
+		<ul class="nav navbar-nav navbar-right">
+			<li><a href="#" onclick="loadCamera(this)"><span class="glyphicon glyphicon-camera" aria-hidden="true"></span></a></li>
 		</ul>
 	</div>
 

@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: 1.0版本
+ * @Author: Frank.Wu
+ * @Date: 2019-12-02 00:15:10
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2019-12-14 12:13:57
+ */
 #include "LidarController.h"
 
 using namespace rapidjson;
@@ -16,7 +24,7 @@ void LidarService::LidarService_Run()
 	//the max parallel connection count
 	set_keep_alive_max_count(500);
 	set_base_dir("./www");
-    listen("192.168.31.16", port);
+    listen("localhost", port);
 }
 
 void LidarService::LidarService_Register(LidarController* controller)

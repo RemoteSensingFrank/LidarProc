@@ -1,7 +1,7 @@
 #pragma once
 //
 // Created by wuwei on 18-1-24.
-// email��wuwei_cug@163.com
+// email：wuwei_cug@163.com
 
 #ifndef LASGUI_LASDANGERPOINTS_H
 #define LASGUI_LASDANGERPOINTS_H
@@ -17,7 +17,6 @@ using namespace GeometryLas;
 //pre define complex flann type
 typedef PointCloudAdaptor<std::vector<Point3D>> PCAdaptor;
 typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PCAdaptor>, PCAdaptor, 3> kd_tree;
-
 
 /**
 * Danger points classify
@@ -82,13 +81,17 @@ protected:
 	long LASDangerPoints_Range(const Point3D *pnt, float distance, ILASDataset* datasetVegterain, std::vector<int> &rectIds);
 };
 
+
 /*
-	��ȡ��·Σ�յ���Ϣ��ͨ��ANN�㷨���м���ʵ�֣�����ڼ򵥷ֿ�?
-	����kdtree�㷨�ܹ��������ߴ���Ч��
-	***����Adaptor�Լ����������Ĺ�������ڴ����������Ҫ�ϴ��ڴ�***
-	***һ����˵��Ҫ�������ƴ�С���������ڴ���ܹ����д��������ܲ����ڴ治�����***
-	Ŀǰ�����ã����ø��Ӹ�Ч�Ļ������ģ�?
+	获取线路危险点信息，通过ANN算法进行加速实现，相比于简单分块
+	采用kdtree算法能够极大的提高处理效率
+	***由于Adaptor以及点云索引的构建因此在处理过程中需要较大内存***
+	***一般来说需要超过点云大小两到三倍内存才能够进行处理否则可能产生内存不足错误***
+	目前已弃用，采用更加高效的混合索引模式
+	对于某些算法，混合索引模式由于需要考虑点云块之间的相关关系，会极大的增加算法复杂度
+	因此虽然内存占用比较大，但是在考虑算法效率的条件下还是适用的
 	Created by Frank.Wu 2018-07-19
+	Added By Frank.Wu 2019-12-12
 */
 class LASDangerPointsFlann:public LASDangerPoints
 {
@@ -96,8 +99,6 @@ public:
 
 	/**
 	* detect danger points from the single las dataset
-	* 想的简单，但是具体实现需要考虑是否重新集成回原来的
-	* 数据集中，如果集成回去应该如何处理？
 	* param distance: distance thresthold
 	* param dataset: dataset las dataset
 	* return 
@@ -112,7 +113,7 @@ public:
 	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset);
 
 	/**
-	* ���ݾ����ȡ��·Σ�յ����?
+	* 根据距离获取线路危险点信息
 	* @param distance
 	* @return
 	*/
@@ -130,7 +131,7 @@ public:
 
 private:
 	/**
-	* 判断每一个点是不是危险点
+	* detect danger point for single point
 	* distance : distance
 	* pnt :  line point
 	* treeVege : vegetation point kdtree
@@ -138,7 +139,7 @@ private:
 	long LASDangerPoints_PerPoint(float distance, const Point3D* pnt,kd_tree &treeVege,vector<int> mapper, ILASDataset* dataset);
 
 	/**
-	* ���ĳһ���㷶�?
+	* detect danger point for single point
 	* @param distance
 	* @param pnt
 	* @param treeVege
@@ -158,21 +159,21 @@ private:
 };
 
 /*
-	��ȡ��·Σ�յ���Ϣ��ͨ��Block ANN�㷨����ʵ�֣�
-	��ǰ���㷨�����⹹��kdtrdd��Adaptor���ڹ����?
-	��������Ҫ���¿����ڴ棬�൱�ڽ����ݶ����ڴ�����
-	��˻ز������ߵ��ڴ����ģ��Ľ�����㷨��ÿһ������
-	����kdtree��Ȼ��ֿ���бȽϺͷ���������˴���Ч��?
-	�������ڴ����ģ�ֻ�������ݶ�ȡ�����й������ȽϺ�ʱ
+	获取线路危险点信息，通过Block ANN算法加速实现，
+	以前的算法中另外构造kdtrdd的Adaptor，在构造的
+	过程中需要重新开辟内存，相当于将数据读入内存两遍
+	因此回产生极高的内存消耗，改进后的算法对每一块数据
+	构建kdtree，然后分块进行比较和分析，提高了处理效率
+	降低了内存消耗，只是在数据读取过程中构建树比较耗时
 	Created by Frank.Wu 2018-08-31
 */
 class LASDangerPointsFlannBlock :public LASDangerPoints
 {
 public:
 	/**
-	* ���ݾ����ȡ��·Σ�յ����?
-	* @param distance ����Ҫ��
-	* @return ���ش������?
+	* 根据距离获取线路危险点信息
+	* @param distance 距离要求
+	* @return 返回错误代码
 	*/
 	virtual long LASDangerPoints_Detect(float distance, ILASDataset* datasetLine, ILASDataset* datasetVegterain);
 
@@ -195,7 +196,7 @@ public:
 	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset,double range,Point2D* ptTower, std::vector<LASIndex> &pntIdx);
 private:
 	/**
-	* ���ĳһ���㷶�?
+	* 检测某一个点范围
 	* @param distance
 	* @param pnt
 	* @param treeVege
@@ -226,6 +227,7 @@ private:
 	long LASDangerPoints_PerPoint(float* distance, int dangerSectionNumber, const Point3D pnt,
 		kd_tree &treeLine, const LASIndex treeIdx, ILASDataset* dataset);
 };
+
 /*
 * detect falling trees
 * */
@@ -282,7 +284,7 @@ class LASDangerPointsMergeArrgegate
 public:
 	/*
 		extract danger points from lastadaset
-		@param:asDataset:las dataset;
+		@param:lasDataset:las dataset;
 		@param:dangerPnts:danger points extract from dataset
 	*/
 	long LASDangerExtract(ILASDataset* lasDataset, Point3Ds &dangerPnts);

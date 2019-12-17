@@ -47,7 +47,7 @@ protected:
 
 TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
 {
-    Point2D pntTower[2];
+    Point2Ds pntTower(2);
     pntTower[0].x = 201136.7999877;
     pntTower[0].y = 2488348.81000137;
     
