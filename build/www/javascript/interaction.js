@@ -123,7 +123,6 @@ function getDataTransTree(callback){
  * @param {*} callback 
  */
 function getDataDeleteTree(callback){
-
     //数据文件删除文件列表
     var treedata=[];
     $.ajax({
@@ -428,4 +427,63 @@ function loadCameraPositions(){
 function unloadCameraPositions(){
     var obj=viewer.scene.scene.getObjectByName("camera");
     viewer.scene.scene.remove(obj);
+}
+
+/**
+ * 点击分类处理进行分类
+ */
+function classifiedProc(){
+    var towerRange=$("#towerRange")[0].value==""?15:$("#towerRange")[0].value;
+    var lineHeight=$("#lineHeight")[0].value==""?7:$("#lineHeight")[0].value;
+    var groundNetSize=$("#groundNetSize")[0].value==""?5:$("#groundNetSize")[0].value;
+    var groundNetDis=$("#groundNetDis")[0].value==""?5:$("#groundNetDis")[0].value;
+    var groundNetAngle=$("#groundNetAngle")[0].value==""?30:$("#groundNetAngle")[0].value;
+    var vegeDistance=$("#vegeDistance")[0].value==""?15:$("#vegeDistance")[0].value;
+    var classifiedName=$("#classifiedName")[0].value==""?"temp.las":$("#classifiedName")[0].value;
+    var selects=$("#classifiedFileList")[0];
+    var indexs = selects.selectedIndex;
+    console.log(selects.options[indexs]);
+    var srcFileName = selects.options[indexs].value+"-"+selects.options[indexs].text;
+    if(srcFileName==undefined){
+        console.log("未选择原始文件");
+        return ;
+    }
+
+    var pntCount = 0;
+    var measuresmens=viewer.scene.measurements;
+    measuresmens.forEach(function(measureItem){
+        if(measureItem.name="Point"){
+            pntCount++;
+        }
+    });
+
+    if(pntCount!=2)
+    {
+        console.log("杆塔数应该为两个表示一个档段");
+        return;
+    }
+    var pointsParam="";
+    measuresmens.forEach(function(measureItem){
+        pointsParam+=measureItem.points[0].position.x+"-"+measureItem.points[0].position.y+"-";
+    });
+    pointsParam+=towerRange+"-"+lineHeight+"-"+groundNetSize+"-"+groundNetDis+"-"+groundNetAngle+"-"+vegeDistance+"-"+classifiedName+"-"+srcFileName;
+
+    $.ajax({
+        type: "GET",
+        url: ip+"/classification/"+pointsParam,
+        dataType: "text",
+        async:true,
+        beforeSend:function(XMLHttpRequest){ 
+            $('#paramModal').modal('hide');
+            $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+            $("#loading").show();
+        }, 
+        success: function(data){
+            $("#loading").empty(); //ajax返回成功，清除loading图标
+            $("#loading").hide();
+        },     
+        error:function(data){
+            console.log(data)
+        }
+    });
 }
