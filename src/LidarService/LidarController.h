@@ -332,6 +332,98 @@ public:
     }   
 };
 
+/**
+ * @brief  文件分块上传接口的文件传输部分
+ * @note   
+ * @retval None
+ */
+class LidarControllerUpload:public LidarController
+{
+public:
+    LidarControllerUpload(LidarService* tService):LidarController(tService){}
+
+    virtual void LidarController_Run()
+    {
+        service->Post("/upload",[](const Request& req, Response& res){
+            auto name = req.get_file_value("name");
+            string nameStr = req.body.substr(name.offset, name.length);
+            auto task = req.get_file_value("task_id"); 
+            string taskStr = req.body.substr(task.offset, task.length);   
+            auto size = req.get_file_value("size"); 
+            string sizeStr = req.body.substr(size.offset, size.length);     
+            auto file = req.get_file_value("file");
+
+            int chunk=0;
+            string chunkStr="0";
+            if(req.has_file("chunk"))
+            {
+                auto chunks = req.get_file_value("chunk");
+                chunkStr = req.body.substr(chunks.offset, chunks.length);  
+                chunk = atoi(chunkStr.c_str());
+            }
+            string fileStr = req.body.substr(file.offset, file.length);
+            FILE *f;
+            
+            //创建文件夹
+            string createdir="mkdir ../data/tmp/"+taskStr;
+            system(createdir.c_str());
+
+            string path="../data/tmp/"+taskStr+"/"+taskStr+"_"+chunkStr;
+            f=fopen(path.c_str(),"wb+");
+            fwrite(fileStr.c_str(),1,file.length,f);
+            fclose(f);
+            res.set_content("upload chunk success", "text/plain;charset=utf-8");
+            res.status=200;
+        });  
+    }   
+};
+
+//完成文件上传（必须从开始到完成一整个流程才算结束）
+class LidarControllerUploadFinished:public LidarController
+{
+public:    
+    LidarControllerUploadFinished(LidarService* tService):LidarController(tService){}
+
+    virtual void LidarController_Run()
+    {
+        service->Post("/upload-finish",[](const Request& req, Response& res){
+            vector<string> splitStr;
+            string params = req.body.c_str();
+            SplitString(params,splitStr,",");
+            FILE *f;
+            string path="../data/tmp/"+splitStr[1];
+            f=fopen(path.c_str(),"wb+");
+            int i=0;
+            bool fileExist=false;
+            do{
+                FILE *fi = fopen(string("../data/tmp/"+splitStr[0]+"/"+splitStr[0]+"_"+to_string(i)).c_str(),"rb");
+                if(fi!=nullptr)
+                {
+                    fileExist=true;
+                    fseek(fi,0,SEEK_END);
+                    int n=ftell(fi);
+                    fseek(fi,0,SEEK_SET);
+                    char* data = new char[n];
+                    fread(data,n,sizeof(char),fi);
+                    fwrite(data,n,sizeof(char),f);
+                    fflush(f);
+                    delete[]data;data=nullptr;
+                    fclose(fi);fi=nullptr;
+                    ++i;
+                }else{
+                    fileExist=false;
+                    break;
+                }
+            }while(true);
+            fclose(f);f=nullptr;
+            string cmd="rm -rf ../data/tmp/"+splitStr[0];
+            system(cmd.c_str());
+            res.set_content("upload success", "text/plain;charset=utf-8");
+            res.status=200;
+        });  
+    }   
+};
+
 class LidarControllerClassfication:public LidarController
 {
 public:
@@ -358,6 +450,7 @@ public:
             points.push_back(Point2D(atof(contents[0].c_str()),atof(contents[1].c_str())));
             points.push_back(Point2D(atof(contents[2].c_str()),atof(contents[3].c_str())));
             classFast.ElectricPatrolFast_Tower(lasdst1,points,atof(contents[4].c_str()),colorTower);
+            
             LASColorExt lineTower;
             lineTower.Red=lineTower.Green=0;lineTower.Blue=255;
             long err=classFast.ElectricPatrolFast_Lines(lasdst1,points,atof(contents[4].c_str()),atof(contents[5].c_str()),lineTower);

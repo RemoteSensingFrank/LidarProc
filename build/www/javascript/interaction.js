@@ -344,6 +344,7 @@ function transDataFile(filename){
 
 /**
  * 点击上传按钮实现文件上传
+ * 不需要点击上传按钮
  */
 function uploadData(){
 }
@@ -351,9 +352,7 @@ function uploadData(){
 function projected2WGS84(x,y){
     let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
     let mapProjection = proj4.defs("WGS84");
-
     var lonlat = proj4(pointcloudProjection,mapProjection,[x,y]);
-
     return [lonlat[1], lonlat[0]]
 }
 
@@ -369,9 +368,7 @@ function projectedFromWGS84(lat,lng){
 function projected2UTM(lat,lng){
     let pointcloudProjection = "+proj=utm +zone=20 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
     let mapProjection = proj4.defs("WGS84");
-
     var xy = proj4(mapProjection,pointcloudProjection,[lng,lat]);
-
     return [xy[0], xy[1]]
 }
 
