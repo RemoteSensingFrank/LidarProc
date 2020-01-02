@@ -7,8 +7,8 @@
  * @version: 1.0版本
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
- * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-11-19 22:01:37
+ * @LastEditors  : Frank.Wu
+ * @LastEditTime : 2019-12-26 14:47:29
  */
 #pragma once
 
@@ -31,7 +31,7 @@ namespace LasAlgorithm
     */
     class PointCloudShrinkSkeleton
     {
-    public:
+    private:
         /**
         * @brief  通过质心收缩算法提取骨架点,判断是否包含质心点，如果包含质心点则不处理这个点簇
         * @note   
@@ -50,7 +50,7 @@ namespace LasAlgorithm
         **/
         Point3Ds PointCloudShrinkSkeleton_Once(Point3Ds pointSet,int nearPointNum);
         
-        
+    public:
         /**
         * @brief  迭代收缩算法
         * @note   
@@ -65,14 +65,15 @@ namespace LasAlgorithm
     };
 
     /**
-    * @brief  extract skeleton from point cloud robost 直接根据重心收缩方法提取点云骨架,
-    * 高鲁棒性算法，噪声剔除
+    * @brief  extract skeleton from point cloud robost 
+    * 直接根据重心收缩方法提取点云骨架,对噪声点的问题无法处理，
+    * 由此导致存在比较大的问题，基于此研究高鲁棒性算法，实现噪声剔除
     * @note   
     * @retval None
     */
     class PointCloudShrinkSkeletonRobost:public PointCloudShrinkSkeleton
     {
-
+        
     };
 }
 

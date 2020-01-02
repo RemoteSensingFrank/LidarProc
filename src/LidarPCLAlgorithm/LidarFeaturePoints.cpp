@@ -39,6 +39,7 @@ namespace pcl
             不支持，或者是指令集的问题
             2019-07-21:经过查看资料发现是PCL库编译的问题，存在Boost库与STD冲突的问题
             编译的时候添加C++11标准用Release编译就可以解决这个问题
+            2019-12-26:一直提取特征Narf点数量为0，不知道问题出现在哪里,需要进一步研究
  * @note   
  * @param  input_cloud:  输入点云
  * @param  &narfIndex:   特征点点云
@@ -55,6 +56,10 @@ long LidarFeaturePoints::LidarFeature_NARF(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     bool rotation_invariant = true;
     pcl::PointCloud<pcl::PointWithViewpoint> far_ranges;
     Eigen::Affine3f scene_sensor_pose (Eigen::Affine3f::Identity ());
+    
+    // -----------------------------------------------
+	// -----Create RangeImage from the PointCloud-----
+	// -----------------------------------------------
     float noise_level = 0.0;
     float min_range = 0.0f;
     int border_size = 1;
@@ -170,15 +175,54 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
 
 #ifdef _DEBUG
     FILE *fs = fopen("../data/test/sift.txt","w+");
-    for(int i=0;i<siftPointIdx.points.size ();++i)
-        fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
-                                     input_cloud->points[siftPointIdx[i]].y,
-                                     input_cloud->points[siftPointIdx[i]].z);
-    fclose(fs);
+    if(fs!=nullptr)
+    {
+        for(int i=0;i<siftPointIdx.points.size ();++i)
+            fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
+                                        input_cloud->points[siftPointIdx[i]].y,
+                                        input_cloud->points[siftPointIdx[i]].z);
+        fclose(fs);
+    }else
+    {
+        printf("create test output failed!\n");
+    }
 #endif
-
     return 0;
 }
 
+// 直接通过kdtree查找比较快
+// inline double disFpfh(pcl::FPFHSignature33 pt1,pcl::FPFHSignature33 pt2)
+// {
+//     double dis = 0;
+//     for(int i=0;i<pt1.descriptorSize();++i)
+//     {
+//         dis+=(pt1.histogram[i]-pt2.histogram[i])*(pt1.histogram[i]-pt2.histogram[i]);
+//     }
+//     return sqrt(dis);
+
+// }
+
+long LidarFeatureRegistration::LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH1,
+                                pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH2,
+                                pcl::PointCloud<int> &siftMatchPointIdx)
+{
+    pcl::KdTreeFLANN<pcl::FPFHSignature33> kdtree;
+    kdtree.setInputCloud(siftFPFH1);
+    const int searchNum=1;
+    std::vector<int> pointIdxNKNSearch(searchNum);
+    std::vector<float> pointNKNSquaredDistance(searchNum);
+    
+    //特征匹配
+    int num=0;
+    for(auto fpfhTar:siftFPFH2->points)
+    {
+        if (kdtree.nearestKSearch(fpfhTar, searchNum, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+        {
+            siftMatchPointIdx.push_back(pointIdxNKNSearch[0]);
+            num++;
+            //printf("%d-%d\n",num,pointIdxNKNSearch[0]);
+        }
+    }
+}
 
 #endif

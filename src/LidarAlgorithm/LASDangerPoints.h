@@ -195,7 +195,7 @@ public:
 	virtual long LASDangerPoints_Detect(float* distance, int dangerSectionNumber, ILASDataset* dataset,double range,Point2D* ptTower, std::vector<LASIndex> &pntIdx);
 private:
 	/**
-	* ���ĳһ���㷶�?
+	* 危险点提取单个点处理
 	* @param distance
 	* @param pnt
 	* @param treeVege
