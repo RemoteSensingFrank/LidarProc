@@ -1,6 +1,6 @@
 #include "LASSkeleton.h"
 #include <set>
-
+#include <iostream>
 #include "../LidarBase/LASReader.h"
 #include"../LidarGeometry/GeometryAlgorithm.h"
 #include"../LidarGeometry/GeometryFlann.h"
@@ -104,6 +104,79 @@ namespace LasAlgorithm
 			pointSet.push_back(lasDataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect].m_vec3d);
 		}
 		return PointCloudShrinkSkeleton_Shrink(pointSet,nearPointNum,iteratorNum);   
+    }
+
+    /**
+     * 判断方法不一定多么的好，但是是目前比较有效的方法，类似于Hough变换的方法
+     **/
+    bool PointCloudShrinkSkeletonRobost::PointCloudShrinkSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold)
+    {
+        //直线拟合
+        double cx=0,cy=0,cz=0;
+        for(int i=0;i<pointCluster.size();++i)
+        {
+            cx+=pointCluster[i].x/pointCluster.size();
+            cy+=pointCluster[i].y/pointCluster.size();
+            cz+=pointCluster[i].z/pointCluster.size();
+        }
+        for(int i=0;i<pointCluster.size();++i)
+        {
+            pointCluster[i].x-=cx;
+            pointCluster[i].y-=cy;
+            pointCluster[i].z-=cz;
+        }
+
+        //计算
+        MatrixXd params = MatrixXd::Zero(2,2);
+        MatrixXd paramM1= MatrixXd::Zero(2,2);
+        MatrixXd paramM2= MatrixXd::Zero(2,2);
+        for(int i=0;i<pointCluster.size();++i)
+        {
+            paramM1(0,0)+=pointCluster[i].x*pointCluster[i].z;
+            paramM1(0,1)+=pointCluster[i].x;
+            paramM1(1,0)+=pointCluster[i].y*pointCluster[i].z;
+            paramM1(1,1)+=pointCluster[i].y;
+
+            paramM2(0,0)+=pointCluster[i].z*pointCluster[i].z;
+            paramM2(0,1)+=pointCluster[i].z;
+            paramM2(1,0)+=pointCluster[i].z;
+            paramM2(1,1)+=1;
+        }
+        params=paramM1*paramM2.inverse();
+        double residual=PointCloudShrinkSkeleton_LineResidual(pointCluster,params);
+        std::cout<<params<<endl;
+        std::cout<<residual<<endl;
+        return residual<threshold;
+    }
+
+    //计算残差
+    double PointCloudShrinkSkeletonRobost::PointCloudShrinkSkeleton_LineResidual(Point3Ds pointCluster,MatrixXd lineParam)
+    {
+        double ex=0,ey=0,e=0;
+        for(int i=0;i<pointCluster.size();++i)
+        {
+            MatrixXd mat(2,1);
+            mat(0,0)=pointCluster[i].z;
+            mat(1,0)=1;
+            MatrixXd res=lineParam*mat;
+
+            ex = res(0,0)-pointCluster[i].x;
+            ey = res(1,0)-pointCluster[i].y;
+            e+=sqrt(ex*ex+ey*ey);
+        }
+    }
+
+
+    void PointCloudShrinkSkeletonRobost::PointCloudShrinkSkeleton_LineTest()
+    {
+        Point3Ds points(30);
+        for (int i = 0; i < 30;i++)
+        {
+            points[i].z = (double)i; 
+            points[i].x = 3*points[i].z + 1 + rand()/RAND_MAX;  //引入噪声
+            points[i].y = 2*points[i].z + 2 + rand()/RAND_MAX;  //引入噪声
+        }
+        PointCloudShrinkSkeleton_LineExtractRaw(points,5);
     }
 
 }

@@ -8,7 +8,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors  : Frank.Wu
- * @LastEditTime : 2019-12-26 14:47:29
+ * @LastEditTime : 2020-01-03 17:50:30
  */
 #pragma once
 
@@ -19,7 +19,10 @@
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
+#include "Eigen/Eigen"
+
 using namespace GeometryLas;
+using namespace Eigen;
 
 namespace LasAlgorithm 
 {
@@ -73,7 +76,27 @@ namespace LasAlgorithm
     */
     class PointCloudShrinkSkeletonRobost:public PointCloudShrinkSkeleton
     {
-        
+
+    private:
+        /**
+         * @name: 判断点簇中哪些点集存在线性特征
+         * @msg:  具体的判断方法为，找到任意两个点的直线，
+         *        连接成直线判断点集拟合优度，选取最好的
+         *        拟合优度的直线，如果最好的拟合优度直线大于某一个阈值，
+         *        则说明具有线性特征（效率比较低，对于离群点的处理问题）
+         * @param Point3Ds pointCluster：点簇的点集
+         *        double threshold：拟合优度阈值
+         * @return: 
+         */
+        bool PointCloudShrinkSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold);
+    
+        /**
+         *  计算拟合残差
+         **/
+        double PointCloudShrinkSkeleton_LineResidual(Point3Ds pointCluster,MatrixXd lineParam);
+
+    public:
+        void PointCloudShrinkSkeleton_LineTest();
     };
 }
 

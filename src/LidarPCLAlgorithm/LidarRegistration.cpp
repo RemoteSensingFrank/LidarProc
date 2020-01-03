@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors  : Frank.Wu
- * @LastEditTime : 2019-12-29 09:23:14
+ * @LastEditTime : 2020-01-03 10:04:34
  */
 #ifdef _USE_PCL_
 #include "LidarRegistration.h"
@@ -12,7 +12,6 @@
 #include <pcl/registration/icp.h>           //ICP类相关头文件
 #include <pcl/registration/icp_nl.h>        //非线性ICP 相关头文件
 #include <pcl/registration/transforms.h>      //变换矩阵类头文件
-
 
 #include <pcl/features/fpfh.h>
 #include <pcl/registration/ia_ransac.h>
@@ -32,8 +31,8 @@ long LidarRegistration::LidarRegistration_ICP(pcl::PointCloud<pcl::PointXYZ>::Pt
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;   //创建IterativeClosestPoint的对象
     icp.setInputCloud(input_cloud);                                 //cloud_in设置为点云的源点
     icp.setInputTarget(ref_cloud);                                  //cloud_out设置为与cloud_in对应的匹配目标
-    icp.setMaxCorrespondenceDistance(5);
-    icp.setMaximumIterations(30);
+    icp.setMaxCorrespondenceDistance(50);
+    icp.setMaximumIterations(5);
     icp.setTransformationEpsilon (1e-8);
     icp.setEuclideanFitnessEpsilon (1);
     pcl::PointCloud<pcl::PointXYZ> registration;                    //存储经过配准变换点云后的点云
@@ -82,8 +81,8 @@ pcl::PointCloud<pcl::FPFHSignature33>::Ptr LidarRegistration::compute_fpfh_featu
     pcl::NormalEstimation<pcl::PointXYZ,pcl::Normal> est_normal;
     est_normal.setInputCloud(input_cloud);
     est_normal.setSearchMethod(tree);
-    //est_normal.setKSearch(5);
-    est_normal.setRadiusSearch(5);
+    est_normal.setKSearch(5);
+    // est_normal.setRadiusSearch(5);
     est_normal.compute(*point_normal);
     //std::cout<<point_normal->points[1000]<<std::endl;
     //fpfh 估计
@@ -95,8 +94,8 @@ pcl::PointCloud<pcl::FPFHSignature33>::Ptr LidarRegistration::compute_fpfh_featu
     est_fpfh.setInputCloud(input_cloud);
     est_fpfh.setInputNormals(point_normal);
     est_fpfh.setSearchMethod(tree);
-    // est_fpfh.setKSearch(10);
-    est_fpfh.setRadiusSearch(8);
+    est_fpfh.setKSearch(10);
+    // est_fpfh.setRadiusSearch(8);
     est_fpfh.compute(*fpfh);
     return fpfh;
 }
