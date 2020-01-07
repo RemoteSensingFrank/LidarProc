@@ -8,7 +8,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-01-03 17:50:30
+ * @LastEditTime : 2020-01-07 14:12:07
  */
 #pragma once
 
@@ -68,13 +68,12 @@ namespace LasAlgorithm
     };
 
     /**
-    * @brief  extract skeleton from point cloud robost 
-    * 直接根据重心收缩方法提取点云骨架,对噪声点的问题无法处理，
-    * 由此导致存在比较大的问题，基于此研究高鲁棒性算法，实现噪声剔除
+    * @brief  extract line skeleton from point cloud robost 
+    * 从点集中提取出具有线性特征的点集
     * @note   
     * @retval None
     */
-    class PointCloudShrinkSkeletonRobost:public PointCloudShrinkSkeleton
+    class PointCloudLineSkeleton
     {
 
     private:
@@ -88,15 +87,41 @@ namespace LasAlgorithm
          *        double threshold：拟合优度阈值
          * @return: 
          */
-        bool PointCloudShrinkSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold);
+        bool PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold);
     
         /**
          *  计算拟合残差
          **/
-        double PointCloudShrinkSkeleton_LineResidual(Point3Ds pointCluster,MatrixXd lineParam);
+        double PointCloudLineSkeleton_LineResidual(Point3Ds pointCluster,MatrixXd lineParam);
+
+
+        /**
+         * @name: 对每个点进行解析，解析一轮，不知道是否要考虑多轮的解析，
+         *        如果考虑多轮的解析则重新调用一次就好了
+         * @param Point3Ds pointSet：全部数据点集
+         *        int nearPointNum：近邻点数目
+         *        double lineResidual：线性拟合残差
+         * @return: 返回点集
+         */   
+        Point3Ds PointCloudLineSkeleton_Once(Point3Ds pointSet,int nearPointNum,double lineResidual);
 
     public:
-        void PointCloudShrinkSkeleton_LineTest();
+        /**
+         * @name: PointCloudLineSkeleton_Extract
+         * @msg: 解析出具有线性特征的骨架点
+         * @param Point3Ds pointSet:    输入点集
+         *        int nearPointNum:     临近点个数
+         *        double lineResidual:  线性残差阈值
+         * @return: 
+         */
+        Point3Ds PointCloudLineSkeleton_Extract(Point3Ds pointSet,int nearPointNum,double lineResidual);
+
+        Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
+
+        /**
+        *  测试直线拟合函数是否正确
+        **/ 
+        void PointCloudShrinkSkeleton_LineTest();        
     };
 }
 

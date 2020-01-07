@@ -15,9 +15,24 @@
 using namespace LasAlgorithm;
 int main(int argc ,char* argv[])
 {
+    ILASDataset *lasdst1 = new ILASDataset();
+    LASReader *reader4 = new LidarMemReader();
+    reader4->LidarReader_Open("../data/default/morenoise.las",lasdst1);
+    reader4->LidarReader_Read(true,1,lasdst1);
+    PointCloudLineSkeleton pcLineDetect;
+    Point3Ds pt=pcLineDetect.PointCloudLineSkeleton_Extract(lasdst1,30,0.2);
+    FILE *fs=fopen("../data/test.txt","w+");
+    for(int i=0;i<pt.size();++i)
+    {
+        fprintf(fs,"%lf,%lf,%lf\n",pt[i].x,pt[i].y,pt[i].z);
+    }
+    fclose(fs);
 
-    PointCloudShrinkSkeletonRobost pcShrinkRobost;
-    pcShrinkRobost.PointCloudShrinkSkeleton_LineTest();
+    delete lasdst1;
+    delete reader4;
+
+
+    //pcShrinkRobost.PointCloudShrinkSkeleton_LineTest();
     // LASProfile profile;
     // ProfileDecorate decorateParam;
     // decorateParam.lbType = LABEL_SQUARE;
