@@ -107,7 +107,8 @@ namespace LasAlgorithm
     }
 
     /**
-     * 判断方法不一定多么的好，但是是目前比较有效的方法，类似于Hough变换的方法
+     * 直接根据直线拟合的方法能够获取线性特征比较强的块
+     * 但是算法存在最大的问题在于在某些块中
      **/
     bool PointCloudLineSkeleton::PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold)
     {
@@ -172,7 +173,19 @@ namespace LasAlgorithm
 
     Point3Ds PointCloudLineSkeleton::PointCloudLineSkeleton_Extract(Point3Ds pointSet,int nearPointNum,double lineResidual)
     {
-        return PointCloudLineSkeleton_Once(pointSet,nearPointNum,lineResidual);
+        Point3Ds pnts(pointSet);
+        Point3Ds pntTmp;
+        for(int i=0;i<1;++i)
+        {
+            pntTmp=PointCloudLineSkeleton_Once(pointSet,nearPointNum,lineResidual);
+#ifdef _DEBUG
+            printf("iterator: %d points count: %d\n",i+1,pntTmp.size());
+#endif
+            pnts.clear();
+            pnts=pntTmp;
+            pntTmp.clear();
+        }
+        return pnts;
     }
 
     Point3Ds PointCloudLineSkeleton::PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual)
