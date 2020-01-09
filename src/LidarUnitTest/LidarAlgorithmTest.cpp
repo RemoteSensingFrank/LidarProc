@@ -4,6 +4,8 @@
 #include "../LidarAlgorithm/LASSimpleClassify.h"
 #include "../LidarAlgorithm/LASProfile.h"
 #include "../LidarAlgorithm/PointProcAlgorithm.h"
+#include "../LidarAlgorithm/LASSkeleton.h"
+
 #include <stdio.h>
 #include <vector>
 #include <string>

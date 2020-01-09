@@ -75,7 +75,6 @@ namespace LasAlgorithm
         
         return pntSkeSet;        
     }
-
     
     Point3Ds  PointCloudShrinkSkeleton::PointCloudShrinkSkeleton_Shrink(Point3Ds pointSet,int nearPointNum,int iteratorNum)
     {
