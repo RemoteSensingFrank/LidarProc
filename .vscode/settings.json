@@ -6,6 +6,9 @@
     "LastEditTime": "Do not edit",
     "LastEditors": "huacong",
     "files.associations": {
+        "eigen": "cpp",
+        "core": "cpp",
+        "numericaldiff": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",

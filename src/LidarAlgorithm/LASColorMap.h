@@ -142,7 +142,7 @@
 
 #include <vector>
 #include <string>
-#include"gdal_priv.h"
+#include "gdal_priv.h"
 #include "../LidarGeometry/Geometry.h"
 
 using namespace std;

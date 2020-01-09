@@ -1,6 +1,7 @@
 // LidarProc.cpp: 定义控制台应用程序的入口点。
 //
 #include<stdio.h>
+
 //#include<gtest/gtest.h>
 #include "./LidarBase/LASReader.h"
 #include "./LidarAlgorithm/LASProfile.h"
@@ -18,12 +19,20 @@ void PorfileGenerateSample()
     ProfileDecorate decorateParam;
     decorateParam.lbType = LABEL_SQUARE;
 
-    Point2D pntTower[2];
-    pntTower[0].x = /* 204742.7500 */182716.690002;
-    pntTower[0].y = /* 2477649.12 */2481004.000000;
+    //pcShrinkRobost.PointCloudShrinkSkeleton_LineTest();
+    // LASProfile profile;
+    // ProfileDecorate decorateParam;
+    // decorateParam.lbType = LABEL_SQUARE;
+
+    // Point2D pntTower[2];
+    // pntTower[0].x = /* 204742.7500 */182716.690002;
+    // pntTower[0].y = /* 2477649.12 */2481004.000000;
 	
-    pntTower[1].x = /* 204781.66 */183023.250000;
-    pntTower[1].y = /* 2477626.81 */2480775.869999;
+    // pntTower[1].x = /* 204781.66 */183023.250000;
+    // pntTower[1].y = /* 2477626.81 */2480775.869999;
+
+    // LidarRegistrationUtil simuUtil(0.5,0.3,0.2,15,5,10);
+    // simuUtil.LidarRegistration_Simulation("../data/default/more.las","../data/default/moreSimulate.las");
 
  	//根据大小计算需要的分辨率，控制图像大小
 	double xscale = fabs(pntTower[0].x-pntTower[1].x)/600;

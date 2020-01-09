@@ -1,9 +1,12 @@
 #pragma once
 #ifndef _GEOMETRY_ALGORITHMS_H_
 #define _GEOMETRY_ALGORITHMS_H_
+
 #include "Eigen/Eigen"
-using namespace Eigen;
 #include "Geometry.h"
+
+using namespace Eigen;
+
 namespace GeometryLas {
 	class  GeometryRelation
 	{
