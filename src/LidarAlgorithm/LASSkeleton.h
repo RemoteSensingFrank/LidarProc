@@ -8,7 +8,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-01-07 14:12:07
+ * @LastEditTime : 2020-01-13 18:28:01
  */
 #pragma once
 
@@ -75,8 +75,7 @@ namespace LasAlgorithm
     */
     class PointCloudLineSkeleton
     {
-
-    private:
+    protected:
         /**
          * @name: 判断点簇中哪些点集存在线性特征
          * @msg:  具体的判断方法为，找到任意两个点的直线，
@@ -84,44 +83,84 @@ namespace LasAlgorithm
          *        拟合优度的直线，如果最好的拟合优度直线大于某一个阈值，
          *        则说明具有线性特征（效率比较低，对于离群点的处理问题）
          * @param Point3Ds pointCluster：点簇的点集
-         *        double threshold：拟合优度阈值
+         * @param double threshold：拟合优度阈值
+         * @param vector<double> &direct:方向
          * @return: 
          */
-        bool PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold);
-    
+        bool PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold,vector<double> &direct);
+    private:
         /**
          *  计算拟合残差
          **/
         double PointCloudLineSkeleton_LineResidual(Point3Ds pointCluster,MatrixXd lineParam);
 
-
         /**
          * @name: 对每个点进行解析，解析一轮，不知道是否要考虑多轮的解析，
          *        如果考虑多轮的解析则重新调用一次就好了
          * @param Point3Ds pointSet：全部数据点集
-         *        int nearPointNum：近邻点数目
-         *        double lineResidual：线性拟合残差
-         * @return: 返回点集
+         * @param int nearPointNum：近邻点数目
+         * @param double lineResidual：线性拟合残差
+         * @return: 
          */   
-        Point3Ds PointCloudLineSkeleton_Once(Point3Ds pointSet,int nearPointNum,double lineResidual);
+         Point3Ds PointCloudLineSkeleton_Once(Point3Ds pointSet,int nearPointNum,double lineResidual);
 
     public:
         /**
          * @name: PointCloudLineSkeleton_Extract
          * @msg: 解析出具有线性特征的骨架点
          * @param Point3Ds pointSet:    输入点集
-         *        int nearPointNum:     临近点个数
-         *        double lineResidual:  线性残差阈值
+         * @param int nearPointNum:     临近点个数
+         * @param double lineResidual:  线性残差阈值
          * @return: 
          */
-        Point3Ds PointCloudLineSkeleton_Extract(Point3Ds pointSet,int nearPointNum,double lineResidual);
+        virtual Point3Ds PointCloudLineSkeleton_Extract(Point3Ds pointSet,int nearPointNum,double lineResidual);
 
-        Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
+        virtual Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
 
         /**
         *  测试直线拟合函数是否正确
         **/ 
         void PointCloudShrinkSkeleton_LineTest();        
+    };
+
+    class PointCloudLineRefineSkeleton:public PointCloudLineSkeleton
+    {
+    protected:
+        /**
+         * @name: 重新定义点云线性特征
+         * @msg: 首先判断点集是否具有线性特征，在具有线性特征的基础上
+         *       获取数据点的主方向，然后根据数据点主方向重新对阈值进行定义
+         *       判断数据点与阈值的关系，得到精化后的点云数据
+         * @param Point3Ds pointCluster：点簇的点集
+         * @param double threshold：拟合优度阈值
+         * @return: 返回具有明显线性特征的点集
+         */        
+        vector<int> PointCloudLineSkeleton_LineRefine(Point3D ptCnt,Point3Ds pointCluster,double threshold);
+
+    private:
+        
+        /**
+         * @name: 对每个点进行解析，解析一轮，不知道是否要考虑多轮的解析，
+         *        如果考虑多轮的解析则重新调用一次就好了
+         * @param Point3Ds pointSet：全部数据点集
+         * @param int nearPointNum：近邻点数目
+         * @param double lineResidual：线性拟合残差
+         * @return: 
+         */   
+         Point3Ds PointCloudLineSkeleton_Once(Point3Ds pointSet,int nearPointNum,double lineResidual);
+
+    public:
+        /**
+         * @name: PointCloudLineSkeleton_Extract
+         * @msg: 解析出具有线性特征的骨架点
+         * @param Point3Ds pointSet:    输入点集
+         * @param int nearPointNum:     临近点个数
+         * @param double lineResidual:  线性残差阈值
+         * @return: 
+         */
+        virtual Point3Ds PointCloudLineSkeleton_Extract(Point3Ds pointSet,int nearPointNum,double lineResidual);
+
+        virtual Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
     };
 }
 

@@ -245,12 +245,12 @@ namespace GeometryLas {
 		*/
 		static vector <Point2D> ProjectToSection(vector<Point3D> pntCloud, Point3D Opoint);//��ʱû�õ�
 
-																						   /**
-																						   * ��ֱ֪�ߵ�б�ʷ��̣����㵽ֱ�ߵĴ���
-																						   * @param lineFactors ֱ�߷��̲������ӵͽ׵��߽�
-																						   * @param knownPoint  ��֪��
-																						   * @return
-																						   */
+		/**
+		 * ��ֱ֪�ߵ�б�ʷ��̣����㵽ֱ�ߵĴ���
+		 * @param lineFactors ֱ�߷��̲������ӵͽ׵��߽�
+		 * @param knownPoint  ��֪��
+		 * @return
+		 */
 		static Point2D GetFootOfPerpendicular(vector <double> lineFactors, Point2D knownPoint);
 
 		/**

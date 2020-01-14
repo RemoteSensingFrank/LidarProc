@@ -8951,16 +8951,13 @@ Potree.Annotation = class extends THREE.EventDispatcher {
 
 		for (let child of this.children) {
 			child.updateBounds();
-
 			box.union(child.boundingBox);
 		}
-
 		this.boundingBox.copy(box);
 	}
 
 	traverse (handler) {
 		let expand = handler(this);
-
 		if (expand === undefined || expand === true) {
 			for (let child of this.children) {
 				child.traverse(handler);
@@ -10333,7 +10330,8 @@ Potree.PointCloudOctree = class extends Potree.PointCloudTree {
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
 		renderer.state.setBlending(THREE.NoBlending);
 		
-		{ // RENDER
+		{ 
+			// RENDER
 			renderer.setRenderTarget(pickState.renderTarget);
 			gl.clearColor(0, 0, 0, 0);
 			renderer.clearTarget( pickState.renderTarget, true, true, true );
@@ -10341,8 +10339,7 @@ Potree.PointCloudOctree = class extends Potree.PointCloudTree {
 			let tmp = this.material;
 			this.material = pickMaterial;
 			
-			pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);
-			
+			pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);			
 			this.material = tmp;
 		}
 		
@@ -10403,27 +10400,27 @@ Potree.PointCloudOctree = class extends Potree.PointCloudTree {
 		}
 		
 		
-		//{ // open window with image
-		//	let img = Potree.utils.pixelsArrayToImage(buffer, w, h);
-		//	let screenshot = img.src;
-		//
-		//	if(!this.debugDIV){
-		//		this.debugDIV = $(`
-		//			<div id="pickDebug"
-		//			style="position: absolute;
-		//			right: 400px; width: 300px;
-		//			bottom: 44px; width: 300px;
-		//			z-index: 1000;
-		//			"></div>`);
-		//		$(document.body).append(this.debugDIV);
-		//	}
-		//
-		//	this.debugDIV.empty();
-		//	this.debugDIV.append($(`<img src="${screenshot}"
-		//		style="transform: scaleY(-1); width: 300px"/>`));
-		//	//$(this.debugWindow.document).append($(`<img src="${screenshot}"/>`));
-		//	//this.debugWindow.document.write('<img src="'+screenshot+'"/>');
-		//}
+		// { // open window with image
+		// 	let img = Potree.utils.pixelsArrayToImage(buffer, w, h);
+		// 	let screenshot = img.src;
+		
+		// 	if(!this.debugDIV){
+		// 		this.debugDIV = $(`
+		// 			<div id="pickDebug"
+		// 			style="position: absolute;
+		// 			right: 400px; width: 300px;
+		// 			bottom: 44px; width: 300px;
+		// 			z-index: 1000;
+		// 			"></div>`);
+		// 		$(document.body).append(this.debugDIV);
+		// 	}
+		
+		// 	this.debugDIV.empty();
+		// 	this.debugDIV.append($(`<img src="${screenshot}"
+		// 		style="transform: scaleY(-1); width: 300px"/>`));
+		// 	//$(this.debugWindow.document).append($(`<img src="${screenshot}"/>`));
+		// 	//this.debugWindow.document.write('<img src="'+screenshot+'"/>');
+		// }
 		
 
 		for(let hit of hits){

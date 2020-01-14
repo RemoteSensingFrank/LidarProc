@@ -11,6 +11,7 @@
 #include "./LidarPCLAlgorithm/LidarRegistration.h"
 #include "./LidarPCLAlgorithm/LidarFilterPCL.h"
 #include "./LidarAlgorithm/LASSimpleClassify.h"
+#include "./LidarAlgorithm/LASSkeleton.h"
 #include "./LidarAlgorithm/LASDangerPoints.h"
 
 void PorfileGenerateSample()
@@ -155,7 +156,22 @@ void ClassifySample()
 
 int main(int argc ,char* argv[])
 {
-    ClassifySample();
+    LasAlgorithm::PointCloudLineRefineSkeleton ptLineSk;
+    ILASDataset *lasdst1 = new ILASDataset();
+    LASReader *reader4 = new LidarMemReader();
+    reader4->LidarReader_Open("../data/default/more.las",lasdst1);
+    reader4->LidarReader_Read(true,1,lasdst1);
+    Point3Ds pts=ptLineSk.PointCloudLineSkeleton_Extract(lasdst1,30,0.5);
+    FILE *fs = fopen("../data/line.txt","w+");
+    //遍历点云数据输出
+    for(int i=0;i<pts.size();++i)
+    {
+        fprintf(fs,"%lf,%lf,%lf\n",pts[i].x,pts[i].y,pts[i].z);
+    }
+    fclose(fs);
+    fs=nullptr;
+    delete lasdst1;
+    delete reader4;
     return 0;
 }
 

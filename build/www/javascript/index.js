@@ -8,42 +8,6 @@
  //当前展示的文件路径
 currentViewerFilePath='';
 
-/**
- * 获取本机IP
- * @param {*} onNewIP 
- */
-function getUserIP(onNewIP) { //  onNewIp - your listener function for new IPs
-    //compatibility for firefox and chrome
-    var myPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-    var pc = new myPeerConnection({
-       iceServers: []
-   }),
-   noop = function() {},
-   localIPs = {},
-   ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/g,
-   key;
-   function iterateIP(ip) {
-       if (!localIPs[ip]) onNewIP(ip);
-       localIPs[ip] = true;
-  }
-    //create a bogus data channel
-   pc.createDataChannel("");
-   // create offer and set local description
-   pc.createOffer().then(function(sdp) {
-       sdp.sdp.split('\n').forEach(function(line) {
-           if (line.indexOf('candidate') < 0) return;
-           line.match(ipRegex).forEach(iterateIP);
-       });
-       pc.setLocalDescription(sdp, noop, noop);
-   }).catch(function(reason) {
-       // An error occurred, so handle the failure to connect
-   });
-   //sten for candidate events
-   pc.onicecandidate = function(ice) {
-       if (!ice || !ice.candidate || !ice.candidate.candidate || !ice.candidate.candidate.match(ipRegex)) return;
-       ice.candidate.candidate.match(ipRegex).forEach(iterateIP);
-   };
-}
 
 /**
  * Cesium 初始化
@@ -81,6 +45,11 @@ function CesiumInitial(imgurl)
 function LoadLASDataViewer(path,projec_def)
 {
     currentViewerFilePath = path;
+    //定义的投影带为50度带
+    let pointcloudProjection = projec_def;
+    let mapProjection = proj4.defs("EPSG:4326");
+    window.toMap = proj4(pointcloudProjection, mapProjection);
+    window.toScene = proj4(mapProjection, pointcloudProjection);
     Potree.loadPointCloud(path, "data1", e => {
         let pointcloud = e.pointcloud;
         pointcloud.projection = projec_def;     //affect the overview
@@ -145,7 +114,7 @@ function InitialScene()
         viewer.setLanguage('en');
         $("#menu_appearance").next().show();
         //viewer.toggleSidebar();
-        });
+    });
 }
 
 function loop(timestamp){
@@ -215,28 +184,5 @@ function Initial()
     CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
     InitialScene();
     LoadLASDataViewer(path,"+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
-
-    /**
-     * 初始化leancloud
-     */
-    var appId="uHNJtTxLkcGm3VRtuRGk53hb-gzGzoHsz";
-    var appKey="h8s1QFO2dLQ62H0axpKB6WnD";
-
-    AV.init({
-        appId:appId,
-        appKey:appKey
-    });
-    var operation = window.AV.Object.extend('operation');
-    var op = new operation();
-    op.save({
-        operation_type:"init",
-        operation_ip:returnCitySN['cip']
-    }).then(function(op) {
-        // 成功
-    }, function(error) {
-        // 失败
-        console.log(error);
-    });
-
     requestAnimationFrame(loop);
 }
