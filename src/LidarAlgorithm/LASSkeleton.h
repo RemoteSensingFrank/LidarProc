@@ -8,7 +8,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-01-13 18:28:01
+ * @LastEditTime : 2020-01-14 19:27:50
  */
 #pragma once
 
@@ -84,10 +84,10 @@ namespace LasAlgorithm
          *        则说明具有线性特征（效率比较低，对于离群点的处理问题）
          * @param Point3Ds pointCluster：点簇的点集
          * @param double threshold：拟合优度阈值
-         * @param vector<double> &direct:方向
+         * @param MatrixXd &param：拟合直线的参数
          * @return: 
          */
-        bool PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold,vector<double> &direct);
+        bool PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold,MatrixXd &param);
     private:
         /**
          *  计算拟合残差

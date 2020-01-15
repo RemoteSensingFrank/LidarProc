@@ -75,6 +75,15 @@ namespace GeometryLas {
 		* �����������ļн�
 		*/
 		static double VectorAngle(const Point3D vec1, const Point3D vec2);
+
+		/** 
+		 * @name: 归一化 
+		 * @msg: 输入向量归一化，规则化
+		 * @param const Point3D vec1:输入向量
+		 * 		  Point3D &vec2:归一化后的向量
+		 * @return: 
+		 */
+		static void Normalize(const Point3D vec1,Point3D &vec2);
 	};
 
 	/*������㺯��*/

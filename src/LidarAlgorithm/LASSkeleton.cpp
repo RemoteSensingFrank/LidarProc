@@ -110,7 +110,7 @@ namespace LasAlgorithm
      * 但是算法存在最大的问题在于在某些块中有线性特征比较强
      * 但是某些点偏差比较大，对于这些偏差大的点无法剔除
      **/
-    bool PointCloudLineSkeleton::PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold,vector<double> &direct)
+    bool PointCloudLineSkeleton::PointCloudLineSkeleton_LineExtractRaw(Point3Ds pointCluster,double threshold,MatrixXd &param)
     {
         //直线拟合
         //减去均值去中心化后平移的值为0，因此在处理过程中需要恢复，如何恢复平移的值还没有想好
@@ -148,10 +148,11 @@ namespace LasAlgorithm
         }
         params=paramM1*(paramM2.inverse());
         double residual=PointCloudLineSkeleton_LineResidual(pointCluster,params);
+        param = params;
         //cout<<params<<endl;
-        direct.push_back(params(0,0));
-        direct.push_back(params(1,0));
-        direct.push_back(1.0);
+        // direct.push_back(params(0,0));
+        // direct.push_back(params(1,0));
+        // direct.push_back(1.0);
         return residual<threshold;
     }
 
@@ -220,7 +221,7 @@ namespace LasAlgorithm
         }
 
         //看起来整个算法是串行算法，没法进行优化
-        vector<double> direct;
+        MatrixXd direct;
         for(int i=0;i<pointSet.size();++i)
         {
             //首先找到K近邻的点
@@ -261,7 +262,7 @@ namespace LasAlgorithm
             points[i].x = 3*points[i].z + 1 + double(rand())/double(RAND_MAX);  //引入噪声
             points[i].y = 2*points[i].z + 2 + double(rand())/double(RAND_MAX);  //引入噪声
         }
-        vector<double> direct;
+        MatrixXd direct;
         PointCloudLineSkeleton_LineExtractRaw(points,5,direct);
     }
 
@@ -271,13 +272,27 @@ namespace LasAlgorithm
     vector<int> PointCloudLineRefineSkeleton::PointCloudLineSkeleton_LineRefine(Point3D ptCnt,Point3Ds pointCluster,double threshold)
     {
         vector<int> lineRefineIdxs;
-        vector<double> direct;
+        MatrixXd direct;
         GeometryRelation geoRel;
+        double cx=0,cy=0,cz=0;
+        for(int i=0;i<pointCluster.size();++i)
+        {
+            cx+=pointCluster[i].x/pointCluster.size();
+            cy+=pointCluster[i].y/pointCluster.size();
+            cz+=pointCluster[i].z/pointCluster.size();
+        }
+        for(int i=0;i<pointCluster.size();++i)
+        {
+            pointCluster[i].x-=cx;
+            pointCluster[i].y-=cy;
+            pointCluster[i].z-=cz;
+        }
         if(PointCloudLineSkeleton_LineExtractRaw(pointCluster,threshold,direct))
         {
+            //整体的判断有问题，在这里给出的是残差而不是距离阈值，需要进一步思考
+            //先去中心化，然后直接判断角度
             //在具有线性特征的情况下进一步获取具体的点
-            double thresholdShrink = threshold*0.6;
-            Point3D blockDirect(direct[0],direct[1],direct[2]);
+            Point3D blockDirect(0,direct(1,1)-direct(1,0)*(direct(0,1)/direct(0,0)),-direct(0,1)/direct(0,0));
             for(int i=0;i<pointCluster.size();++i)
             {
                 double distance=DistanceComputation::Distance(ptCnt,pointCluster[i]);
@@ -286,11 +301,10 @@ namespace LasAlgorithm
                 Point3D ptDirect(pointCluster[i].x-blockDirect.x,pointCluster[i].y-blockDirect.y,pointCluster[i].z-blockDirect.z);
                 double vecterAngle = geoRel.VectorAngle(blockDirect,ptDirect);
                 //判断(综合考虑方向因素后的距离是否小于原始距离的60%)
-                if((1-fabs(cos(vecterAngle)))*distance<thresholdShrink)
+                if(vecterAngle<0.2)
                 {
                     lineRefineIdxs.push_back(i);
                 }
-
             }
         }
         return lineRefineIdxs;
@@ -314,7 +328,7 @@ namespace LasAlgorithm
         }
 
         //看起来整个算法是串行算法，没法进行优化
-        vector<double> direct;
+        MatrixXd direct;
         for(int i=0;i<pointSet.size();++i)
         {
             //首先找到K近邻的点
@@ -333,7 +347,7 @@ namespace LasAlgorithm
                 //获取强线性特征的点集
                 vector<int> lineRef;
                 lineRef=PointCloudLineSkeleton_LineRefine(pointSet[i],temPtSet,lineResidual);
-                printf("%d\n",lineRef.size());
+                // printf("%d\n",lineRef.size());
                 for(int j=0;j<lineRef.size();++j)
                 {
                     int idx = lineRef[j];

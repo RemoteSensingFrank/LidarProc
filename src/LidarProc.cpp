@@ -161,7 +161,7 @@ int main(int argc ,char* argv[])
     LASReader *reader4 = new LidarMemReader();
     reader4->LidarReader_Open("../data/default/more.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
-    Point3Ds pts=ptLineSk.PointCloudLineSkeleton_Extract(lasdst1,30,0.5);
+    Point3Ds pts=ptLineSk.PointCloudLineSkeleton_Extract(lasdst1,30,0.2);
     FILE *fs = fopen("../data/line.txt","w+");
     //遍历点云数据输出
     for(int i=0;i<pts.size();++i)

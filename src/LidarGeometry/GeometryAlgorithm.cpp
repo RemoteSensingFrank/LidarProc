@@ -436,6 +436,14 @@ namespace GeometryLas {
 		return acos(abMo / aMo / bMo);
 	}
 
+	void GeometryRelation::Normalize(const Point3D vec1,Point3D &vec2)
+	{
+		double dlen = sqrt(vec1.x*vec1.x+vec1.y*vec1.y +vec1.z*vec1.z);
+		vec2.x = vec1.x/dlen;
+		vec2.y = vec1.y/dlen;
+		vec2.z = vec1.z/dlen;
+	}
+
 
 	/*****************************************************************************
 	* @brief : ???????
