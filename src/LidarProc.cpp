@@ -115,53 +115,53 @@ void ClassifySample()
 {
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("../data/default/segment2.las",lasdst1);
+    reader4->LidarReader_Open("../data/default/mergecolor.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
     
     classifyElectricPatrolFast classFast;
-    Point2Ds points;
-    LASColorExt colorTower;
-    colorTower.Red=colorTower.Blue=colorTower.Green=255;
+    // Point2Ds points;
+    // LASColorExt colorTower;
+    // colorTower.Red=colorTower.Blue=colorTower.Green=255;
     
-    points.push_back(Point2D(182221.410003662109,2481208.119995117188));
-    points.push_back(Point2D(182704.270019531250,2481000.869995117188));
-    classFast.ElectricPatrolFast_Tower(lasdst1,points,18,colorTower);
+    // points.push_back(Point2D(182221.410003662109,2481208.119995117188));
+    // points.push_back(Point2D(182704.270019531250,2481000.869995117188));
+    // classFast.ElectricPatrolFast_Tower(lasdst1,points,18,colorTower);
     
-    LASColorExt lineTower;
-    lineTower.Red=lineTower.Green=0;lineTower.Blue=255;
-    long err=classFast.ElectricPatrolFast_Lines(lasdst1,points,18,7,lineTower);
+    // LASColorExt lineTower;
+    // lineTower.Red=lineTower.Green=0;lineTower.Blue=255;
+    // long err=classFast.ElectricPatrolFast_Lines(lasdst1,points,18,7,lineTower);
     //reader4->LidarReader_Write("../data/default/classifiedLine.las",lasdst1,elcLine);
 
     LASColorExt groundTower;
     groundTower.Red=groundTower.Green=255;groundTower.Blue=0;
-    classFast.ElectricPatrolFast_Ground(lasdst1,5,2,20,groundTower);
+    classFast.ElectricPatrolFast_Ground(lasdst1,8,0.5,15,groundTower);
+    reader4->LidarReader_Write("../data/default/classifiedGround.las",lasdst1,elcGround);
     
-    
-    LASColorExt vegetationTower;
-    vegetationTower.Red=vegetationTower.Blue=0;vegetationTower.Green=255;
-    //classFast.ElectricPatrolFast_Vegetation(lasdst1,5,20,vegetationTower);
-    classFast.ElectricPatrolFast_VegetationLast(lasdst1,vegetationTower);
-    //reader4->LidarReader_Write("../data/default/classifiedVege.las",lasdst1,elcVegetation);
+    // LASColorExt vegetationTower;
+    // vegetationTower.Red=vegetationTower.Blue=0;vegetationTower.Green=255;
+    // //classFast.ElectricPatrolFast_Vegetation(lasdst1,5,20,vegetationTower);
+    // classFast.ElectricPatrolFast_VegetationLast(lasdst1,vegetationTower);
+    // //reader4->LidarReader_Write("../data/default/classifiedVege.las",lasdst1,elcVegetation);
 
-    LASDangerPointsFlann dangerDetect;
-    dangerDetect.LASDangerPoints_Detect(22,lasdst1);
-    //reader4->LidarReader_Write("../data/default/classifiedDanger.las",lasdst1,elcDanger);
+    // LASDangerPointsFlann dangerDetect;
+    // dangerDetect.LASDangerPoints_Detect(22,lasdst1);
+    // //reader4->LidarReader_Write("../data/default/classifiedDanger.las",lasdst1,elcDanger);
 
-    reader4->LidarReader_Write("../data/default/classified.las",lasdst1);
+    // reader4->LidarReader_Write("../data/default/classified.las",lasdst1);
 
 
     delete lasdst1;
     delete reader4;
 }
 
-int main(int argc ,char* argv[])
+void SimpleLineExtract()
 {
     LasAlgorithm::PointCloudLineRefineSkeleton ptLineSk;
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("../data/default/more.las",lasdst1);
+    reader4->LidarReader_Open("../data/default/segment1.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
-    Point3Ds pts=ptLineSk.PointCloudLineSkeleton_Extract(lasdst1,30,0.2);
+    Point3Ds pts=ptLineSk.PointCloudLineSkeleton_Extract(lasdst1,50,0.15);
     FILE *fs = fopen("../data/line.txt","w+");
     //遍历点云数据输出
     for(int i=0;i<pts.size();++i)
@@ -172,6 +172,11 @@ int main(int argc ,char* argv[])
     fs=nullptr;
     delete lasdst1;
     delete reader4;
+}
+
+int main(int argc ,char* argv[])
+{
+    ClassifySample();
     return 0;
 }
 

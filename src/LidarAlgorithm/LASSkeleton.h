@@ -4,11 +4,12 @@
  *  首先根据某一点获取其N近邻个点，在获取这些点的基础上计算N近邻点
  *  的中心点（通过重心法计算中心点），然后迭代，找出所有点，完成
  *  简单骨架提取算法，但是效率比较低-先进行效率分析
+ * 
  * @version: 1.0版本
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-01-14 19:27:50
+ * @LastEditTime : 2020-02-06 14:45:22
  */
 #pragma once
 
@@ -82,6 +83,7 @@ namespace LasAlgorithm
          *        连接成直线判断点集拟合优度，选取最好的
          *        拟合优度的直线，如果最好的拟合优度直线大于某一个阈值，
          *        则说明具有线性特征（效率比较低，对于离群点的处理问题）
+         * 
          * @param Point3Ds pointCluster：点簇的点集
          * @param double threshold：拟合优度阈值
          * @param MatrixXd &param：拟合直线的参数

@@ -3,8 +3,8 @@
  * @version: v1.1 add kmeans segment method
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
- * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-11-27 16:51:14
+ * @LastEditors  : Frank.Wu
+ * @LastEditTime : 2020-01-16 17:05:23
  */
 
 #pragma once
@@ -59,12 +59,12 @@ namespace LasAlgorithm {
 	{
 	public:
 		/*
-		��״���Ƶ���ȡ�ָ���ڲ�ͬ����״�ĵ�������Ҫ�ķ��������ǲ�һ����
-		������״�ĵ���������˵��Ҫ���Ƿ��߷���
-		@param pointSet ����ĵ㼯
-		@param type ���Ʒ������
-		@param directionRange �Ƕ���ֵ
-		@param knnRange KNN���෶Χ��ֵ
+		面状点云的提取分割，对于不同的形状的点云所需要的方向特征是不一样的
+		对于面状的点云特征来说重要的是法线方向
+		@param pointSet 输入的点集
+		@param type 点云分类类别
+		@param directionRange 角度阈值
+		@param knnRange KNN聚类范围阈值
 		*/
 		long PointCloudSegmentDirect_SegmentPoly(Point3Ds pointSet, int *type, float directionRange, float knnRange);
 

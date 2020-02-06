@@ -114,7 +114,7 @@ namespace LasAlgorithm
     {
         //直线拟合
         //减去均值去中心化后平移的值为0，因此在处理过程中需要恢复，如何恢复平移的值还没有想好
-        //先求缩放比例，然后代入回均值去求平移的值，如果只是判断是否为直线，则可以省略改过程
+        //先求缩放比例，然后代入回均值去求平移的值，如果只是判断是否为直线，则可以省略该过程
         double cx=0,cy=0,cz=0;
         for(int i=0;i<pointCluster.size();++i)
         {
@@ -267,7 +267,6 @@ namespace LasAlgorithm
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     //精化线拟合
     vector<int> PointCloudLineRefineSkeleton::PointCloudLineSkeleton_LineRefine(Point3D ptCnt,Point3Ds pointCluster,double threshold)
     {
@@ -289,19 +288,42 @@ namespace LasAlgorithm
         }
         if(PointCloudLineSkeleton_LineExtractRaw(pointCluster,threshold,direct))
         {
+            //V1.0
             //整体的判断有问题，在这里给出的是残差而不是距离阈值，需要进一步思考
             //先去中心化，然后直接判断角度
             //在具有线性特征的情况下进一步获取具体的点
-            Point3D blockDirect(0,direct(1,1)-direct(1,0)*(direct(0,1)/direct(0,0)),-direct(0,1)/direct(0,0));
+            //Point3D blockDirect(0,direct(1,1)-direct(1,0)*(direct(0,1)/direct(0,0)),-direct(0,1)/direct(0,0));
+            // for(int i=0;i<pointCluster.size();++i)
+            // {
+            //     double distance=DistanceComputation::Distance(ptCnt,pointCluster[i]);
+            //     //方向的计算有问题
+            //     //虚拟于主方向上任何一个点理论上都可以，只需要了解到大小的趋势就行
+            //     Point3D ptDirect(pointCluster[i].x-blockDirect.x,pointCluster[i].y-blockDirect.y,pointCluster[i].z-blockDirect.z);
+            //     double vecterAngle = geoRel.VectorAngle(blockDirect,ptDirect);
+            //     //判断(综合考虑方向因素后的距离是否小于原始距离的60%)
+            //     //无法很好的判断与主方向的夹角的问题，因此这里在对角度的精化上存在没有明确物理意义的地方
+            //     if(vecterAngle<0.2)
+            //     {
+            //         
+            //     }
+            // }
+
+            //V2.0
+            //按方向判断总是感觉有点问题，还是按残差判断比较靠谱
+            //direct 中存储的是线性参数，通过此种方法是能够提取出线性特征，但是感觉没有太大意义
+            //计算残差
+            double ex=0,ey=0,e=0;
             for(int i=0;i<pointCluster.size();++i)
             {
-                double distance=DistanceComputation::Distance(ptCnt,pointCluster[i]);
-                //方向的计算有问题
-                //虚拟于主方向上任何一个点理论上都可以，只需要了解到大小的趋势就行
-                Point3D ptDirect(pointCluster[i].x-blockDirect.x,pointCluster[i].y-blockDirect.y,pointCluster[i].z-blockDirect.z);
-                double vecterAngle = geoRel.VectorAngle(blockDirect,ptDirect);
-                //判断(综合考虑方向因素后的距离是否小于原始距离的60%)
-                if(vecterAngle<0.2)
+                MatrixXd mat(2,1);
+                mat(0,0)=pointCluster[i].z;
+                mat(1,0)=1;
+                MatrixXd res=direct*mat;
+
+                ex = res(0,0)-pointCluster[i].x;
+                ey = res(1,0)-pointCluster[i].y;
+                double e=sqrt(ex*ex+ey*ey);
+                if(e<threshold)
                 {
                     lineRefineIdxs.push_back(i);
                 }
@@ -393,5 +415,7 @@ namespace LasAlgorithm
 		}
 		return PointCloudLineSkeleton_Extract(pointSet,nearPointNum,lineResidual); 
     }
+
+
 
 }
