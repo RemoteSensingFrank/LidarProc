@@ -176,7 +176,62 @@ void SimpleLineExtract()
 
 int main(int argc ,char* argv[])
 {
-    ClassifySample();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
+    ILASDataset *lasdst1 = new ILASDataset();
+    LASReader *reader4 = new LidarMemReader();
+    reader4->LidarReader_Open("../data/default/moreSimulate.las",lasdst1);
+    reader4->LidarReader_Read(true,1,lasdst1);
+
+    ILASDataset *lasdst2 = new ILASDataset();
+    LASReader *reader5 = new LidarMemReader();
+    reader5->LidarReader_Open("../data/default/more.las",lasdst2);
+    reader5->LidarReader_Read(true,1,lasdst2);
+
+
+    LASTransToPCL transPCL;
+    transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
+    transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
+
+    LidarFeaturePoints lidarFeatures;
+    pcl::PointCloud<int> siftPointIdx1;
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
+    lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
+
+    pcl::PointCloud<int> siftPointIdx2;
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
+    lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
+
+    LidarFeatureRegistration liadrReg;
+    pcl::PointCloud<int> siftMatchPointIdx;
+    liadrReg.LidarRegistration_Sift(fpfhs1,fpfhs2,siftMatchPointIdx);
+    double rot[6];
+    liadrReg.LidarRegistration_RotTrans(pclPointCloudI,
+                                        siftPointIdx1,
+                                        pclPointCloudO,
+                                        siftPointIdx2,
+                                        siftMatchPointIdx,
+                                        rot);
+    // FILE *fs = fopen("../data/sift_match.txt","w+");
+    // if(fs!=nullptr)
+    // {
+    //     for(int i=0;i<siftMatchPointIdx.points.size ();++i)
+    //         printf("%d-%d\n",i,siftMatchPointIdx.points[i]);
+    //         //fprintf(fs,"%d %d\n",i,pclPointCloudI->points[i]);
+    //     fclose(fs);
+    // }else
+    // {
+    //     printf("create test output failed!\n");
+    // }
+
+    for(int i=0;i<6;++i)
+    {
+        printf("%lf\n",rot[i]);
+    }
+
+    delete lasdst1;
+    delete reader4;
+  
     return 0;
 }
 

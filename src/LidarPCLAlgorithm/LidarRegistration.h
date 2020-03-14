@@ -56,6 +56,7 @@ public:
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr compute_fpfh_feature(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
                                                                     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree);
 
+
 };
 
 #endif

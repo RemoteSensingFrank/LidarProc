@@ -313,21 +313,15 @@ function projected2WGS84(x,y){
 }
 
 function projectedFromWGS84(lat,lng){
-    let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
-    let mapProjection = proj4.defs("WGS84");
-
-    var xy = proj4(mapProjection,pointcloudProjection,[lng,lat]);
-
+    // let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
+    // let mapProjection = proj4.defs("WGS84");
+    var xy = proj4('+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs',[lng,lat]);
     return [xy[0], xy[1]]
 }
 
-function projected2UTM(lat,lng){
-    let pointcloudProjection = "+proj=utm +zone=20 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
-    let mapProjection = proj4.defs("WGS84");
-
-    var xy = proj4(mapProjection,pointcloudProjection,[lng,lat]);
-
-    return [xy[0], xy[1]]
+function projectedToWGS84(x,y){
+    var lla=proj4('+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs').inverse([x,y])
+    return lla;
 }
 
 
@@ -409,17 +403,37 @@ function makeImageFrustrum(Rx,Ry,Rz,Cx,Cy,Cz){
 /**
  * 加载或移除相机
  */
-function loadCameraPositions(){
-    var ncams = camX.length;
+function loadCameraPositions(reconstructions){
+    unloadCameraPositions();
+    var ncams = 0;
+    for(var reconstruction_id=0;reconstruction_id<reconstructions.length;reconstruction_id++){
+        for (var shot_id in reconstructions[reconstruction_id].shots) {
+            ncams+=1;
+        }
+    }
     var imageobj=Array(ncams);
     var group = new THREE.Group();
     group.name="camera";
-    for(var imagenum=0;imagenum<ncams;imagenum++){
-        imageobj[imagenum]=makeImageFrustrum(camRoll[imagenum],camPitch[imagenum],camYaw[imagenum],camX[imagenum],camY[imagenum],camZ[imagenum]);
-        imageobj[imagenum].myimagenum = imagenum;
-        imageobj[imagenum].isFiltered = false;
-        group.add(imageobj[imagenum]);
+    var imagenum = 0;
+    for(var reconstruction_id=0;reconstruction_id<reconstructions.length;reconstruction_id++){
+        for (var shot_id in reconstructions[reconstruction_id].shots) {
+            if (reconstructions[reconstruction_id].shots.hasOwnProperty(shot_id)) {
+                imageobj[imagenum]=cameraLineGeo(reconstructions[reconstruction_id],shot_id);
+                imageobj[imagenum].myimagenum = imagenum;
+                imageobj[imagenum].isFiltered = false;
+                group.add(imageobj[imagenum]);
+            }
+            imagenum+=1;
+        }
     }
+
+
+    // for(var imagenum=0;imagenum<ncams;imagenum++){
+    //     imageobj[imagenum]=makeImageFrustrum(camRoll[imagenum],camPitch[imagenum],camYaw[imagenum],camX[imagenum],camY[imagenum],camZ[imagenum]);
+    //     imageobj[imagenum].myimagenum = imagenum;
+    //     imageobj[imagenum].isFiltered = false;
+    //     group.add(imageobj[imagenum]);
+    // }
     viewer.scene.scene.add(group);
     viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z);
 }
@@ -428,6 +442,152 @@ function unloadCameraPositions(){
     var obj=viewer.scene.scene.getObjectByName("camera");
     viewer.scene.scene.remove(obj);
 }
+
+
+/**
+ * 构建观测相机
+ */
+function rotate(vector, angleaxis,world) {
+    var v = new THREE.Vector3(vector[0], vector[1], vector[2]);
+    var axis = new THREE.Vector3(angleaxis[0],
+                                 angleaxis[1],
+                                 angleaxis[2]);
+    var angle = axis.length();
+    axis.normalize();
+    var matrix = new THREE.Matrix4().makeRotationAxis(axis, angle);
+    v.applyMatrix4(matrix);
+    return v;
+}
+
+function opticalCenter(shot) {
+    var angleaxis = [-shot.rotation[0],
+                     -shot.rotation[1],
+                     -shot.rotation[2]];
+
+    var cent = shot.gps_position;
+
+    var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
+    var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
+
+
+    var centWorldPlane=projectedFromWGS84(lat,lng);
+    if(lng==0&&lat==0){
+        centWorldPlane[0]=centWorldPlane[1]=0;
+    }
+
+    var centWorld = [
+        centWorldPlane[0],
+        centWorldPlane[1],
+        0
+    ];                 
+
+    var Rt = rotate(shot.translation, angleaxis,centWorld);
+    Rt.negate();
+
+    Rt.x = Rt.x+centWorld[0];
+    Rt.y = Rt.y+centWorld[1];
+    Rt.z = Rt.z+centWorld[2];
+    //var lla=projectedToWGS84(Rt.x,Rt.y);
+    // Rt.x = lla[0];
+    // Rt.y = lla[1];
+    return Rt;
+}
+
+function pixelToVertex(cam, shot, u, v, scale) {
+    // Projection model:
+    // xc = R * x + t
+    // u = focal * xc / zc
+    // v = focal * yc / zc
+    var focal = cam.focal || 0.3;
+    var zc = scale;
+    var xc = u / focal * zc;
+    var yc = v / focal * zc;
+
+    var xct = [xc - shot.translation[0],
+               yc - shot.translation[1],
+               zc - shot.translation[2]];
+
+
+    var angleaxis = [-shot.rotation[0],
+                     -shot.rotation[1],
+                     -shot.rotation[2]];
+    var cent = shot.gps_position;
+
+    var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
+    var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
+
+    var centWorldPlane=projectedFromWGS84(lat,lng);
+    if(lng==0&&lat==0){
+        centWorldPlane[0]=centWorldPlane[1]=0;
+    }
+
+    var centWorld = [
+        centWorldPlane[0],
+        centWorldPlane[1],
+        0
+    ];
+    var Rt = rotate(xct, angleaxis,centWorld);
+    Rt.x = Rt.x+centWorld[0];
+    Rt.y = Rt.y+centWorld[1];
+    Rt.z = Rt.z+centWorld[2];
+    //var lla=projectedToWGS84(Rt.x,Rt.y);
+    // Rt.x = lla[0];
+    // Rt.y = lla[1];
+    return Rt
+}
+
+function cameraLineGeo(reconstruction, shot_id) {
+    var shot = reconstruction.shots[shot_id];
+    var cam  = reconstruction.cameras[shot.camera];
+
+    var dx = cam.width / 2.0 / Math.max(cam.width, cam.height);
+    var dy = cam.height / 2.0 / Math.max(cam.width, cam.height);
+
+    var pyramidgeometry = new THREE.Geometry();
+    var imagepyramid  = new THREE.Object3D();
+
+    pyramidgeometry.vertices = [
+        pixelToVertex(cam, shot, -dx, -dy, 0.9),
+        pixelToVertex(cam, shot,  dx, -dy, 0.9),
+        pixelToVertex(cam, shot,  dx,  dy, 0.9),
+        pixelToVertex(cam, shot, -dx,  dy, 0.9),
+        opticalCenter(shot)
+    ];
+
+    pyramidgeometry.faces = [
+        new THREE.Face3( 1, 0, 4 ),
+        new THREE.Face3( 2, 1, 4 ),
+        new THREE.Face3( 3, 2, 4 ),
+        new THREE.Face3( 0, 3, 4 )
+    ];
+
+    var pyramidmaterial = new THREE.MeshBasicMaterial( {   color: 0xff0000,
+        wireframe: false
+    } );
+    var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
+    var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
+
+
+    var centWorldPlane=projectedFromWGS84(lat,lng);
+    if(lng==0&&lat==0){
+        centWorldPlane[0]=centWorldPlane[1]=0;
+    }
+    imagepyramid.position.x = pyramidgeometry.vertices[4].x;
+    imagepyramid.position.y = pyramidgeometry.vertices[4].y;
+    imagepyramid.position.z = pyramidgeometry.vertices[4].z;
+
+    // imagepyramid.rotation.x = -shot.rotation[0];
+    // imagepyramid.rotation.y = -shot.rotation[1];
+    // imagepyramid.rotation.z = -shot.rotation[2];
+
+    // imagepyramid.scale.x = 1;
+    // imagepyramid.scale.y = 1;
+    // imagepyramid.scale.z = 1;
+    var pyramid = new THREE.Mesh( pyramidgeometry, pyramidmaterial );
+    imagepyramid.add(pyramid);
+    return imagepyramid
+}
+
 
 /**
  * 点击分类处理进行分类

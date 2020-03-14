@@ -1,5 +1,15 @@
+/*
+ * @Descripttion: 
+ * @version: 1.0版本
+ * @Author: Frank.Wu
+ * @Date: 2020-01-09 15:25:57
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2020-03-05 18:47:44
+ */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
+#include "../LidarGeometry/Geometry.h"
+
 #include <boost/thread/thread.hpp>
 #include <pcl/range_image/range_image.h>
 #include <pcl/features/range_image_border_extractor.h>
@@ -12,6 +22,9 @@
 #include <pcl/features/fpfh.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
+#include<ceres/ceres.h>
+using namespace ceres;
+using namespace GeometryLas;
 
 typedef pcl::PointXYZ PointType;
 /**
@@ -83,7 +96,7 @@ long LidarFeaturePoints::LidarFeature_NARF(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     /*提取特征描述*/
     std::vector<int> keypoint_indices2;
     keypoint_indices2.resize (narfIndex.points.size ());
-    for (unsigned int i=0; i<narfIndex.size (); ++i) // This step is necessary to get the right vector type
+    for (unsigned int i=0; i<narfIndex.size (); ++i) // This step is necessar_t[1] to get the right vector type
         keypoint_indices2[i]=narfIndex.points[i];
     pcl::NarfDescriptor narf_descriptor (&range_image, &keypoint_indices2);
     narf_descriptor.getParameters ().support_size = support_size;
@@ -98,10 +111,10 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
                                            pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH)
 {
     // Parameters for sift computation
-    float min_scale = 0.5f;       //the standard deviation of the smallest scale in the scale space
-    int n_octaves   = 10;        //the number of octaves (i.e. doublings of scale) to compute
-    int n_scales_per_octave = 4;//the number of scales to compute within each octave
-    float min_contrast = 0.2f;  //the minimum contrast required for detection
+    float min_scale = 1.0f;       //the standard deviation of the smallest scale in the scale space
+    int n_octaves   = 8;          //the number of octaves (i.e. doublings of scale) to compute
+    int n_scales_per_octave = 4;  //the number of scales to compute within each octave
+    float min_contrast = 0.2f;    //the minimum contrast required for detection
 
     pcl::console::TicToc time;
     time.tic();
@@ -224,5 +237,132 @@ long LidarFeatureRegistration::LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHS
         }
     }
 }
+#ifdef _USE_CERES_
+/**
+ * @name: ceres 自动求导,注意，各个库采用的编译器类型要一致，
+ *        PCL采用C++14 则ceres也采用c++14，否则在link的时候会出问题
+ * @msg: 
+ * @return: 
+ */
+struct CostFunctorRotTrans{
+    
+	CostFunctorRotTrans(double x1,double y1,double z1,double x2,double y2,double z2)
+                        :m_x1(x1), m_y1(y1), m_z1(z1), m_x2(x2), m_y2(y2), m_z2(z2)
+    {}
+
+	template <typename T> 
+    bool operator()(const T* r_t, T* residual) const 
+    {
+        T a11 = cos(r_t[1])*cos(r_t[2]);
+        T a12 = sin(r_t[0])*sin(r_t[1])*cos(r_t[2]) - cos(r_t[0])*sin(r_t[2]);
+        T a13 = cos(r_t[0])*sin(r_t[1])*cos(r_t[2]) + sin(r_t[0])*sin(r_t[2]);
+        T b11 = cos(r_t[1])*sin(r_t[2]);
+        T b12 = sin(r_t[0])*sin(r_t[1])*sin(r_t[2]) + cos(r_t[0])*cos(r_t[2]);
+        T b13 = cos(r_t[0])*sin(r_t[1])*sin(r_t[2]) - sin(r_t[0])*cos(r_t[2]);
+        T c11 = -sin(r_t[1]);
+        T c12 = sin(r_t[0])*cos(r_t[1]);
+        T c13 = cos(r_t[0])*cos(r_t[1]);
+
+        residual[0]=(a11*m_x1+a12*m_y1+a13*m_z1+r_t[3]-m_x2)*
+                    (a11*m_x1+a12*m_y1+a13*m_z1+r_t[3]-m_x2);
+        residual[1]=(b11*m_x1+b12*m_y1+b13*m_z1+r_t[4]-m_y2)*
+                    (b11*m_x1+b12*m_y1+b13*m_z1+r_t[4]-m_y2);
+        residual[2]=(c11*m_x1+c12*m_y1+c13*m_z1+r_t[5]-m_z2)*
+                    (c11*m_x1+c12*m_y1+c13*m_z1+r_t[5]-m_z2);
+		
+        return true;
+	}
+ 
+	// static ceres::CostFunction* Create(const double observed_depth) {
+	// 	return (new ceres::AutoDiffCostFunction<CostFunctorRotTrans, 6, 3>(
+	// 		new CostFunctorRotTrans(m_obs,m_match)));
+	// }
+ 
+    const double m_x1;
+    const double m_y1;
+    const double m_z1;
+    const double m_x2;
+    const double m_y2;
+    const double m_z2;
+};
+
+/**
+ * @name: 获取数值中点
+ * @param {type} 
+ * @return: 
+ */
+static Point3D GetMaxMinCenterPoint(pcl::PointCloud<pcl::PointXYZ>::Ptr pts_cloud)
+{
+    Point3D ptMax(-999999999,-999999999,-999999999);
+    Point3D ptMin(999999999,999999999,999999999);
+
+    for (int i = 0; i < pts_cloud->points.size(); ++i) 
+    {
+        ptMax.x=max(double(pts_cloud->points[i].x),ptMax.x);
+        ptMax.y=max(double(pts_cloud->points[i].y),ptMax.y);
+        ptMax.z=max(double(pts_cloud->points[i].z),ptMax.z);
+
+        ptMin.x=min(double(pts_cloud->points[i].x),ptMin.x);
+        ptMin.y=min(double(pts_cloud->points[i].y),ptMin.y);
+        ptMin.z=min(double(pts_cloud->points[i].z),ptMin.z);
+    }
+
+    return Point3D((ptMax.x+ptMin.x)/2,(ptMax.y+ptMin.y)/2,(ptMax.z+ptMin.z)/2);
+}
+
+//TODO:
+//功能是做完了，最后也能够收敛，但是计算结果的残差太大，而且在匹配过程中可能存在误匹配的店
+//第一步是需要处理误匹配的店，然后再找到减小残差的办法
+long LidarFeatureRegistration::LidarRegistration_RotTrans(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                    pcl::PointCloud<int> ptSiftIdx1,
+                                    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                    pcl::PointCloud<int> ptSiftIdx2,
+                                    pcl::PointCloud<int> siftMatchPointIdx,
+                                    double *r_t)
+{
+    Problem problem;
+    for(int i=0;i<6;++i)
+        r_t[i]=0;
+    Point3D ptCent1 = GetMaxMinCenterPoint(cloud1);
+    Point3D ptCent2 = GetMaxMinCenterPoint(cloud2);
+    
+    double *obs=new double[3*siftMatchPointIdx.points.size()];
+    double *match=new double[3*siftMatchPointIdx.points.size()];
+
+    for (int i = 0; i < siftMatchPointIdx.points.size(); ++i) 
+    {
+        const int idx1 = ptSiftIdx2.points[i];
+        const int idx2 = ptSiftIdx1.points[siftMatchPointIdx.points[i]];
+        
+        obs[i*3+0]=cloud1->points[idx1].x-ptCent1.x;
+        obs[i*3+1]=cloud1->points[idx1].y-ptCent1.y;
+        obs[i*3+2]=cloud1->points[idx1].z-ptCent1.z;
+
+        match[i*3+0]=cloud2->points[idx2].x-ptCent1.x;
+        match[i*3+1]=cloud2->points[idx2].y-ptCent1.y;
+        match[i*3+2]=cloud2->points[idx2].z-ptCent1.z;
+    }
+
+    for (int i = 0; i < siftMatchPointIdx.points.size(); ++i) 
+    {
+        CostFunction* cost_function =
+            new AutoDiffCostFunction<CostFunctorRotTrans, 3,6>(
+                new CostFunctorRotTrans(obs[i+3+0],obs[i+3+1],obs[i+3+2],match[i*3+0],match[i*3+1],match[i*3+2]));
+        problem.AddResidualBlock(cost_function, nullptr, r_t);
+    }
+    
+    Solver::Options options;
+    options.linear_solver_type=ceres::DENSE_QR;
+    options.minimizer_progress_to_stdout=true;
+    options.max_num_iterations = 500;
+    Solver::Summary summary;
+    Solve(options,&problem,&summary);
+
+    delete obs;obs=nullptr;
+    delete match;match=nullptr;
+
+    return 0;
+}
+#endif
 
 #endif

@@ -183,7 +183,6 @@ function classifiedFast(){
             backdrop:"static",  //点击背景不关闭
             keyboard: false     //触发键盘esc事件时不关闭
         });
-
     }
 
 }
@@ -192,10 +191,33 @@ function classifiedFast(){
  * 加载相机信息
  */
 function loadCamera(e){
-    if($(e).hasClass('active')){  //判断是否选中
-        unloadCameraPositions();
-     }else{
-        loadCameraPositions();
-     }
-     $(e).toggleClass('active');
+    // if($(e).hasClass('active')){  //判断是否选中
+    //     unloadCameraPositions();
+    //  }else{
+    //     loadCameraPositions();
+    //  }
+    //  $(e).toggleClass('active');
+    $("#cameraModel").modal({
+        backdrop:"static",  //点击背景不关闭
+        keyboard: false     //触发键盘esc事件时不关闭
+    });
 }
+
+/**
+ * 打开camera重建数据
+ */
+function onReconstructionFileSelected(evt) {
+    let file = evt.target.files[0];
+    console.log(file);
+
+    $("#cameraModel").modal('hide');
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        data = JSON.parse(e.target.result);
+        //setReconstructionData(data);
+        loadCameraPositions(data)
+    };
+    reader.readAsText(file);
+}
+
