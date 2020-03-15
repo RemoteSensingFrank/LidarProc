@@ -302,25 +302,27 @@ function transDataFile(filename){
     });
 }
 
-
-function projected2WGS84(x,y){
-    let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
-    let mapProjection = proj4.defs("WGS84");
-
-    var lonlat = proj4(pointcloudProjection,mapProjection,[x,y]);
-
-    return [lonlat[1], lonlat[0]]
-}
-
-function projectedFromWGS84(lat,lng){
+/**
+ * 将WGS84经纬度转换为UTM投影坐标
+ * @param ：纬度
+ * @param ：经度
+ * @param ：投影带
+ */
+function projectedFromWGS84(lat,lng,zone){
     // let pointcloudProjection = "+proj=utm +zone=20 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
     // let mapProjection = proj4.defs("WGS84");
-    var xy = proj4('+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs',[lng,lat]);
+    var xy = proj4('+proj=utm +zone='+zone+' +ellps=WGS84 +datum=WGS84 +units=m +no_defs',[lng,lat]);
     return [xy[0], xy[1]]
 }
 
-function projectedToWGS84(x,y){
-    var lla=proj4('+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs').inverse([x,y])
+/**
+ * 将UTM投影坐标转换为WGS84经纬度
+ * @param ：纬度
+ * @param ：经度
+ * @param ：投影带
+ */
+function projectedToWGS84(x,y,zone){
+    var lla=proj4('+proj=utm +zone=' +zone+' +ellps=WGS84 +datum=WGS84 +units=m +no_defs').inverse([x,y])
     return lla;
 }
 
@@ -402,6 +404,7 @@ function makeImageFrustrum(Rx,Ry,Rz,Cx,Cy,Cz){
 
 /**
  * 加载或移除相机
+ * @param ：平差输出结果 
  */
 function loadCameraPositions(reconstructions){
     unloadCameraPositions();
@@ -438,6 +441,9 @@ function loadCameraPositions(reconstructions){
     viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z);
 }
 
+/**
+ *移除相机姿态参数
+ */
 function unloadCameraPositions(){
     var obj=viewer.scene.scene.getObjectByName("camera");
     viewer.scene.scene.remove(obj);
@@ -445,9 +451,11 @@ function unloadCameraPositions(){
 
 
 /**
- * 构建观测相机
+ * 旋转操作
+ * @param：待旋转的向量
+ * @param：旋转角度
  */
-function rotate(vector, angleaxis,world) {
+function rotate(vector, angleaxis) {
     var v = new THREE.Vector3(vector[0], vector[1], vector[2]);
     var axis = new THREE.Vector3(angleaxis[0],
                                  angleaxis[1],
@@ -459,6 +467,10 @@ function rotate(vector, angleaxis,world) {
     return v;
 }
 
+/**
+ * 计算相机光心在世界坐标系中的坐标
+ * @param : 成像的shot
+ */
 function opticalCenter(shot) {
     var angleaxis = [-shot.rotation[0],
                      -shot.rotation[1],
@@ -493,6 +505,14 @@ function opticalCenter(shot) {
     return Rt;
 }
 
+/**
+ * 将影像点解算为直接坐标系下的点
+ * @param : 成像的相机参数
+ * @param : 成像的shot
+ * @param : 在像平面上的x坐标
+ * @param : 在像平面上的y坐标
+ * @param : 缩放比例参数
+ */
 function pixelToVertex(cam, shot, u, v, scale) {
     // Projection model:
     // xc = R * x + t
@@ -536,6 +556,11 @@ function pixelToVertex(cam, shot, u, v, scale) {
     return Rt
 }
 
+/**
+ * 将相机的成像范围转换为实际空间中的坐标
+ * @param : 相片重构参数
+ * @param : 相片id
+ */
 function cameraLineGeo(reconstruction, shot_id) {
     var shot = reconstruction.shots[shot_id];
     var cam  = reconstruction.cameras[shot.camera];
