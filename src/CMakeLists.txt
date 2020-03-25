@@ -42,6 +42,7 @@ include_directories(./LidarPotreeCvt/include)
 include_directories(./LidarPotreeCvt/lib/rapidjson/include)
 include_directories(./LidarPotreeCvt/lib/arguments)
 include_directories(./ ./LidarBase ./LidarGeometry ./LidarAlgorithm ./LidarService ./LidarUtil ./LidarResearch)
+include_directories(../library/Eigen)
 
 # Add block directories 
 find_package(libLAS REQUIRED)
@@ -63,7 +64,7 @@ set(lnkLibs libgeometry libbase libalgorithm libutility libservice libresearch l
 set(exlnkLibs libgtest.so libgtest_main.so pthread)
 
 target_link_libraries(LidarServer ${lnkLibs})
-target_link_libraries(LidarServer ${exlnkLibs} laszip )
+target_link_libraries(LidarServer ${exlnkLibs} laszip)
 
 target_link_libraries(LidarProc ${lnkLibs})
 target_link_libraries(LidarProc ${exlnkLibs} laszip)
