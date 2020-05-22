@@ -8,8 +8,8 @@
  * @version: 1.0版本
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
- * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-02-06 14:45:22
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2020-05-22 16:43:56
  */
 #pragma once
 
@@ -164,6 +164,7 @@ namespace LasAlgorithm
 
         virtual Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
     };
+    
 }
 
 #endif

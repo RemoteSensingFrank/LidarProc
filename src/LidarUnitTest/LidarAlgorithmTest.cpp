@@ -10,8 +10,10 @@
 #include <vector>
 #include <string>
 #include <gtest/gtest.h>
+
 using namespace std;
 using namespace LasAlgorithm;
+
 //define secret id and key
 // string secretId ="AKID3tY1HMEqFRQFqDLL4ZyAC4mGVWLwCdor";
 // string secretKey="1pQnwra6MOEoCMGuLVS9ZlhRv86nLemf";
@@ -85,6 +87,7 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
     reader->LidarReader_Write("../data/default/classify_tower_line.las",dataset);
 }
 
+
 TEST(LASPROFILE,LASPROFILEProfileTestCase)
 {
 #ifdef _USE_OPENCV_
@@ -106,6 +109,7 @@ TEST(LASPROFILE,LASPROFILEProfileTestCase)
 #endif  
     EXPECT_EQ(0,0);
 }
+
 
 TEST(LASSKELETON,LASSKELETONTestCase)
 {
@@ -129,6 +133,7 @@ TEST(LASSKELETON,LASSKELETONTestCase)
     
     EXPECT_GT(points.size(),0);
 }
+
 
 TEST(LASKMEANS,LASKMEANSTestCase)
 {

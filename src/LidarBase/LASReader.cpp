@@ -86,12 +86,13 @@ long LidarMemReader::LidarReader_Read(bool inMemory, int skip, _OUT_ ILASDataset
 					j*heightPer + refLasHeader.min_y,
 					(i + 1)*widthPer + refLasHeader.min_x,
 					(j + 1)*heightPer + refLasHeader.min_y);
+
 			}
 		}
 		dataset->LASDataset_BuildTree();
 		dataset->m_totalReadLasNumber = totalLasNumber;
 		dataset->m_LASPointID = new LASIndex[totalLasNumber];
-
+		
 		/*
 		//每一个矩形区域中的点的索引
 		//deleted by Frank.Wu
@@ -266,7 +267,7 @@ long LidarMemReader::LidarReader_Write(const char* pathLidar, ILASDataset* datas
 		if (dataset->m_lasRectangles[i].m_lasPoints[j].m_classify == classType)
 		{
 			int x = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.x - lasHeader.x_offset) / lasHeader.x_scale_factor;
-			int y = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y - lasHeader.y_offset)/ lasHeader.y_scale_factor;
+			int y = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y - lasHeader.y_offset) / lasHeader.y_scale_factor;
 			int z = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z - lasHeader.z_offset) / lasHeader.z_scale_factor;
 			
 			fwrite(&x, sizeof(int), 1, fLasOut);
@@ -619,6 +620,18 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 	int read_once = refLasHeader.number_of_point_records;
 	long bytelen = read_once_max * refLasHeader.point_data_record_length;
 
+	for(int i=0;i<widthNum;++i)
+	{
+		for(int j=0;j<heightNum;++j)
+		{
+			if(!inMemory){
+				dataset->m_lasRectangles[j*widthNum + i].m_lasPoints.isInMemory=inMemory;
+				dataset->m_lasRectangles[j*widthNum + i].m_lasPoints.fsLasPoints =fs;
+				dataset->m_lasRectangles[j*widthNum + i].m_lasPoints.header=refLasHeader;
+			}
+		}
+	}
+
 	//反复申请小内存可能出现内存碎片影响效率需要内存池优化
 	//memory pool
 	unsigned char *readOnce = new unsigned char[bytelen];
@@ -647,7 +660,12 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 				continue;
 
 			if (inMemory)
+			{
 				dataset->m_lasRectangles[heighIdx*widthNum + widtnIdx].m_lasPoints.push_back(lasPnts);
+			}
+			else{
+				dataset->m_lasRectangles[heighIdx*widthNum + widtnIdx].m_lasPoints.push_back(i);
+			}
 			dataset->m_lasRectangles[heighIdx*widthNum + widtnIdx].m_lasPoints_numbers++;
 			dataset->m_LASPointID[totallasPnts+ readlasPnts].point_idx_inRect = pointsRect[heighIdx*widthNum + widtnIdx];
 			dataset->m_LASPointID[totallasPnts+ readlasPnts].rectangle_idx = heighIdx * widthNum + widtnIdx;
@@ -669,8 +687,6 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 	delete[]readOnce; readOnce = nullptr;
 	return 0;
 }
-
-
 
 long LidarPatchReader::LidarReader_ReadHeader(FILE* lf, LASHeader &lasHeader)
 {

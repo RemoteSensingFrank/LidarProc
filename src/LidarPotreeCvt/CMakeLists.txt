@@ -17,7 +17,6 @@ include_directories(include ${RAPIDJSON_INCLUDE_DIR})
 include_directories(include ${ARGUMENTS_INCLUDE_DIR})
 include_directories(include ${LIBEIGEN})
 
-
 add_library(libpotreecvt ${files} ${lib_rapidjson_files} ${lib_argument_files})
 target_link_libraries(libpotreecvt ${libLAS_LIBRARIES})
 if(UNIX)

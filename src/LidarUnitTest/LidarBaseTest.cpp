@@ -110,8 +110,6 @@ protected:
 
 string LidarBaseTest::m_baseTestFilePath="./test/basetestfile.las";
 
-
-
 TEST_F(LidarBaseTest,LasHeaderTestCase0)
 {
     LASHeader lasHd;
@@ -131,7 +129,6 @@ TEST_F(LidarBaseTest,LasHeaderTestCase1)
     delete lasdst;lasdst=nullptr;
 }
 
-
 TEST_F(LidarBaseTest,LasHeaderTestCase2)
 {
     ILASDataset *lasdst = new ILASDataset();
@@ -149,7 +146,6 @@ TEST_F(LidarBaseTest,LasHeaderTestCase2)
     EXPECT_EQ(0,reader2->LidarReader_Export("./test/write4.txt",lasdst,0));
     delete lasdst;lasdst=nullptr;
 }
-
 
 TEST_F(LidarBaseTest,LasHeaderTestCase3)
 {

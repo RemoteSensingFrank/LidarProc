@@ -387,7 +387,6 @@ namespace LasAlgorithm
         return pntSkeSet;      
     }
 
-
     Point3Ds PointCloudLineRefineSkeleton::PointCloudLineSkeleton_Extract(Point3Ds pointSet,int nearPointNum,double lineResidual)
     {
         Point3Ds pnts(pointSet);
@@ -415,7 +414,4 @@ namespace LasAlgorithm
 		}
 		return PointCloudLineSkeleton_Extract(pointSet,nearPointNum,lineResidual); 
     }
-
-
-
 }

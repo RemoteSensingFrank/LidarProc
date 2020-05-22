@@ -113,17 +113,45 @@ public:
 
 
 /*
-	adaptor it's hard to adjust the 
+	adaptor it's hard to adjust
+	Modified: uplevel porcess for not in memory
+			  for the large size of the las file
+			  we can use the file index
 */
 struct PointCloudBlockAdaptor
 {
+	//if 
+	//	lasPoints is not empty then the fsLasPoints is not nullptr and isInMemory is true
+	//else
+	//	fsLasPoints is nullptr and isInMemory is false
 	std::vector<LASPoint> lasPoints;
+
+	//to get points data from file 
+	std::vector<int> lasPointsIdx;
+	FILE *fsLasPoints;
+	bool isInMemory;
+	LASHeader header;
 
 	//reload operator [] to keep the code with same format
 	inline void push_back(LASPoint pnt) { lasPoints.push_back(pnt); }
+	inline void push_back(int pntIdx) { lasPointsIdx.push_back(pntIdx); }
 
 	//reload operator [] to keep the code with same format
-	inline LASPoint &operator[](int i) { return lasPoints[i]; }
+	LASPoint &operator[](int i) { 
+		if(isInMemory){
+			return lasPoints[i];
+		}else{
+			LASPoint lasPnt;
+			fseek(fsLasPoints, header.offset_to_point_data+lasPointsIdx[i]*header.point_data_record_length, SEEK_SET);
+			unsigned char *readOnce = new unsigned char[header.point_data_record_length];
+			fread(readOnce, header.point_data_record_length, 1, fsLasPoints);
+			lasPnt.ExportToBuffer(readOnce,header);
+			delete[]readOnce; readOnce = nullptr;
+			return lasPnt;
+		} 
+	}
+
+
 
 	//clear data
 	inline void clear() { lasPoints.clear(); }

@@ -1,5 +1,5 @@
 /**
- * Frank.Wu 针对需求进行了一些定制化的开发以满足我的项目的需求，主要修改内容见博客
+ * Frank.Wu make some modification for my purpose
  * Blog: http://wuweiBlog.com
  */
 
@@ -22341,6 +22341,10 @@ initSidebar = (viewer) => {
 
 	}
 
+	/**
+	 * initial the classification from the config file
+	 * update：by Frank.Wu
+	 */
 	function initClassificationList () {
 		let elClassificationList = $('#classificationList');
 
@@ -22358,6 +22362,9 @@ initSidebar = (viewer) => {
 
 			let elInput = element.find('input');
 
+			/**
+			 * click the check and choose to show the type of the point cloud
+			 */
 			elInput.click(event => {
 				viewer.setClassificationVisibility(code, event.target.checked);
 			});
@@ -22409,6 +22416,10 @@ initSidebar = (viewer) => {
 		*/
 	}
 
+	/**
+	 * set language
+	 * update：by Frank.Wu
+	 */
 	function initAccordion () {
 		$('.accordion > h3').each(function () {
 			let header = $(this);
