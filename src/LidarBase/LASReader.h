@@ -62,6 +62,9 @@ public:
 	/*
 		读取数据集(将数据集读取到文件中)
 		@param inMemory：是否读取到内存中（可以只读取索引）
+		 Warning：if choose inMemory false, the data in dataset is read from file system
+		 in tempory and cannot be changed. If want to change the data, the parameter must
+		 be true
 		@param skip：选择读取点的采样频率
 		@param dataset：数据集
 	*/

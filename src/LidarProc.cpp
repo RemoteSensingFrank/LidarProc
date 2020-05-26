@@ -176,42 +176,53 @@ void SimpleLineExtract()
 
 int main(int argc ,char* argv[])
 {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
+    // printf("-1");
+    // pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
+    // pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
+    // printf("0");
+    printf("1");
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("../data/default/moreSimulate.las",lasdst1);
-    reader4->LidarReader_Read(true,1,lasdst1);
+    reader4->LidarReader_Open("../data/register/cube_filtered.las",lasdst1);
+    reader4->LidarReader_Read(false,1,lasdst1);
+    LASIndex idx = lasdst1->m_LASPointID[0];
+	int rectidx = idx.rectangle_idx;
+	int pntidx = idx.point_idx_inRect;
+
+	LASPoint &pnt = lasdst1->m_lasRectangles[rectidx].m_lasPoints[pntidx];
+    //printf("%lf\n",pnt.m_vec3d.x);
 
     ILASDataset *lasdst2 = new ILASDataset();
     LASReader *reader5 = new LidarMemReader();
-    reader5->LidarReader_Open("../data/default/more.las",lasdst2);
-    reader5->LidarReader_Read(true,1,lasdst2);
+    // reader5->LidarReader_Open("../data/register/cube_filtered_t.las",lasdst2);
+    // reader5->LidarReader_Read(true,1,lasdst2);
+    printf("2");
+    // LASTransToPCL transPCL;
+    // transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
+    // transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
+    // printf("3");
+    // LidarRegistration lidarReg;
+    // lidarReg.LidarRegistration_ICP(pclPointCloudI,pclPointCloudO,"../data/register/reg.las");
 
+    // LidarFeaturePoints lidarFeatures;
+    // pcl::PointCloud<int> siftPointIdx1;
+    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
+    // lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
 
-    LASTransToPCL transPCL;
-    transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
-    transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
+    // pcl::PointCloud<int> siftPointIdx2;
+    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
+    // lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
-    LidarFeaturePoints lidarFeatures;
-    pcl::PointCloud<int> siftPointIdx1;
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
-    lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
-
-    pcl::PointCloud<int> siftPointIdx2;
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
-    lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
-
-    LidarFeatureRegistration liadrReg;
-    pcl::PointCloud<int> siftMatchPointIdx;
-    liadrReg.LidarRegistration_Sift(fpfhs1,fpfhs2,siftMatchPointIdx);
-    double rot[6];
-    liadrReg.LidarRegistration_RotTrans(pclPointCloudI,
-                                        siftPointIdx1,
-                                        pclPointCloudO,
-                                        siftPointIdx2,
-                                        siftMatchPointIdx,
-                                        rot);
+    // LidarFeatureRegistration liadrReg;
+    // pcl::PointCloud<int> siftMatchPointIdx;
+    // liadrReg.LidarRegistration_Sift(fpfhs1,fpfhs2,siftMatchPointIdx);
+    // double rot[6];
+    // liadrReg.LidarRegistration_RotTrans(pclPointCloudI,
+    //                                     siftPointIdx1,
+    //                                     pclPointCloudO,
+    //                                     siftPointIdx2,
+    //                                     siftMatchPointIdx,
+    //                                     rot);
     // FILE *fs = fopen("../data/sift_match.txt","w+");
     // if(fs!=nullptr)
     // {
@@ -224,14 +235,15 @@ int main(int argc ,char* argv[])
     //     printf("create test output failed!\n");
     // }
 
-    for(int i=0;i<6;++i)
-    {
-        printf("%lf\n",rot[i]);
-    }
+    // for(int i=0;i<6;++i)
+    // {
+    //     printf("%lf\n",rot[i]);
+    // }
 
     delete lasdst1;
     delete reader4;
-  
+    delete lasdst2;
+    delete reader5;
     return 0;
 }
 

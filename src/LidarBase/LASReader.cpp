@@ -629,6 +629,9 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 				dataset->m_lasRectangles[j*widthNum + i].m_lasPoints.fsLasPoints =fs;
 				dataset->m_lasRectangles[j*widthNum + i].m_lasPoints.header=refLasHeader;
 			}
+			else{
+				dataset->m_lasRectangles[j*widthNum + i].m_lasPoints.isInMemory=inMemory;
+			}
 		}
 	}
 
@@ -798,7 +801,6 @@ long LidarReaderTxt::LidarReader_Open(const char* pathLidar, ILASDataset* datase
 	dataset->m_lasHeader.file_signature[1] = 'A';
 	dataset->m_lasHeader.file_signature[2] = 'S';
 	dataset->m_lasHeader.file_signature[3] = 'F';
-
 	return 0;
 }
 

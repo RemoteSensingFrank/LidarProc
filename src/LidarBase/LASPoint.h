@@ -128,7 +128,7 @@ struct PointCloudBlockAdaptor
 
 	//to get points data from file 
 	std::vector<int> lasPointsIdx;
-	FILE *fsLasPoints;
+	FILE* fsLasPoints;
 	bool isInMemory;
 	LASHeader header;
 
@@ -137,37 +137,66 @@ struct PointCloudBlockAdaptor
 	inline void push_back(int pntIdx) { lasPointsIdx.push_back(pntIdx); }
 
 	//reload operator [] to keep the code with same format
-	LASPoint &operator[](int i) { 
-		if(isInMemory){
+	LASPoint& operator[](int i) {
+		if (isInMemory) {
 			return lasPoints[i];
-		}else{
+		}
+		else {
 			LASPoint lasPnt;
-			fseek(fsLasPoints, header.offset_to_point_data+lasPointsIdx[i]*header.point_data_record_length, SEEK_SET);
-			unsigned char *readOnce = new unsigned char[header.point_data_record_length];
+			fseek(fsLasPoints, header.offset_to_point_data + lasPointsIdx[i] * header.point_data_record_length, SEEK_SET);
+			unsigned char* readOnce = new unsigned char[header.point_data_record_length];
 			fread(readOnce, header.point_data_record_length, 1, fsLasPoints);
-			lasPnt.ExportToBuffer(readOnce,header);
+			lasPnt.ExtractFromBuffer(readOnce, header);
 			delete[]readOnce; readOnce = nullptr;
 			return lasPnt;
-		} 
+		}
 	}
 
 
 
 	//clear data
-	inline void clear() { lasPoints.clear(); }
+	inline void clear() { 
+		if (isInMemory) {
+			return lasPoints.clear();
+		}
+		else {
+			return lasPointsIdx.clear();
+		}
+	}
 
 	// must return the number of data points
 	//(for adatopr the function must be relized)
-	inline size_t kdtree_get_point_count() const { return lasPoints.size(); }
+	inline size_t kdtree_get_point_count() const {
+		if (isInMemory) {
+			return lasPoints.size();
+		}
+		else {
+			return lasPointsIdx.size();
+		}
+	}
 
 	// Returns the dim'th component of the idx'th point in the class:
 	// Since this is inlined and the "dim" argument is typically an immediate value, the
 	//  "if/else's" are actually solved at compile time.
 	inline double kdtree_get_pt(const size_t idx, int dim) const
 	{
-		if (dim == 0) return lasPoints[idx].m_vec3d.x;
-		else if (dim == 1) return lasPoints[idx].m_vec3d.y;
-		else return lasPoints[idx].m_vec3d.z;
+		if (isInMemory) {
+			if (dim == 0) return lasPoints[idx].m_vec3d.x;
+			else if (dim == 1) return lasPoints[idx].m_vec3d.y;
+			else return lasPoints[idx].m_vec3d.z;
+		}
+		else {
+			LASPoint lasPnt;
+			fseek(fsLasPoints, header.offset_to_point_data + lasPointsIdx[idx] * header.point_data_record_length, SEEK_SET);
+			unsigned char* readOnce = new unsigned char[header.point_data_record_length];
+			fread(readOnce, header.point_data_record_length, 1, fsLasPoints);
+			lasPnt.ExtractFromBuffer(readOnce, header);
+			delete[]readOnce; readOnce = nullptr;
+
+			if (dim == 0) return lasPnt.m_vec3d.x;
+			else if (dim == 1) return lasPnt.m_vec3d.y;
+			else return lasPnt.m_vec3d.z;
+		}
 	}
 
 	// Optional bounding-box computation: return false to default to a standard bbox computation loop.

@@ -3,8 +3,8 @@
  * @version: 1.0版本
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
- * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-01-03 10:04:34
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2020-05-26 12:06:41
  */
 #ifdef _USE_PCL_
 #include "LidarRegistration.h"
@@ -29,12 +29,20 @@ long LidarRegistration::LidarRegistration_ICP(pcl::PointCloud<pcl::PointXYZ>::Pt
                           const char* pathRegistration)
 {
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;   //创建IterativeClosestPoint的对象
-    icp.setInputCloud(input_cloud);                                 //cloud_in设置为点云的源点
+    
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree1 (new pcl::search::KdTree<pcl::PointXYZ>);
+	tree1->setInputCloud(input_cloud);
+	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree2 (new pcl::search::KdTree<pcl::PointXYZ>);
+	tree2->setInputCloud(ref_cloud);
+	icp.setSearchMethodSource(tree1);
+	icp.setSearchMethodTarget(tree2);
+
+    icp.setInputSource(input_cloud);                                 //cloud_in设置为点云的源点
     icp.setInputTarget(ref_cloud);                                  //cloud_out设置为与cloud_in对应的匹配目标
-    icp.setMaxCorrespondenceDistance(50);
-    icp.setMaximumIterations(5);
+    icp.setMaxCorrespondenceDistance(1500);
+    icp.setMaximumIterations(300);
     icp.setTransformationEpsilon (1e-8);
-    icp.setEuclideanFitnessEpsilon (1);
+    icp.setEuclideanFitnessEpsilon (0.1);
     pcl::PointCloud<pcl::PointXYZ> registration;                    //存储经过配准变换点云后的点云
     icp.align(registration);                                        //打印配准相关输入信息
     std::cout << "has converged:" << icp.hasConverged() <<" score: " <<icp.getFitnessScore() << std::endl;
