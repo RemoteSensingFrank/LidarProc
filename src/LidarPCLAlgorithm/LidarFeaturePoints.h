@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-03-05 00:16:56
+ * @LastEditTime: 2020-06-02 23:21:01
  */
 #ifdef _USE_PCL_
 
@@ -85,6 +85,7 @@ public:
                                 pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH2,
                                 pcl::PointCloud<int> &siftMatchPointIdx);
 
+
 #ifdef _USE_CERES_
     /**
      * @name: 根据匹配点计算旋转矩阵，
@@ -100,7 +101,25 @@ public:
                                     pcl::PointCloud<int> siftMatchPointIdx,
                                     double *r_t);
 #endif 
-                                    
+    /**
+     * @name: compute the correlation of two points in two datasets
+     * @msg: 
+     * @param int idxPnt1:index in dataset1
+     *        int idxPnt2:index in dataset2
+     *        LASDataset *lasdst1：
+     *        LASDataset *lasdst2:
+     *        int nearPointsNum:
+     * @return: correlation
+     */
+    double LidarRegistration_Correlation(int idxPnt1,int idxPnt2,LASDataset *lasdst1,LASDataset *lasdst2,int nearPointsNum=10);                    
+
+    /**
+     * @name: get distance histrogram for a point in near point dataset
+     * @msg: 
+     * @param {type} 
+     * @return: 
+     */
+    long LidarRegistration_DisHistro(int idxPnt,vector<int> idxPntAllNear,LASDataset *lasdst,double *disHistro);
 };
 
 #endif

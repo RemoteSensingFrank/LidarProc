@@ -176,33 +176,25 @@ void SimpleLineExtract()
 
 int main(int argc ,char* argv[])
 {
-    // printf("-1");
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
-    // printf("0");
-    printf("1");
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("../data/register/cube_filtered.las",lasdst1);
-    reader4->LidarReader_Read(false,1,lasdst1);
+    reader4->LidarReader_Open("../data/register/moreSimulate.las",lasdst1);
+    reader4->LidarReader_Read(true,1,lasdst1);
     LASIndex idx = lasdst1->m_LASPointID[0];
 	int rectidx = idx.rectangle_idx;
 	int pntidx = idx.point_idx_inRect;
 
-	LASPoint &pnt = lasdst1->m_lasRectangles[rectidx].m_lasPoints[pntidx];
-    //printf("%lf\n",pnt.m_vec3d.x);
-
     ILASDataset *lasdst2 = new ILASDataset();
     LASReader *reader5 = new LidarMemReader();
-    // reader5->LidarReader_Open("../data/register/cube_filtered_t.las",lasdst2);
-    // reader5->LidarReader_Read(true,1,lasdst2);
-    printf("2");
-    // LASTransToPCL transPCL;
-    // transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
-    // transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
-    // printf("3");
-    // LidarRegistration lidarReg;
-    // lidarReg.LidarRegistration_ICP(pclPointCloudI,pclPointCloudO,"../data/register/reg.las");
+    reader5->LidarReader_Open("../data/register/more.las",lasdst2);
+    reader5->LidarReader_Read(true,1,lasdst2);
+    LASTransToPCL transPCL;
+    transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
+    transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
+    LidarRegistration lidarReg;
+    lidarReg.LidarRegistration_ICP(pclPointCloudI,pclPointCloudO,"../data/register/reg2.las");
 
     // LidarFeaturePoints lidarFeatures;
     // pcl::PointCloud<int> siftPointIdx1;

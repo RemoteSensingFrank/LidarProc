@@ -113,11 +113,16 @@ public:
 
 
 /*
+	TODO:
 	adaptor it's hard to adjust
 	Modified: uplevel porcess for not in memory
 			  for the large size of the las file
 			  we can use the file index
+			  
 */
+
+typedef void (LASPntCallBack)(LASPoint pnt);
+
 struct PointCloudBlockAdaptor
 {
 	//if 
@@ -148,6 +153,9 @@ struct PointCloudBlockAdaptor
 			fread(readOnce, header.point_data_record_length, 1, fsLasPoints);
 			lasPnt.ExtractFromBuffer(readOnce, header);
 			delete[]readOnce; readOnce = nullptr;
+
+			//TODO:
+			//return local params and for some compiler it will return nullptr
 			return lasPnt;
 		}
 	}
