@@ -4,11 +4,13 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-03-05 18:47:44
+ * @LastEditTime: 2020-06-07 15:55:30
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
+
 #include "../LidarGeometry/Geometry.h"
+#include "../LidarGeometry/GeometryAlgorithm.h"
 
 #include <boost/thread/thread.hpp>
 #include <pcl/range_image/range_image.h>
@@ -45,6 +47,8 @@ namespace pcl
       }
     };
 }
+
+
 
 /**
  * @brief  代码运行过程会有内存泄露的问题，感觉应该是库的问题，但是不知道问题在哪里
@@ -212,7 +216,6 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
 //         dis+=(pt1.histogram[i]-pt2.histogram[i])*(pt1.histogram[i]-pt2.histogram[i]);
 //     }
 //     return sqrt(dis);
-
 // }
 
 long LidarFeatureRegistration::LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH1,
@@ -237,6 +240,126 @@ long LidarFeatureRegistration::LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHS
         }
     }
 }
+
+long LidarFeatureRegistration::LidarRegistration_Match(pcl::PointCloud<int> idxList1,
+                                 pcl::PointCloud<int> idxList2,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 std::vector<MATCHHISTRODIS> &matches)
+{
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1;
+	kdtree1.setInputCloud(cloud1);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree2;
+	kdtree2.setInputCloud(cloud2);
+
+    for(int i=0;i<idxList1.size();++i)
+    {
+        //find the most match point
+        MATCHHISTRODIS matchTmp;
+        matchTmp.relation=-1;
+        matchTmp.idx1 = idxList1[i];
+        matchTmp.idx2 = idxList2[0];
+        for(int j=0;j<idxList2.size();++j)
+        {
+            pcl::PointXYZ pnt1=cloud1->points[idxList1[i]];
+            pcl::PointXYZ pnt2=cloud2->points[idxList2[j]];
+            double rel=LidarRegistration_CorrelationMatch(pnt1,pnt2,kdtree1,cloud1,kdtree2,cloud2,50);
+            matchTmp.idx2 = matchTmp.relation>rel?matchTmp.idx2:idxList2[j];
+            matchTmp.relation=max(rel,matchTmp.relation);
+        }
+        matches.push_back(matchTmp);
+    }
+    return 0;
+}
+
+
+double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXYZ pnt1,pcl::PointXYZ pnt2,
+                                                                pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1,
+                                                                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                                                pcl::KdTreeFLANN<pcl::PointXYZ> kdtree2,
+                                                                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                                                int nearPointsNum)
+{
+    std::vector<int> pointIdxNKNSearch1(nearPointsNum);
+    std::vector<int> pointIdxNKNSearch2(nearPointsNum);
+    std::vector<float> pointNKNSquaredDistance(nearPointsNum);
+
+    kdtree1.nearestKSearch(pnt1, nearPointsNum, pointIdxNKNSearch1, pointNKNSquaredDistance);
+    kdtree2.nearestKSearch(pnt2, nearPointsNum, pointIdxNKNSearch2, pointNKNSquaredDistance);
+
+    double *distro1 = new double[nearPointsNum];
+    double *distro2 = new double[nearPointsNum];
+
+    LidarRegistration_DisHistro(pointIdxNKNSearch1[0],pointIdxNKNSearch1,cloud1,distro1);
+    LidarRegistration_DisHistro(pointIdxNKNSearch2[0],pointIdxNKNSearch2,cloud2,distro2);
+    double colRel=LidarRegistration_Correlation(distro1,distro2,nearPointsNum);
+    
+    delete []distro1;distro1=nullptr;
+    delete []distro2;distro1=nullptr;
+    return colRel;
+
+    // std::vector<int> match;
+    // double matchRatio=0;
+    // for(int i=0;i<nearPointsNum;++i)
+    // {
+    //     LidarRegistration_DisHistro(pointIdxNKNSearch1[i],pointIdxNKNSearch1,cloud1,distro1);
+    //     double maxRel = -99999;
+    //     match.push_back(i);
+    //     int maxInd=0;
+    //     for(int j=0;j<nearPointsNum;++j)
+    //     {
+    //         LidarRegistration_DisHistro(pointIdxNKNSearch2[j],pointIdxNKNSearch2,cloud2,distro2);
+    //         double colRel=LidarRegistration_Correlation(distro1,distro2,nearPointsNum);
+    //         maxInd = maxRel>colRel?maxInd:j;
+    //         maxRel=max(maxRel,colRel);
+    //     }
+    //     match.push_back(maxInd);
+    //     matchRatio+=maxRel;
+    // }
+    // // printf("%lf\n",matchRatio);
+    // delete []distro1;distro1=nullptr;
+    // delete []distro2;distro1=nullptr;
+    // return matchRatio/nearPointsNum;
+} 
+
+double LidarFeatureRegistration::LidarRegistration_Correlation(double* data1,double *data2,int num)
+{
+    double sumA(0.0), sumB(0.0), aveA(0.0), aveB(0.0);
+ 
+	//求和
+	sumA = std::accumulate(data1,data1+num, 0.0);
+	sumB = std::accumulate(data2,data2+num, 0.0);
+ 
+	//求平均值
+	aveA = sumA / double(num);
+	aveB = sumB / double(num);
+ 
+	//计算相关系数
+	double R1(0), R2(0), R3(0);
+	for (long i = 0; i < num; i++)
+	{
+		R1 += (data1[i] - aveA) * (data2[i] - aveB);
+		R2 += pow((data1[i] - aveA), 2);
+		R3 += pow((data2[i] - aveB), 2);
+	}
+ 
+	return (R1 / sqrt(R2*R3));
+}
+
+
+long LidarFeatureRegistration::LidarRegistration_DisHistro(int idxPnt,vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro)
+{
+    memset(disHistro,sizeof(double)*idxPntAllNear.size(),0);
+    for(int i=0;i<idxPntAllNear.size();++i)
+    {
+        Point3D pt1(cloud1->points[idxPntAllNear[i]].x,cloud1->points[idxPntAllNear[i]].y,cloud1->points[idxPntAllNear[i]].z);
+        Point3D pt2(cloud1->points[idxPnt].x,cloud1->points[idxPnt].y,cloud1->points[idxPnt].z);
+        disHistro[i] = DistanceComputation::Distance(pt1,pt2);
+    }
+    std::sort(disHistro,disHistro+idxPntAllNear.size());
+    return 0;
+}
+
 #ifdef _USE_CERES_
 /**
  * @name: ceres 自动求导,注意，各个库采用的编译器类型要一致，
@@ -356,7 +479,7 @@ long LidarFeatureRegistration::LidarRegistration_RotTrans(pcl::PointCloud<pcl::P
     options.minimizer_progress_to_stdout=true;
     options.max_num_iterations = 500;
     Solver::Summary summary;
-    Solve(options,&problem,&summary);
+    ceres::Solve(options, &problem, &summary);
 
     delete obs;obs=nullptr;
     delete match;match=nullptr;

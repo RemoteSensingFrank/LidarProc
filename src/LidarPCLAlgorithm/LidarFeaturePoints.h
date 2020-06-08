@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-06-02 23:21:01
+ * @LastEditTime: 2020-06-06 17:01:10
  */
 #ifdef _USE_PCL_
 
@@ -70,6 +70,14 @@ public:
  * @note   
  * @retval None
  */
+
+struct MATCHHISTRODIS
+{
+    int idx1;
+    int idx2;
+    double relation;
+};
+
 class LidarFeatureRegistration
 {
 public:
@@ -86,6 +94,22 @@ public:
                                 pcl::PointCloud<int> &siftMatchPointIdx);
 
 
+    /**
+     * @name: find the most match point pair and correlation value
+     * @msg: 
+     * @param pcl::PointCloud<int> idxList1：特征点1
+              pcl::PointCloud<int> idxList2：特征点2
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1：点云1
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2：点云2
+              std::vector<MATCHHISTRODIS> &matches：得到的匹配结果
+     * @return: 
+     */
+    long LidarRegistration_Match(pcl::PointCloud<int> idxList1,
+                                 pcl::PointCloud<int> idxList2,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 std::vector<MATCHHISTRODIS> &matches);
+                                 
 #ifdef _USE_CERES_
     /**
      * @name: 根据匹配点计算旋转矩阵，
@@ -101,17 +125,32 @@ public:
                                     pcl::PointCloud<int> siftMatchPointIdx,
                                     double *r_t);
 #endif 
+
+private:
     /**
      * @name: compute the correlation of two points in two datasets
      * @msg: 
-     * @param int idxPnt1:index in dataset1
-     *        int idxPnt2:index in dataset2
-     *        LASDataset *lasdst1：
-     *        LASDataset *lasdst2:
+     * @param pcl::PointXYZ pnt1
+     *        pcl::PointXYZ pnt2
+     *        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1
+     *        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree2
      *        int nearPointsNum:
      * @return: correlation
      */
-    double LidarRegistration_Correlation(int idxPnt1,int idxPnt2,LASDataset *lasdst1,LASDataset *lasdst2,int nearPointsNum=10);                    
+    double LidarRegistration_CorrelationMatch(pcl::PointXYZ pnt1,pcl::PointXYZ pnt2,
+                                         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1,
+                                         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree2,
+                                         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                         int nearPointsNum=10);                    
+
+    /**
+     * @name:calculate correlation of two dataset 
+     * @msg: 
+     * @param {type} 
+     * @return: 
+     */
+    double LidarRegistration_Correlation(double* data1,double *data2,int num);
 
     /**
      * @name: get distance histrogram for a point in near point dataset
@@ -119,7 +158,9 @@ public:
      * @param {type} 
      * @return: 
      */
-    long LidarRegistration_DisHistro(int idxPnt,vector<int> idxPntAllNear,LASDataset *lasdst,double *disHistro);
+    long LidarRegistration_DisHistro(int idxPnt,std::vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro);
+
+    
 };
 
 #endif

@@ -13,7 +13,6 @@
 #include "./LidarAlgorithm/LASSimpleClassify.h"
 #include "./LidarAlgorithm/LASSkeleton.h"
 #include "./LidarAlgorithm/LASDangerPoints.h"
-
 void PorfileGenerateSample()
 {
     LASProfile profile;
@@ -182,9 +181,6 @@ int main(int argc ,char* argv[])
     LASReader *reader4 = new LidarMemReader();
     reader4->LidarReader_Open("../data/register/moreSimulate.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
-    LASIndex idx = lasdst1->m_LASPointID[0];
-	int rectidx = idx.rectangle_idx;
-	int pntidx = idx.point_idx_inRect;
 
     ILASDataset *lasdst2 = new ILASDataset();
     LASReader *reader5 = new LidarMemReader();
@@ -193,44 +189,48 @@ int main(int argc ,char* argv[])
     LASTransToPCL transPCL;
     transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
     transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
-    LidarRegistration lidarReg;
-    lidarReg.LidarRegistration_ICP(pclPointCloudI,pclPointCloudO,"../data/register/reg2.las");
 
-    // LidarFeaturePoints lidarFeatures;
-    // pcl::PointCloud<int> siftPointIdx1;
-    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
-    // lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
+    LidarFeaturePoints lidarFeatures;
+    pcl::PointCloud<int> siftPointIdx1;
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
+    lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
 
-    // pcl::PointCloud<int> siftPointIdx2;
-    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
-    // lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
+    pcl::PointCloud<int> siftPointIdx2;
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
+    lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
-    // LidarFeatureRegistration liadrReg;
-    // pcl::PointCloud<int> siftMatchPointIdx;
-    // liadrReg.LidarRegistration_Sift(fpfhs1,fpfhs2,siftMatchPointIdx);
-    // double rot[6];
-    // liadrReg.LidarRegistration_RotTrans(pclPointCloudI,
-    //                                     siftPointIdx1,
-    //                                     pclPointCloudO,
-    //                                     siftPointIdx2,
-    //                                     siftMatchPointIdx,
-    //                                     rot);
-    // FILE *fs = fopen("../data/sift_match.txt","w+");
-    // if(fs!=nullptr)
-    // {
-    //     for(int i=0;i<siftMatchPointIdx.points.size ();++i)
-    //         printf("%d-%d\n",i,siftMatchPointIdx.points[i]);
-    //         //fprintf(fs,"%d %d\n",i,pclPointCloudI->points[i]);
-    //     fclose(fs);
-    // }else
-    // {
-    //     printf("create test output failed!\n");
-    // }
+    LidarFeatureRegistration lidarReg;
+    std::vector<MATCHHISTRODIS> matches;
+    lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,matches);
 
-    // for(int i=0;i<6;++i)
-    // {
-    //     printf("%lf\n",rot[i]);
-    // }
+
+    FILE *fs = fopen("./test0.txt","w+");
+    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudI->points[matches[0].idx1].x,
+                                pclPointCloudI->points[matches[0].idx1].y,
+                                pclPointCloudI->points[matches[0].idx1].z);
+    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudO->points[matches[0].idx2].x,
+                                pclPointCloudO->points[matches[0].idx2].y,
+                                pclPointCloudO->points[matches[0].idx2].z);
+    fclose(fs);
+    fs = fopen("./test1.txt","w+");
+    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudI->points[matches[1].idx1].x,
+                                pclPointCloudI->points[matches[1].idx1].y,
+                                pclPointCloudI->points[matches[1].idx1].z);
+    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudO->points[matches[1].idx2].x,
+                                pclPointCloudO->points[matches[1].idx2].y,
+                                pclPointCloudO->points[matches[1].idx2].z);
+    fclose(fs);
+    fs = fopen("./test2.txt","w+");
+    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudI->points[matches[2].idx1].x,
+                                pclPointCloudI->points[matches[2].idx1].y,
+                                pclPointCloudI->points[matches[2].idx1].z);
+    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudO->points[matches[2].idx2].x,
+                                pclPointCloudO->points[matches[2].idx2].y,
+                                pclPointCloudO->points[matches[2].idx2].z);
+    fclose(fs);
+    fs=nullptr;
+
+
 
     delete lasdst1;
     delete reader4;

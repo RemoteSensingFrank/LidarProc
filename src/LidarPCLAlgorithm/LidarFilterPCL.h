@@ -1,4 +1,8 @@
+
 #include <iostream>
+
+#ifdef _USE_PCL_
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 
@@ -34,3 +38,4 @@ public:
     */
     long LidarFilterPCL_VoxelGrid(pcl::PointCloud<pcl::PointXYZ>::Ptr input,double gridsizeX,double gridsizeY,double gridsizeZ,const char* pathOut);
 };
+#endif
