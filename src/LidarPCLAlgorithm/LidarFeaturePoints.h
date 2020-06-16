@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-06-06 17:01:10
+ * @LastEditTime: 2020-06-09 11:39:41
  */
 #ifdef _USE_PCL_
 
@@ -97,10 +97,11 @@ public:
     /**
      * @name: find the most match point pair and correlation value
      * @msg: 
-     * @param pcl::PointCloud<int> idxList1：特征点1
-              pcl::PointCloud<int> idxList2：特征点2
-              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1：点云1
-              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2：点云2
+     * @param pcl::PointCloud<int> idxList1：feature index 1
+              pcl::PointCloud<int> idxList2：feature index 2
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1：point cloud 1
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2：point cloud 2
+               int matchNum: match number of points
               std::vector<MATCHHISTRODIS> &matches：得到的匹配结果
      * @return: 
      */
@@ -108,6 +109,7 @@ public:
                                  pcl::PointCloud<int> idxList2,
                                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
                                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 int matchNum,
                                  std::vector<MATCHHISTRODIS> &matches);
                                  
 #ifdef _USE_CERES_

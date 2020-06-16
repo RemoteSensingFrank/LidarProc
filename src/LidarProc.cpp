@@ -199,38 +199,12 @@ int main(int argc ,char* argv[])
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
     lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
-    LidarFeatureRegistration lidarReg;
-    std::vector<MATCHHISTRODIS> matches;
-    lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,matches);
-
-
-    FILE *fs = fopen("./test0.txt","w+");
-    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudI->points[matches[0].idx1].x,
-                                pclPointCloudI->points[matches[0].idx1].y,
-                                pclPointCloudI->points[matches[0].idx1].z);
-    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudO->points[matches[0].idx2].x,
-                                pclPointCloudO->points[matches[0].idx2].y,
-                                pclPointCloudO->points[matches[0].idx2].z);
+    //std::string path="../data/"+to_string(int(0))+".txt";
+    FILE* fs = fopen("0.txt","r+");
     fclose(fs);
-    fs = fopen("./test1.txt","w+");
-    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudI->points[matches[1].idx1].x,
-                                pclPointCloudI->points[matches[1].idx1].y,
-                                pclPointCloudI->points[matches[1].idx1].z);
-    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudO->points[matches[1].idx2].x,
-                                pclPointCloudO->points[matches[1].idx2].y,
-                                pclPointCloudO->points[matches[1].idx2].z);
-    fclose(fs);
-    fs = fopen("./test2.txt","w+");
-    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudI->points[matches[2].idx1].x,
-                                pclPointCloudI->points[matches[2].idx1].y,
-                                pclPointCloudI->points[matches[2].idx1].z);
-    fprintf(fs,"%lf,%lf,%lf\n", pclPointCloudO->points[matches[2].idx2].x,
-                                pclPointCloudO->points[matches[2].idx2].y,
-                                pclPointCloudO->points[matches[2].idx2].z);
-    fclose(fs);
-    fs=nullptr;
-
-
+    // LidarFeatureRegistration lidarReg;
+    // std::vector<MATCHHISTRODIS> matches;
+    // lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,50,matches);
 
     delete lasdst1;
     delete reader4;

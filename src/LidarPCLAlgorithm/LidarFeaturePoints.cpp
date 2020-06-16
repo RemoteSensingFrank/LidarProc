@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-06-07 15:55:30
+ * @LastEditTime: 2020-06-09 14:26:51
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -245,6 +245,7 @@ long LidarFeatureRegistration::LidarRegistration_Match(pcl::PointCloud<int> idxL
                                  pcl::PointCloud<int> idxList2,
                                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
                                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 int matchNum,
                                  std::vector<MATCHHISTRODIS> &matches)
 {
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1;
@@ -263,11 +264,36 @@ long LidarFeatureRegistration::LidarRegistration_Match(pcl::PointCloud<int> idxL
         {
             pcl::PointXYZ pnt1=cloud1->points[idxList1[i]];
             pcl::PointXYZ pnt2=cloud2->points[idxList2[j]];
-            double rel=LidarRegistration_CorrelationMatch(pnt1,pnt2,kdtree1,cloud1,kdtree2,cloud2,50);
+            double rel=LidarRegistration_CorrelationMatch(pnt1,pnt2,kdtree1,cloud1,kdtree2,cloud2,matchNum);
             matchTmp.idx2 = matchTmp.relation>rel?matchTmp.idx2:idxList2[j];
             matchTmp.relation=max(rel,matchTmp.relation);
         }
         matches.push_back(matchTmp);
+
+        //DEBUG
+        //output match point list
+        pcl::PointXYZ pnt1=cloud1->points[matchTmp.idx1];
+        pcl::PointXYZ pnt2=cloud2->points[matchTmp.idx2];
+
+        std::vector<int> pointIdxNKNSearch1(matchNum);
+        std::vector<int> pointIdxNKNSearch2(matchNum);
+        std::vector<float> pointNKNSquaredDistance(matchNum);
+
+        kdtree1.nearestKSearch(pnt1, matchNum, pointIdxNKNSearch1, pointNKNSquaredDistance);
+        kdtree2.nearestKSearch(pnt2, matchNum, pointIdxNKNSearch2, pointNKNSquaredDistance);
+
+        std::string path=to_string(i)+".txt";
+        FILE* fs = fopen(path.c_str(),"r+");
+        for(int tIdx=0;tIdx<matchNum;++tIdx)
+        {
+            fprintf(fs,"%lf,%lf,%lf\n", cloud1->points[matchTmp.idx1].x,
+                            cloud1->points[matchTmp.idx1].y,
+                            cloud1->points[matchTmp.idx1].z);
+            fprintf(fs,"%lf,%lf,%lf\n", cloud2->points[matchTmp.idx2].x,
+                            cloud2->points[matchTmp.idx2].y,
+                            cloud2->points[matchTmp.idx2].z);
+        }
+        fclose(fs);
     }
     return 0;
 }
