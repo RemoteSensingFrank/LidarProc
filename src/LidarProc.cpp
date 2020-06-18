@@ -179,12 +179,12 @@ int main(int argc ,char* argv[])
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("../data/register/moreSimulate.las",lasdst1);
+    reader4->LidarReader_Open("/local/data/moreSimulate.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
 
     ILASDataset *lasdst2 = new ILASDataset();
     LASReader *reader5 = new LidarMemReader();
-    reader5->LidarReader_Open("../data/register/more.las",lasdst2);
+    reader5->LidarReader_Open("/local/data/more.las",lasdst2);
     reader5->LidarReader_Read(true,1,lasdst2);
     LASTransToPCL transPCL;
     transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
@@ -200,7 +200,7 @@ int main(int argc ,char* argv[])
     lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
     //std::string path="../data/"+to_string(int(0))+".txt";
-    FILE* fs = fopen("0.txt","r+");
+    FILE* fs = fopen("../data/0.txt","w+");
     fclose(fs);
     // LidarFeatureRegistration lidarReg;
     // std::vector<MATCHHISTRODIS> matches;

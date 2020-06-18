@@ -191,18 +191,18 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     //std::cout << "SIFT points in the result are " << feauture_cloud->points.size () << std::endl;
 
 #ifdef _DEBUG
-    FILE *fs = fopen("../data/test/sift.txt","w+");
-    if(fs!=nullptr)
-    {
-        for(int i=0;i<siftPointIdx.points.size ();++i)
-            fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
-                                        input_cloud->points[siftPointIdx[i]].y,
-                                        input_cloud->points[siftPointIdx[i]].z);
-        fclose(fs);
-    }else
-    {
-        printf("create test output failed!\n");
-    }
+    // FILE *fs = fopen("../data/test/sift.txt","w+");
+    // if(fs!=nullptr)
+    // {
+    //     for(int i=0;i<siftPointIdx.points.size ();++i)
+    //         fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
+    //                                     input_cloud->points[siftPointIdx[i]].y,
+    //                                     input_cloud->points[siftPointIdx[i]].z);
+    //     fclose(fs);
+    // }else
+    // {
+    //     printf("create test output failed!\n");
+    // }
 #endif
     return 0;
 }

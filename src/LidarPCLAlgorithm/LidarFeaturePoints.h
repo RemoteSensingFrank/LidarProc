@@ -161,8 +161,6 @@ private:
      * @return: 
      */
     long LidarRegistration_DisHistro(int idxPnt,std::vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro);
-
-    
 };
 
 #endif
