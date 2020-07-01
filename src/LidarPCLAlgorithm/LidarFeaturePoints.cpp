@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-06-09 14:26:51
+ * @LastEditTime: 2020-07-01 19:09:29
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -15,6 +15,7 @@
 #include <boost/thread/thread.hpp>
 #include <pcl/range_image/range_image.h>
 #include <pcl/features/range_image_border_extractor.h>
+#include <pcl/registration/correspondence_rejection_sample_consensus.h>
 
 #include <pcl/console/time.h>
 #include <pcl/point_types.h>
@@ -152,7 +153,7 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     fpfh.setSearchMethod(treeFPFH);
     //fpfh.setIndices(keypoints_indices);
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs(new pcl::PointCloud<pcl::FPFHSignature33>());
-    fpfh.setKSearch(10);        //近邻10个点
+    fpfh.setKSearch(50);        //近邻10个点
     fpfh.compute(*fpfhs);       //计算特征
     
     //判断SIFT点在原始点云中的index
@@ -218,9 +219,9 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
 //     return sqrt(dis);
 // }
 
-long LidarFeatureRegistration::LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH1,
+long LidarFeatureRegistration::LidarRegistration_SiftFPFHMatch(pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH1,
                                 pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH2,
-                                pcl::PointCloud<int> &siftMatchPointIdx)
+                                std::vector<MATCHHISTRODIS> &matches)
 {
     pcl::KdTreeFLANN<pcl::FPFHSignature33> kdtree;
     kdtree.setInputCloud(siftFPFH1);
@@ -234,9 +235,12 @@ long LidarFeatureRegistration::LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHS
     {
         if (kdtree.nearestKSearch(fpfhTar, searchNum, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
         {
-            siftMatchPointIdx.push_back(pointIdxNKNSearch[0]);
+            MATCHHISTRODIS matchTmp;
+            matchTmp.relation=-1;
+            matchTmp.idx2 = num;
+            matchTmp.idx1 = pointIdxNKNSearch[0];
+            matches.push_back(matchTmp);
             num++;
-            //printf("%d-%d\n",num,pointIdxNKNSearch[0]);
         }
     }
 }
@@ -269,11 +273,116 @@ long LidarFeatureRegistration::LidarRegistration_Match(pcl::PointCloud<int> idxL
             matchTmp.relation=max(rel,matchTmp.relation);
         }
         matches.push_back(matchTmp);
+    }
+    return 0;
+}
 
-        //DEBUG
+long LidarFeatureRegistration::LidarRegistration_RANSC(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                             pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                             pcl::PointCloud<int> siftPointIdx1,
+                             pcl::PointCloud<int> siftPointIdx2,
+                             int type,
+                             std::vector<MATCHHISTRODIS> &matches)
+{
+
+    boost::shared_ptr<pcl::Correspondences> correspondence_all(new pcl::Correspondences);
+    boost::shared_ptr<pcl::Correspondences> correspondence_inliner(new pcl::Correspondences);
+    pcl::Correspondences correspondences;
+    
+    for(int i=0;i<matches.size();++i)
+    {
         //output match point list
-        pcl::PointXYZ pnt1=cloud1->points[matchTmp.idx1];
-        pcl::PointXYZ pnt2=cloud2->points[matchTmp.idx2];
+        int id1,id2;
+        if(type==0)
+        {
+
+            if(siftPointIdx1[matches[i].idx1]>cloud1->points.size())
+            {
+                printf("%d\n",siftPointIdx1[matches[i].idx1]);
+                continue;
+            }
+
+            if(siftPointIdx2[matches[i].idx2]>cloud2->points.size())
+            {
+                printf("%d\n",siftPointIdx2[matches[i].idx2]);
+                continue;
+            }
+            id1 = siftPointIdx1[matches[i].idx1];
+            id2 = siftPointIdx2[matches[i].idx2];
+        }
+        else if(type==1)
+        {
+            id1 = matches[i].idx1;
+            id2 = matches[i].idx2;
+        }
+
+        pcl::Correspondence Correspondence;
+		Correspondence.index_match = id1;   //目标点云
+		Correspondence.index_query = id2;//源点云
+		correspondences.push_back(Correspondence);
+    }
+    *correspondence_all = correspondences;
+
+    printf("process ransc\n");
+    pcl::registration::<pcl::PointXYZ> ransac;
+	ransac.setInputSource(cloud1);
+	ransac.setInputTarget(cloud2);
+	ransac.setMaximumIterations(200);
+	ransac.setInlierThreshold(3);
+	ransac.getRemainingCorrespondences(*correspondence_all, *correspondence_inliner);
+
+    matches.clear();
+    for (int i = 0; i < correspondence_inliner->size(); i++)
+	{
+        MATCHHISTRODIS matchdis;
+        matchdis.idx1 = correspondence_inliner->at(i).index_match;
+        matchdis.idx2 = correspondence_inliner->at(i).index_query;
+        matchdis.relation = -1;
+        matches.push_back(matchdis);
+    }
+    return 0;
+}
+
+
+void LidarFeatureRegistration::LidarRegistration_OutputTest(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 pcl::PointCloud<int> siftPointIdx1,
+                                 pcl::PointCloud<int> siftPointIdx2,
+                                 int type,
+                                 std::vector<MATCHHISTRODIS> matches)
+{
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1;
+	kdtree1.setInputCloud(cloud1);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree2;
+	kdtree2.setInputCloud(cloud2);
+    const int matchNum=20;
+    for(int i=0;i<matches.size();++i)
+    {
+        //output match point list
+        int id1,id2;
+        if(type==0)
+        {
+            if(siftPointIdx1[matches[i].idx1]>cloud1->points.size())
+            {
+                printf("%d\n",siftPointIdx1[matches[i].idx1]);
+                continue;
+            }
+            if(siftPointIdx2[matches[i].idx2]>cloud2->points.size())
+            {
+                printf("%d\n",siftPointIdx2[matches[i].idx2]);
+                continue;
+            }
+            id1 = siftPointIdx1[matches[i].idx1];
+            id2 = siftPointIdx2[matches[i].idx2];
+        }
+        else if(type==1)
+        {
+            id1 = matches[i].idx1;
+            id2 = matches[i].idx2;
+        }
+
+        pcl::PointXYZ pnt1=cloud1->points[id1];
+        pcl::PointXYZ pnt2=cloud2->points[id2];
 
         std::vector<int> pointIdxNKNSearch1(matchNum);
         std::vector<int> pointIdxNKNSearch2(matchNum);
@@ -282,23 +391,83 @@ long LidarFeatureRegistration::LidarRegistration_Match(pcl::PointCloud<int> idxL
         kdtree1.nearestKSearch(pnt1, matchNum, pointIdxNKNSearch1, pointNKNSquaredDistance);
         kdtree2.nearestKSearch(pnt2, matchNum, pointIdxNKNSearch2, pointNKNSquaredDistance);
 
-        std::string path=to_string(i)+".txt";
-        FILE* fs = fopen(path.c_str(),"r+");
+        std::string path="../data/"+to_string(i)+".txt";
+        FILE* fs = fopen(path.c_str(),"w+");
+        //printf("%d\n",matchNum);
         for(int tIdx=0;tIdx<matchNum;++tIdx)
         {
-            fprintf(fs,"%lf,%lf,%lf\n", cloud1->points[matchTmp.idx1].x,
-                            cloud1->points[matchTmp.idx1].y,
-                            cloud1->points[matchTmp.idx1].z);
-            fprintf(fs,"%lf,%lf,%lf\n", cloud2->points[matchTmp.idx2].x,
-                            cloud2->points[matchTmp.idx2].y,
-                            cloud2->points[matchTmp.idx2].z);
+            fprintf(fs,"%lf,%lf,%lf\n", cloud1->points[pointIdxNKNSearch1[tIdx]].x,
+                            cloud1->points[pointIdxNKNSearch1[tIdx]].y,
+                            cloud1->points[pointIdxNKNSearch1[tIdx]].z);
+            fprintf(fs,"%lf,%lf,%lf\n", cloud2->points[pointIdxNKNSearch2[tIdx]].x,
+                            cloud2->points[pointIdxNKNSearch2[tIdx]].y,
+                            cloud2->points[pointIdxNKNSearch1[tIdx]].z);
         }
         fclose(fs);
     }
-    return 0;
 }
 
+void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 pcl::PointCloud<int> siftPointIdx1,
+                                 pcl::PointCloud<int> siftPointIdx2,
+                                 int type,
+                                 std::vector<MATCHHISTRODIS> matches,
+                                 double *r_t)
+{
+    for(int i=0;i<matches.size();++i)
+    {
+        //output match point list
+        int id1,id2;
+        if(type==0)
+        {
 
+            if(siftPointIdx1[matches[i].idx1]>cloud1->points.size())
+            {
+                printf("%d\n",siftPointIdx1[matches[i].idx1]);
+                continue;
+            }
+
+            if(siftPointIdx2[matches[i].idx2]>cloud2->points.size())
+            {
+                printf("%d\n",siftPointIdx2[matches[i].idx2]);
+                continue;
+            }
+            id1 = siftPointIdx1[matches[i].idx1];
+            id2 = siftPointIdx2[matches[i].idx2];
+        }
+        else if(type==1)
+        {
+            id1 = matches[i].idx1;
+            id2 = matches[i].idx2;
+        }
+
+        pcl::PointXYZ pnt1=cloud1->points[id1];
+        pcl::PointXYZ pnt2=cloud2->points[id2];
+
+        double x1 = pnt1.x,y1 = pnt1.y,z1=pnt1.z;
+        double x2 = pnt2.x,y2 = pnt2.y,z2=pnt2.z;
+        
+        
+        double a11 = cos(r_t[1])*cos(r_t[2]);
+        double a12 = sin(r_t[0])*sin(r_t[1])*cos(r_t[2]) - cos(r_t[0])*sin(r_t[2]);
+        double a13 = cos(r_t[0])*sin(r_t[1])*cos(r_t[2]) + sin(r_t[0])*sin(r_t[2]);
+        double b11 = cos(r_t[1])*sin(r_t[2]);
+        double b12 = sin(r_t[0])*sin(r_t[1])*sin(r_t[2]) + cos(r_t[0])*cos(r_t[2]);
+        double b13 = cos(r_t[0])*sin(r_t[1])*sin(r_t[2]) - sin(r_t[0])*cos(r_t[2]);
+        double c11 = -sin(r_t[1]);
+        double c12 = sin(r_t[0])*cos(r_t[1]);
+        double c13 = cos(r_t[0])*cos(r_t[1]);
+
+        double res1=(a11*x1+a12*y1+a13*z1+r_t[3]-x2)*
+                    (a11*x1+a12*y1+a13*z1+r_t[3]-x2);
+        double res2=(b11*x1+b12*y1+b13*z1+r_t[4]-y2)*
+                    (b11*x1+b12*y1+b13*z1+r_t[4]-y2);
+        double res3=(c11*x1+c12*y1+c13*z1+r_t[5]-z2)*
+                    (c11*x1+c12*y1+c13*z1+r_t[5]-z2);
+        printf("RMS of x=%lf,y=%lf,z=%lf\n",res1,res2,res3);
+    }
+}
 double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXYZ pnt1,pcl::PointXYZ pnt2,
                                                                 pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1,
                                                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
@@ -369,7 +538,16 @@ double LidarFeatureRegistration::LidarRegistration_Correlation(double* data1,dou
 		R3 += pow((data2[i] - aveB), 2);
 	}
  
-	return (R1 / sqrt(R2*R3));
+    //计算距离
+    double dis=0;
+    for(long i=0;i<num;++i)
+    {
+        dis+=(data1[i]-data2[i])*(data1[i]-data2[i]);
+    }
+    dis=sqrt(dis/num);
+    double ratio=1.0;
+
+	return (/*R1 / sqrt(R2*R3)*/1/dis*ratio);
 }
 
 

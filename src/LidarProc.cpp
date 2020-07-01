@@ -13,6 +13,8 @@
 #include "./LidarAlgorithm/LASSimpleClassify.h"
 #include "./LidarAlgorithm/LASSkeleton.h"
 #include "./LidarAlgorithm/LASDangerPoints.h"
+#include "./LidarUtil/Simulation.h"
+
 void PorfileGenerateSample()
 {
     LASProfile profile;
@@ -179,7 +181,7 @@ int main(int argc ,char* argv[])
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("/local/data/moreSimulate.las",lasdst1);
+    reader4->LidarReader_Open("/local/data/moreSimulate2.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
 
     ILASDataset *lasdst2 = new ILASDataset();
@@ -192,19 +194,26 @@ int main(int argc ,char* argv[])
 
     LidarFeaturePoints lidarFeatures;
     pcl::PointCloud<int> siftPointIdx1;
+    pcl::PointCloud<int> siftPointIdx2;
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
     lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
 
-    pcl::PointCloud<int> siftPointIdx2;
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
     lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
+    //LidarRegistrationUtil lidarRegUtil(100,0,0,0,0,0);
+    //lidarRegUtil.LidarRegistration_Simulation("/local/data/more.las","/local/data/moreSimulate2.las");
+
     //std::string path="../data/"+to_string(int(0))+".txt";
-    FILE* fs = fopen("../data/0.txt","w+");
-    fclose(fs);
-    // LidarFeatureRegistration lidarReg;
-    // std::vector<MATCHHISTRODIS> matches;
-    // lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,50,matches);
+    // FILE* fs = fopen("../data/0.txt","w+");
+    // fclose(fs);
+    LidarFeatureRegistration lidarReg;
+    std::vector<MATCHHISTRODIS> matches;
+    lidarReg.LidarRegistration_SiftFPFHMatch(fpfhs1,fpfhs2,matches);
+    
+    //lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,200,matches);
+    lidarReg.LidarRegistration_RANSC(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
+    lidarReg.LidarRegistration_OutputTest(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
 
     delete lasdst1;
     delete reader4;

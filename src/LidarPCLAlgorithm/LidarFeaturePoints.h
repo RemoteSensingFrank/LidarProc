@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-06-09 11:39:41
+ * @LastEditTime: 2020-07-01 11:35:57
  */
 #ifdef _USE_PCL_
 
@@ -86,13 +86,14 @@ public:
     * @note   
     * @param  siftFPFH1: 点集1中的FPFH特征
     * @param  siftFPFH2: 点集2中的FPFH特征
+    * @param  pcl::PointCloud<int> siftPointIdx1,
+      @param  pcl::PointCloud<int> siftPointIdx2,
     * @param  &siftMatchPointIdx: 匹配点的ID
     * @retval 
     */
-    long LidarRegistration_Sift(pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH1,
-                                pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH2,
-                                pcl::PointCloud<int> &siftMatchPointIdx);
-
+    long LidarRegistration_SiftFPFHMatch(pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH1,
+                                         pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH2,
+                                         std::vector<MATCHHISTRODIS> &matches);
 
     /**
      * @name: find the most match point pair and correlation value
@@ -111,7 +112,58 @@ public:
                                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
                                  int matchNum,
                                  std::vector<MATCHHISTRODIS> &matches);
-                                 
+
+    /**
+     * @name: LidarRegistration_RANSC
+     * @msg: using ransc method to optimize the two match points
+     * @param pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1：input point cloud 1
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2：input point cloud 2
+              int matchNum：match numbers
+              std::vector<MATCHHISTRODIS> matches：matches
+     * @return: 
+     */
+    long LidarRegistration_RANSC(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 pcl::PointCloud<int> siftPointIdx1,
+                                 pcl::PointCloud<int> siftPointIdx2,
+                                 int type,
+                                 std::vector<MATCHHISTRODIS> &matches);
+
+    /**
+     * @name: Output the nearest point set for a pair of the match points
+     * @msg: 
+     * @param pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1：点集1
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2：点集2
+              std::vector<MATCHHISTRODIS> &matches：匹配集
+     * @return: 
+     */
+    void LidarRegistration_OutputTest(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 pcl::PointCloud<int> siftPointIdx1,
+                                 pcl::PointCloud<int> siftPointIdx2,
+                                 int type,
+                                 std::vector<MATCHHISTRODIS> matches);
+
+    /**
+     * @name: check the RMS of the match points
+     * @msg: 
+     * @param pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1：点集1
+              pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2：点集2
+              pcl::PointCloud<int> siftPointIdx1, match point index in points list 1
+              pcl::PointCloud<int> siftPointIdx2, match point index in points list 2 
+              int type: match algorithms
+              std::vector<MATCHHISTRODIS> &matches：匹配集
+              double *r_t: 先验信息
+     * @return: 
+     */
+    void LidarRegistration_Check(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
+                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                 pcl::PointCloud<int> siftPointIdx1,
+                                 pcl::PointCloud<int> siftPointIdx2,
+                                 int type,
+                                 std::vector<MATCHHISTRODIS> matches,
+                                 double *r_t);
+
 #ifdef _USE_CERES_
     /**
      * @name: 根据匹配点计算旋转矩阵，

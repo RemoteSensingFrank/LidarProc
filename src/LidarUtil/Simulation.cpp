@@ -3,8 +3,8 @@
  * @version: 1.0版本
  * @Author: Frank.Wu
  * @Date: 2019-12-26 15:39:14
- * @LastEditors  : Frank.Wu
- * @LastEditTime : 2020-01-09 11:33:38
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2020-07-01 10:49:17
  */
 
 #include "Simulation.h"
@@ -42,10 +42,12 @@ long LidarRegistrationUtil::LidarRegistration_TransPer(Point3D &pt,Point3D cente
     ptMat(1,0) = pt.y-centerPt.y;
     ptMat(2,0) = pt.z-centerPt.z;
 
+    //rotation
     MatrixXd transMat=rotMat*ptMat;
-    pt.x = transMat(0,0)+centerPt.x;
-    pt.y = transMat(1,0)+centerPt.y;
-    pt.z = transMat(2,0)+centerPt.z;
+    
+    pt.x = transMat(0,0)+centerPt.x-mx;
+    pt.y = transMat(1,0)+centerPt.y-my;
+    pt.z = transMat(2,0)+centerPt.z-mz;
 
     return 0;
 }

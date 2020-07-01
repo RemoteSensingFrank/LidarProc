@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-06-03 11:09:57
+ * @LastEditTime: 2020-06-26 13:11:22
  */ 
 #include "LidarFilterPCL.h"
 
@@ -23,7 +23,7 @@ long LidarFilterPCL::LidarFilterPCL_StatisticalOutlierRemoval(pcl::PointCloud<pc
  
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2(new pcl::PointCloud<pcl::PointXYZ>);
     sor.setInputCloud(cloud_filtered);          //设置待滤波的点云
-	sor.setMeanK(minNum/2);                       //设置在进行统计时考虑查询点临近点数
+	sor.setMeanK(minNum/2);                     //设置在进行统计时考虑查询点临近点数
 	sor.setStddevMulThresh(thresDis);           //设置判断是否为离群点的阀值
 	sor.filter(*cloud_filtered2);               //存储
 
