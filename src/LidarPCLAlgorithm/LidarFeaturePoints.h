@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-01 11:35:57
+ * @LastEditTime: 2020-07-06 16:18:56
  */
 #ifdef _USE_PCL_
 
@@ -12,6 +12,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/keypoints/narf_keypoint.h>
 #include <pcl/features/narf_descriptor.h>
+#include "../LidarBase/LASPoint.h"
 /**
  * @brief  使用PCL库对点云数据进行特征点提取
  * @note   
@@ -153,6 +154,7 @@ public:
               pcl::PointCloud<int> siftPointIdx2, match point index in points list 2 
               int type: match algorithms
               std::vector<MATCHHISTRODIS> &matches：匹配集
+              Point3D pntCenter 中心点坐标
               double *r_t: 先验信息
      * @return: 
      */
@@ -162,6 +164,7 @@ public:
                                  pcl::PointCloud<int> siftPointIdx2,
                                  int type,
                                  std::vector<MATCHHISTRODIS> matches,
+                                 GeometryLas::Point3D pntCenter,
                                  double *r_t);
 
 #ifdef _USE_CERES_

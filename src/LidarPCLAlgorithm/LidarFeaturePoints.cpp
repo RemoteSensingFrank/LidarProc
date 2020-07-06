@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-01 19:09:29
+ * @LastEditTime: 2020-07-06 16:59:36
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -101,7 +101,7 @@ long LidarFeaturePoints::LidarFeature_NARF(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     /*提取特征描述*/
     std::vector<int> keypoint_indices2;
     keypoint_indices2.resize (narfIndex.points.size ());
-    for (unsigned int i=0; i<narfIndex.size (); ++i) // This step is necessar_t[1] to get the right vector type
+    for (unsigned int i=0; i<narfIndex.size (); ++i) // This step is necessary to get the right vector type
         keypoint_indices2[i]=narfIndex.points[i];
     pcl::NarfDescriptor narf_descriptor (&range_image, &keypoint_indices2);
     narf_descriptor.getParameters ().support_size = support_size;
@@ -153,7 +153,7 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     fpfh.setSearchMethod(treeFPFH);
     //fpfh.setIndices(keypoints_indices);
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs(new pcl::PointCloud<pcl::FPFHSignature33>());
-    fpfh.setKSearch(50);        //近邻10个点
+    fpfh.setKSearch(10);        //近邻10个点
     fpfh.compute(*fpfhs);       //计算特征
     
     //判断SIFT点在原始点云中的index
@@ -289,6 +289,7 @@ long LidarFeatureRegistration::LidarRegistration_RANSC(pcl::PointCloud<pcl::Poin
     boost::shared_ptr<pcl::Correspondences> correspondence_inliner(new pcl::Correspondences);
     pcl::Correspondences correspondences;
     
+    
     for(int i=0;i<matches.size();++i)
     {
         //output match point list
@@ -317,18 +318,21 @@ long LidarFeatureRegistration::LidarRegistration_RANSC(pcl::PointCloud<pcl::Poin
         }
 
         pcl::Correspondence Correspondence;
-		Correspondence.index_match = id1;   //目标点云
-		Correspondence.index_query = id2;//源点云
+		Correspondence.index_match = id2;   //目标点云
+		Correspondence.index_query = id1;//源点云
+        // printf("%d-%d\n",id2,id1);
 		correspondences.push_back(Correspondence);
     }
     *correspondence_all = correspondences;
 
     printf("process ransc\n");
-    pcl::registration::<pcl::PointXYZ> ransac;
+    pcl::registration::CorrespondenceRejectorSampleConsensus<pcl::PointXYZ> ransac;
+    // printf("%d\n",cloud1->points.size());
+    // printf("%d\n",cloud2->points.size());
 	ransac.setInputSource(cloud1);
 	ransac.setInputTarget(cloud2);
-	ransac.setMaximumIterations(200);
-	ransac.setInlierThreshold(3);
+	ransac.setMaximumIterations(400);
+	ransac.setInlierThreshold(40);
 	ransac.getRemainingCorrespondences(*correspondence_all, *correspondence_inliner);
 
     matches.clear();
@@ -413,6 +417,7 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
                                  pcl::PointCloud<int> siftPointIdx2,
                                  int type,
                                  std::vector<MATCHHISTRODIS> matches,
+                                 GeometryLas::Point3D pntCenter,
                                  double *r_t)
 {
     for(int i=0;i<matches.size();++i)
@@ -421,7 +426,6 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
         int id1,id2;
         if(type==0)
         {
-
             if(siftPointIdx1[matches[i].idx1]>cloud1->points.size())
             {
                 printf("%d\n",siftPointIdx1[matches[i].idx1]);
@@ -445,27 +449,30 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
         pcl::PointXYZ pnt1=cloud1->points[id1];
         pcl::PointXYZ pnt2=cloud2->points[id2];
 
-        double x1 = pnt1.x,y1 = pnt1.y,z1=pnt1.z;
+        double x1 = pnt1.x-pntCenter.x,y1 = pnt1.y-pntCenter.y,z1=pnt1.z-pntCenter.z;
         double x2 = pnt2.x,y2 = pnt2.y,z2=pnt2.z;
         
-        
-        double a11 = cos(r_t[1])*cos(r_t[2]);
-        double a12 = sin(r_t[0])*sin(r_t[1])*cos(r_t[2]) - cos(r_t[0])*sin(r_t[2]);
-        double a13 = cos(r_t[0])*sin(r_t[1])*cos(r_t[2]) + sin(r_t[0])*sin(r_t[2]);
-        double b11 = cos(r_t[1])*sin(r_t[2]);
-        double b12 = sin(r_t[0])*sin(r_t[1])*sin(r_t[2]) + cos(r_t[0])*cos(r_t[2]);
-        double b13 = cos(r_t[0])*sin(r_t[1])*sin(r_t[2]) - sin(r_t[0])*cos(r_t[2]);
-        double c11 = -sin(r_t[1]);
-        double c12 = sin(r_t[0])*cos(r_t[1]);
-        double c13 = cos(r_t[0])*cos(r_t[1]);
+        MatrixXd rotMat = MatrixXd::Identity(3,3);
+        rotMat(0,0) = cos(r_t[1])*cos(r_t[2]);
+        rotMat(0,1) = sin(r_t[0])*sin(r_t[1])*cos(r_t[2]) - cos(r_t[0])*sin(r_t[2]);
+        rotMat(0,2) = cos(r_t[0])*sin(r_t[1])*cos(r_t[2]) + sin(r_t[0])*sin(r_t[2]);
+        rotMat(1,0) = cos(r_t[1])*sin(r_t[2]);
+        rotMat(1,1) = sin(r_t[0])*sin(r_t[1])*sin(r_t[2]) + cos(r_t[0])*cos(r_t[2]);
+        rotMat(1,2) = cos(r_t[0])*sin(r_t[1])*sin(r_t[2]) - sin(r_t[0])*cos(r_t[2]);
+        rotMat(2,0) = -sin(r_t[1]);
+        rotMat(2,1) = sin(r_t[0])*cos(r_t[1]);
+        rotMat(2,2) = cos(r_t[0])*cos(r_t[1]);
 
-        double res1=(a11*x1+a12*y1+a13*z1+r_t[3]-x2)*
-                    (a11*x1+a12*y1+a13*z1+r_t[3]-x2);
-        double res2=(b11*x1+b12*y1+b13*z1+r_t[4]-y2)*
-                    (b11*x1+b12*y1+b13*z1+r_t[4]-y2);
-        double res3=(c11*x1+c12*y1+c13*z1+r_t[5]-z2)*
-                    (c11*x1+c12*y1+c13*z1+r_t[5]-z2);
-        printf("RMS of x=%lf,y=%lf,z=%lf\n",res1,res2,res3);
+        MatrixXd ptMat(3,1);
+        ptMat(0,0) = x1;
+        ptMat(1,0) = y1;
+        ptMat(2,0) = z1;
+        MatrixXd transMat=rotMat*ptMat;
+
+        double res1=((transMat(0,0)+r_t[3]-x2+pntCenter.x)*(transMat(0,0)+r_t[3]-x2+pntCenter.x));
+        double res2=((transMat(1,0)+r_t[4]-y2+pntCenter.y)*(transMat(1,0)+r_t[4]-y2+pntCenter.y));
+        double res3=((transMat(2,0)+r_t[5]-z2+pntCenter.z)*(transMat(2,0)+r_t[5]-z2+pntCenter.z));
+        printf("RMS of x=%lf,y=%lf,z=%lf,total=%lf\n",res1,res2,res3,sqrt(res1+res2+res3)/3);
     }
 }
 double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXYZ pnt1,pcl::PointXYZ pnt2,

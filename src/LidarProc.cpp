@@ -181,12 +181,12 @@ int main(int argc ,char* argv[])
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("/local/data/moreSimulate2.las",lasdst1);
+    reader4->LidarReader_Open("/mnt/d/1.LidarProcess/linux/LidarProc/data/register/moreSimulate2.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
 
     ILASDataset *lasdst2 = new ILASDataset();
     LASReader *reader5 = new LidarMemReader();
-    reader5->LidarReader_Open("/local/data/more.las",lasdst2);
+    reader5->LidarReader_Open("/mnt/d/1.LidarProcess/linux/LidarProc/data/register/more.las",lasdst2);
     reader5->LidarReader_Read(true,1,lasdst2);
     LASTransToPCL transPCL;
     transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
@@ -209,11 +209,17 @@ int main(int argc ,char* argv[])
     // fclose(fs);
     LidarFeatureRegistration lidarReg;
     std::vector<MATCHHISTRODIS> matches;
-    lidarReg.LidarRegistration_SiftFPFHMatch(fpfhs1,fpfhs2,matches);
     
+    LASHeader header=lasdst1->m_lasHeader;
+    GeometryLas::Point3D centerPt((header.max_x+header.min_x)/2,(header.max_y+header.min_y)/2,(header.max_z+header.min_z)/2);
+    
+    int type=0;
+    lidarReg.LidarRegistration_SiftFPFHMatch(fpfhs1,fpfhs2,matches);
     //lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,200,matches);
-    lidarReg.LidarRegistration_RANSC(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
-    lidarReg.LidarRegistration_OutputTest(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
+    //lidarReg.LidarRegistration_RANSC(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
+    //lidarReg.LidarRegistration_OutputTest(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
+    double rot[]={0,0,0,100,0,0};
+    lidarReg.LidarRegistration_Check(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,type,matches,centerPt,rot);
 
     delete lasdst1;
     delete reader4;
