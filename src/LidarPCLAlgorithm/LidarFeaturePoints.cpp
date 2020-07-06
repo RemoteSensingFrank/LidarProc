@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-06 16:59:36
+ * @LastEditTime: 2020-07-06 17:24:34
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -327,8 +327,6 @@ long LidarFeatureRegistration::LidarRegistration_RANSC(pcl::PointCloud<pcl::Poin
 
     printf("process ransc\n");
     pcl::registration::CorrespondenceRejectorSampleConsensus<pcl::PointXYZ> ransac;
-    // printf("%d\n",cloud1->points.size());
-    // printf("%d\n",cloud2->points.size());
 	ransac.setInputSource(cloud1);
 	ransac.setInputTarget(cloud2);
 	ransac.setMaximumIterations(400);
