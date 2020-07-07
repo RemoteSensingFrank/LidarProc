@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-06 17:24:34
+ * @LastEditTime: 2020-07-07 19:41:27
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -418,6 +418,7 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
                                  GeometryLas::Point3D pntCenter,
                                  double *r_t)
 {
+    double totalRMS=0;
     for(int i=0;i<matches.size();++i)
     {
         //output match point list
@@ -471,7 +472,10 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
         double res2=((transMat(1,0)+r_t[4]-y2+pntCenter.y)*(transMat(1,0)+r_t[4]-y2+pntCenter.y));
         double res3=((transMat(2,0)+r_t[5]-z2+pntCenter.z)*(transMat(2,0)+r_t[5]-z2+pntCenter.z));
         printf("RMS of x=%lf,y=%lf,z=%lf,total=%lf\n",res1,res2,res3,sqrt(res1+res2+res3)/3);
+        totalRMS+=sqrt(res1+res2+res3)/3;
     }
+
+    printf("total RMS error:%lf\n",totalRMS/matches.size());
 }
 double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXYZ pnt1,pcl::PointXYZ pnt2,
                                                                 pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1,
@@ -492,6 +496,8 @@ double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXY
 
     LidarRegistration_DisHistro(pointIdxNKNSearch1[0],pointIdxNKNSearch1,cloud1,distro1);
     LidarRegistration_DisHistro(pointIdxNKNSearch2[0],pointIdxNKNSearch2,cloud2,distro2);
+    // LidarRegistration_DisAngleHistro(pointIdxNKNSearch1[0],pointIdxNKNSearch1,cloud1,distro1);
+    // LidarRegistration_DisAngleHistro(pointIdxNKNSearch2[0],pointIdxNKNSearch2,cloud2,distro2);
     double colRel=LidarRegistration_Correlation(distro1,distro2,nearPointsNum);
     
     delete []distro1;distro1=nullptr;
@@ -559,14 +565,55 @@ double LidarFeatureRegistration::LidarRegistration_Correlation(double* data1,dou
 long LidarFeatureRegistration::LidarRegistration_DisHistro(int idxPnt,vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro)
 {
     memset(disHistro,sizeof(double)*idxPntAllNear.size(),0);
+    Point3D pt2(cloud1->points[idxPnt].x,cloud1->points[idxPnt].y,cloud1->points[idxPnt].z);
     for(int i=0;i<idxPntAllNear.size();++i)
     {
         Point3D pt1(cloud1->points[idxPntAllNear[i]].x,cloud1->points[idxPntAllNear[i]].y,cloud1->points[idxPntAllNear[i]].z);
-        Point3D pt2(cloud1->points[idxPnt].x,cloud1->points[idxPnt].y,cloud1->points[idxPnt].z);
         disHistro[i] = DistanceComputation::Distance(pt1,pt2);
     }
     std::sort(disHistro,disHistro+idxPntAllNear.size());
     return 0;
+}
+
+
+long LidarFeatureRegistration::LidarRegistration_DisAngleHistro(int idxPnt,vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro)
+{
+    double *histro = new double[idxPntAllNear.size()];
+    memset(histro,sizeof(double)*idxPntAllNear.size(),0);
+    memset(disHistro,sizeof(double)*idxPntAllNear.size(),0);
+    Point3D pt2(cloud1->points[idxPnt].x,cloud1->points[idxPnt].y,cloud1->points[idxPnt].z);
+    for(int i=0;i<idxPntAllNear.size();++i)
+    {
+        Point3D pt1(cloud1->points[idxPntAllNear[i]].x,cloud1->points[idxPntAllNear[i]].y,cloud1->points[idxPntAllNear[i]].z);
+        histro[i] = DistanceComputation::Distance(pt1,pt2);
+    }
+    
+    vector<int> idx(idxPntAllNear.size());
+    for (int i = 0; i < idxPntAllNear.size(); i++)idx[i] = i;
+    sort(histro,histro+idxPntAllNear.size());
+    sort(idx.begin(),idx.end(),[histro](int i1, int i2) {return histro[i1] < histro[i2]; });
+    
+    double vx1=cloud1->points[idx[0]].x-cloud1->points[idxPnt].x;
+    double vy1=cloud1->points[idx[0]].y-cloud1->points[idxPnt].y;
+    double vz1=cloud1->points[idx[0]].z-cloud1->points[idxPnt].z;
+
+    double down1 = vx1*vx1+vy1*vy1+vz1*vz1;
+    disHistro[0] = histro[0];
+    for (int i = 1; i < idxPntAllNear.size(); i++)
+    {
+
+        double vx2=cloud1->points[idx[i]].x-cloud1->points[idxPnt].x;
+        double vy2=cloud1->points[idx[i]].y-cloud1->points[idxPnt].y;
+        double vz2=cloud1->points[idx[i]].z-cloud1->points[idxPnt].y;
+        
+        double up = vx1*vx2+vy1*vy2+vz1*vz2;
+        double down2 = vx2*vx2+vy2*vy2+vz2*vz2;
+        if(i==1)
+            printf("up:%lf,down1:%lf,down2:%lf,angle:%lf\n",up,down1,down2,up/sqrt(down1)/sqrt(down2));
+        disHistro[i] = histro[i]*up/sqrt(down1)/sqrt(down2);
+        // angleHistro[i-1]=up/sqrt(down1)*sqrt(down2);
+    }
+    delete []histro;histro=nullptr;
 }
 
 #ifdef _USE_CERES_

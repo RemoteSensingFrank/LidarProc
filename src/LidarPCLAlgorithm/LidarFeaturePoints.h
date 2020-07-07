@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-06 16:18:56
+ * @LastEditTime: 2020-07-06 19:09:04
  */
 #ifdef _USE_PCL_
 
@@ -216,6 +216,14 @@ private:
      * @return: 
      */
     long LidarRegistration_DisHistro(int idxPnt,std::vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro);
+
+    /**
+     * @name: take the angle into consideration
+     * @msg: 
+     * @param {type} 
+     * @return: 
+     */
+    long LidarRegistration_DisAngleHistro(int idxPnt,std::vector<int> idxPntAllNear,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,double *disHistro);
 };
 
 #endif
