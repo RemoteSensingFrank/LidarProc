@@ -187,6 +187,7 @@ function classifiedFast(){
 
 }
 
+
 /**
  * 加载相机信息
  */
@@ -208,14 +209,11 @@ function loadCamera(e){
  */
 function onReconstructionFileSelected(evt) {
     let file = evt.target.files[0];
-    console.log(file);
-
     $("#cameraModel").modal('hide');
 
     var reader = new FileReader();
     reader.onload = function(e) {
         data = JSON.parse(e.target.result);
-        //setReconstructionData(data);
         loadCameraPositions(data)
     };
     reader.readAsText(file);

@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: 1.0版本
+ * @Author: Frank.Wu
+ * @Date: 2019-11-18 21:31:08
+ * @LastEditors: Frank.Wu
+ * @LastEditTime: 2020-07-11 11:32:38
+ */ 
 #pragma once
 //
 // Created by wuwei on 18-1-5.
@@ -47,6 +55,13 @@ private:
 	LASDense m_model;
 };
 
+/**
+ *	激光点云不变性特征提取 
+ */
+class LASInvarianceFeatureExtract
+{
+public:
+}
 
 
 #endif //LASGUI_LASMODEL_H

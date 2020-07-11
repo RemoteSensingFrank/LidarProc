@@ -184,7 +184,7 @@ function loop(timestamp){
  */
 function Initial()
 {
-    var path = "pointclouds/more/cloud.js";
+    var path = "pointclouds/data/cloud.js";
     // 不添加cesium库单独通过potree进行数据展示
     //CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
     InitialScene();

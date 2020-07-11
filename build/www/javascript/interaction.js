@@ -484,7 +484,7 @@ function opticalCenter(shot) {
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
 
 
-    var centWorldPlane=projectedFromWGS84(lat,lng);
+    var centWorldPlane=projectedFromWGS84(lat,lng,50);
     if(lng==0&&lat==0){
         centWorldPlane[0]=centWorldPlane[1]=0;
     }
@@ -538,7 +538,7 @@ function pixelToVertex(cam, shot, u, v, scale) {
     var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
 
-    var centWorldPlane=projectedFromWGS84(lat,lng);
+    var centWorldPlane=projectedFromWGS84(lat,lng,50);
     if(lng==0&&lat==0){
         centWorldPlane[0]=centWorldPlane[1]=0;
     }
@@ -595,7 +595,7 @@ function cameraLineGeo(reconstruction, shot_id) {
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
 
 
-    var centWorldPlane=projectedFromWGS84(lat,lng);
+    var centWorldPlane=projectedFromWGS84(lat,lng,50);
     if(lng==0&&lat==0){
         centWorldPlane[0]=centWorldPlane[1]=0;
     }
