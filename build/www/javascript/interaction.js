@@ -424,7 +424,7 @@ function loadCameraPositions(reconstructions){
                 imageobj[imagenum]=cameraLineGeo(reconstructions[reconstruction_id],shot_id);
                 imageobj[imagenum].myimagenum = imagenum;
                 imageobj[imagenum].isFiltered = false;
-                group.add(imageobj[imagenum]);
+                group.add(imageobj[imagenum].children[0]);
             }
             imagenum+=1;
         }
@@ -437,8 +437,36 @@ function loadCameraPositions(reconstructions){
     //     imageobj[imagenum].isFiltered = false;
     //     group.add(imageobj[imagenum]);
     // }
+    
+    // //test measurement
+    // let measure = new Potree.Measure();
+    // measure.name = "Canopy";
+    // measure.showDistances = false;
+    // measure.showCoordinates = true;
+    // measure.maxMarkers = 1;
+    // measure.addMarker(new THREE.Vector3(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z));
+    // viewer.scene.addMeasurement(measure);
+
+    // viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z+100);
+    // viewer.scene.view.lookAt(new THREE.Vector3(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z));
+
+    // //test group 
+    // var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
+    // var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+    // var cubeA = new THREE.Mesh( geometry, material );
+    // cubeA.position.set( 100, 100, 0 );
+    // var cubeB = new THREE.Mesh( geometry, material );
+    // cubeB.position.set( -100, -100, 0 );
+    // var group = new THREE.Group();
+    // group.add( cubeA );
+    // group.add( cubeB );
+    // viewer.scene.scene.add(group);
+    // viewer.scene.view.position.set(100,100,0);
+    // viewer.scene.view.lookAt(new THREE.Vector3(0,0,0));
+ 
     viewer.scene.scene.add(group);
-    viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z);
+    viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z+100);
+    viewer.scene.view.lookAt(new THREE.Vector3(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z));
 }
 
 /**
@@ -484,7 +512,7 @@ function opticalCenter(shot) {
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
 
 
-    var centWorldPlane=projectedFromWGS84(lat,lng);
+    var centWorldPlane=projectedFromWGS84(lat,lng,50);
     if(lng==0&&lat==0){
         centWorldPlane[0]=centWorldPlane[1]=0;
     }
@@ -538,7 +566,7 @@ function pixelToVertex(cam, shot, u, v, scale) {
     var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
 
-    var centWorldPlane=projectedFromWGS84(lat,lng);
+    var centWorldPlane=projectedFromWGS84(lat,lng,50);
     if(lng==0&&lat==0){
         centWorldPlane[0]=centWorldPlane[1]=0;
     }
@@ -552,6 +580,7 @@ function pixelToVertex(cam, shot, u, v, scale) {
     Rt.x = Rt.x+centWorld[0];
     Rt.y = Rt.y+centWorld[1];
     Rt.z = Rt.z+centWorld[2];
+
     //var lla=projectedToWGS84(Rt.x,Rt.y);
     // Rt.x = lla[0];
     // Rt.y = lla[1];
@@ -589,13 +618,13 @@ function cameraLineGeo(reconstruction, shot_id) {
     ];
 
     var pyramidmaterial = new THREE.MeshBasicMaterial( {   color: 0xff0000,
-        wireframe: false
+        wireframe: true
     } );
     var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
 
 
-    var centWorldPlane=projectedFromWGS84(lat,lng);
+    var centWorldPlane=projectedFromWGS84(lat,lng,50);
     if(lng==0&&lat==0){
         centWorldPlane[0]=centWorldPlane[1]=0;
     }
@@ -610,6 +639,7 @@ function cameraLineGeo(reconstruction, shot_id) {
     // imagepyramid.scale.x = 1;
     // imagepyramid.scale.y = 1;
     // imagepyramid.scale.z = 1;
+
     var pyramid = new THREE.Mesh( pyramidgeometry, pyramidmaterial );
     imagepyramid.add(pyramid);
     return imagepyramid

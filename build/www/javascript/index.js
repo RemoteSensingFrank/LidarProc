@@ -46,10 +46,6 @@ function LoadLASDataViewer(path,projec_def)
 {
     currentViewerFilePath = path;
     //定义的投影带为50度带
-    let pointcloudProjection = projec_def;
-    let mapProjection = proj4.defs("EPSG:4326");
-    window.toMap = proj4(pointcloudProjection, mapProjection);
-    window.toScene = proj4(mapProjection, pointcloudProjection);
     Potree.loadPointCloud(path, "data1", e => {
         let pointcloud = e.pointcloud;
         pointcloud.projection = projec_def;     //affect the overview
@@ -58,32 +54,9 @@ function LoadLASDataViewer(path,projec_def)
         material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX 
         material.pointSizeType  = Potree.PointSizeType.ADAPTIVE;
         
-        //定义的投影带为50度带
-        let pointcloudProjection = projec_def;
-		let mapProjection = proj4.defs("EPSG:4326");
-        Potree.measureTimings = true;
-		window.toMap = proj4(pointcloudProjection, mapProjection);
-		window.toScene = proj4(mapProjection, pointcloudProjection);
-		{
-			let bb = viewer.getBoundingBox();
-			let minWGS84 = proj4(pointcloudProjection, mapProjection, bb.min.toArray());
-            let maxWGS84 = proj4(pointcloudProjection, mapProjection, bb.max.toArray());
-            
-            if(typeof cesiumViewer != "undefined")
-            {
-                let cp = new Cesium.Cartesian3.fromDegrees((minWGS84[0]+maxWGS84[0])/2, (minWGS84[1]+maxWGS84[1])/2, 500.0);
-                cesiumViewer.camera.setView({
-                    destination : cp,
-                    orientation: {
-                        heading : 0.0, 
-                        pitch : 90.0, 
-                        roll : 0.0 
-                    }
-                });
-                viewer.scene.view.position.set((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,(bb.min.z+bb.max.z)/2+500);
-		        viewer.scene.view.lookAt(new THREE.Vector3((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,0.0));
-            }
-		}
+        viewer.scene.view.position.set((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,(bb.min.z+bb.max.z)/2+500);
+        viewer.scene.view.lookAt(new THREE.Vector3((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,0.0));
+
     });
 }
 
@@ -108,7 +81,7 @@ function InitialScene()
 	viewer.setPointBudget(1000*1000);
 	viewer.setMinNodeSize(0);
 	viewer.loadSettingsFromURL();
-	viewer.setBackground(null);
+	viewer.setBackground("skybox");
     
 	viewer.loadGUI(() => {
         viewer.setLanguage('en');
@@ -181,8 +154,8 @@ function loop(timestamp){
 function Initial()
 {
     var path = "pointclouds/data1/cloud.js";
-    CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
+    //CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
     InitialScene();
     LoadLASDataViewer(path,"+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
-    requestAnimationFrame(loop);
+    //requestAnimationFrame(loop);
 }
