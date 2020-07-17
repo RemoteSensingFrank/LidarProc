@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-07 19:41:27
+ * @LastEditTime: 2020-07-13 16:34:49
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -288,7 +288,6 @@ long LidarFeatureRegistration::LidarRegistration_RANSC(pcl::PointCloud<pcl::Poin
     boost::shared_ptr<pcl::Correspondences> correspondence_all(new pcl::Correspondences);
     boost::shared_ptr<pcl::Correspondences> correspondence_inliner(new pcl::Correspondences);
     pcl::Correspondences correspondences;
-    
     
     for(int i=0;i<matches.size();++i)
     {
@@ -608,8 +607,6 @@ long LidarFeatureRegistration::LidarRegistration_DisAngleHistro(int idxPnt,vecto
         
         double up = vx1*vx2+vy1*vy2+vz1*vz2;
         double down2 = vx2*vx2+vy2*vy2+vz2*vz2;
-        if(i==1)
-            printf("up:%lf,down1:%lf,down2:%lf,angle:%lf\n",up,down1,down2,up/sqrt(down1)/sqrt(down2));
         disHistro[i] = histro[i]*up/sqrt(down1)/sqrt(down2);
         // angleHistro[i-1]=up/sqrt(down1)*sqrt(down2);
     }

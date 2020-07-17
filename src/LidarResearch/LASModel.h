@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:08
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-11 11:32:38
+ * @LastEditTime: 2020-07-11 14:55:57
  */ 
 #pragma once
 //
@@ -61,7 +61,31 @@ private:
 class LASInvarianceFeatureExtract
 {
 public:
-}
+	/**
+	 * 提取局部点云
+	 * ILASDataset* dataset：点云数据集
+	 * int pointIdx：中心点坐标
+	 * int num：点云个数
+	 **/ 
+	Point3Ds LASInvariancePointsPart(ILASDataset* dataset,int pointIdx,int num);
+
+
+	/**
+	 * 计算距离直方图
+	 * Point3Ds part：点集
+	 * double *histro：距离直方图
+	 **/
+	long LASInvariancePointsLASDisHistroCal(Point3Ds part,double *histro);
+
+
+	/**
+	 * 计算角度直方图
+	 * Point3Ds part：点集
+	 * double *histro：距离直方图
+	 **/
+	long LASInvariancePointsLASAngleHistroCal(Point3Ds part,double *histro);
+	
+};
 
 
 #endif //LASGUI_LASMODEL_H

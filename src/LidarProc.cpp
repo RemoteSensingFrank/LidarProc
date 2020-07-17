@@ -14,6 +14,7 @@
 #include "./LidarAlgorithm/LASSkeleton.h"
 #include "./LidarAlgorithm/LASDangerPoints.h"
 #include "./LidarUtil/Simulation.h"
+#include "./LidarResearch/LASModel.h"
 
 void PorfileGenerateSample()
 {
@@ -177,7 +178,7 @@ void SimpleLineExtract()
 
 int main(int argc ,char* argv[])
 {
-    LidarRegistrationUtil lidarRegUtil(100,0,0,30,0,0);
+    LidarRegistrationUtil lidarRegUtil(100,0,0,30,15,30);
     lidarRegUtil.LidarRegistration_Simulation("/local/data/more.las","/local/data/moreSimulate2.las");
 
 
@@ -192,40 +193,55 @@ int main(int argc ,char* argv[])
     LASReader *reader5 = new LidarMemReader();
     reader5->LidarReader_Open("/local/data/more.las",lasdst2);
     reader5->LidarReader_Read(true,1,lasdst2);
-    LASTransToPCL transPCL;
-    transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
-    transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
 
-    LidarFeaturePoints lidarFeatures;
-    pcl::PointCloud<int> siftPointIdx1;
-    pcl::PointCloud<int> siftPointIdx2;
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
-    lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
 
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
-    lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
+    //点云局部分析
+    LASInvarianceFeatureExtract lasInvariance;
+    int pointIndex=1;
+    Point3Ds pnts1=lasInvariance.LASInvariancePointsPart(lasdst1,500,20);
+    Point3Ds pnts2=lasInvariance.LASInvariancePointsPart(lasdst2,500,20);
+
+    double disHistro1[20],disHistro2[20];
+    lasInvariance.LASInvariancePointsLASDisHistroCal(pnts1,disHistro1);
+    lasInvariance.LASInvariancePointsLASDisHistroCal(pnts2,disHistro2);
+    lasInvariance.LASInvariancePointsLASAngleHistroCal(pnts1,disHistro1);
+    lasInvariance.LASInvariancePointsLASAngleHistroCal(pnts2,disHistro2);
+    
+    // LASTransToPCL transPCL;
+    // transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
+    // transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
+
+    // LidarFeaturePoints lidarFeatures;
+    // pcl::PointCloud<int> siftPointIdx1;
+    // pcl::PointCloud<int> siftPointIdx2;
+    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
+    // lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
+
+    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
+    // lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
     //std::string path="../data/"+to_string(int(0))+".txt";
     // FILE* fs = fopen("../data/0.txt","w+");
     // fclose(fs);
-    LidarFeatureRegistration lidarReg;
-    std::vector<MATCHHISTRODIS> matches;
+    // LidarFeatureRegistration lidarReg;
+    // std::vector<MATCHHISTRODIS> matches;
     
-    LASHeader header=lasdst1->m_lasHeader;
-    GeometryLas::Point3D centerPt((header.max_x+header.min_x)/2,(header.max_y+header.min_y)/2,(header.max_z+header.min_z)/2);
+    // LASHeader header=lasdst1->m_lasHeader;
+    // GeometryLas::Point3D centerPt((header.max_x+header.min_x)/2,(header.max_y+header.min_y)/2,(header.max_z+header.min_z)/2);
     
-    int type=1;
+    // int type=1;
     //lidarReg.LidarRegistration_SiftFPFHMatch(fpfhs1,fpfhs2,matches);
-    lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,100,matches);
+    //lidarReg.LidarRegistration_Match(siftPointIdx1,siftPointIdx2,pclPointCloudI,pclPointCloudO,100,matches);
     //lidarReg.LidarRegistration_RANSC(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
     //lidarReg.LidarRegistration_OutputTest(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,0,matches);
-    double rot[]={30,0,0,100,0,0};
-    lidarReg.LidarRegistration_Check(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,type,matches,centerPt,rot);
-
+    //double rot[]={30,0,0,100,0,0};
+    //lidarReg.LidarRegistration_Check(pclPointCloudI,pclPointCloudO,siftPointIdx1,siftPointIdx2,type,matches,centerPt,rot);
+    
     delete lasdst1;
     delete reader4;
     delete lasdst2;
     delete reader5;
+
     return 0;
 }
 

@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-12-02 00:15:10
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-12-14 12:13:57
+ * @LastEditTime: 2020-07-11 09:54:04
  */
 #include "LidarController.h"
 
@@ -19,12 +19,12 @@ void LidarService::LidarService_Run()
 	}
 	
 	int port=1234;
-	printf("localhost:%d\n",port);
+	printf("http://106.52.133.33/:%d\n",port);
 
 	//the max parallel connection count
 	set_keep_alive_max_count(500);
 	set_base_dir("./www");
-    listen("localhost", port);
+    listen("http://106.52.133.33/", port);
 }
 
 void LidarService::LidarService_Register(LidarController* controller)
