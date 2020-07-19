@@ -8,7 +8,6 @@
  //当前展示的文件路径
 currentViewerFilePath='';
 
-
 /**
  * Cesium 初始化
  * @param {ima} imgurl 
@@ -45,18 +44,25 @@ function CesiumInitial(imgurl)
 function LoadLASDataViewer(path,projec_def)
 {
     currentViewerFilePath = path;
+
+    
+
+    var pos=currentViewerFilePath.lastIndexOf("\/");
+    var strFilePath=currentViewerFilePath.substring(0,pos);
+    pos=strFilePath.lastIndexOf("\/");
+    var strFileName=strFilePath.substring(pos+1,strFilePath.length);
+
     //定义的投影带为50度带
-    Potree.loadPointCloud(path, "data1", e => {
+    Potree.loadPointCloud(currentViewerFilePath, strFileName, e => {
         let pointcloud = e.pointcloud;
-        pointcloud.projection = projec_def;     //affect the overview
         let material = pointcloud.material;
         viewer.scene.addPointCloud(pointcloud);
         material.pointColorType = Potree.PointColorType.RGB; // any Potree.PointColorType.XXXX 
         material.pointSizeType  = Potree.PointSizeType.ADAPTIVE;
         
-        viewer.scene.view.position.set((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,(bb.min.z+bb.max.z)/2+500);
-        viewer.scene.view.lookAt(new THREE.Vector3((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,0.0));
-
+        // viewer.scene.view.position.set((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,(bb.min.z+bb.max.z)/2+500);
+        // viewer.scene.view.lookAt(new THREE.Vector3((bb.min.x+bb.max.x)/2,(bb.min.y+bb.max.y)/2,0.0));
+        viewer.fitToScreen();
     });
 }
 
@@ -89,6 +95,7 @@ function InitialScene()
         //viewer.toggleSidebar();
     });
 }
+
 
 function loop(timestamp){
     requestAnimationFrame(loop);
@@ -156,6 +163,6 @@ function Initial()
     var path = "pointclouds/data1/cloud.js";
     //CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
     InitialScene();
-    LoadLASDataViewer(path,"+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
+    //LoadLASDataViewer(path,"+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
     //requestAnimationFrame(loop);
 }

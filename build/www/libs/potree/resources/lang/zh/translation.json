@@ -12,6 +12,9 @@
         "about_opt": "关于"
     },
     "tt": {
+        "calculate_model":"模型精化计算",
+        "withdraw_model":"撤回操作",
+        "line_model":"线性模型",
         "angle_measurement": "角度测量",
         "distance_measurement": "距离测量",
         "height_measurement": "高度测量",

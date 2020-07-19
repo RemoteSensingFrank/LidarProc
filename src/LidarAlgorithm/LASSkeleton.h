@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-05-22 16:43:56
+ * @LastEditTime: 2020-07-19 14:40:19
  */
 #pragma once
 
@@ -20,6 +20,7 @@
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
+#include "../LidarUtil/GeojsonUtil.h"
 #include "Eigen/Eigen"
 
 using namespace GeometryLas;
@@ -165,6 +166,17 @@ namespace LasAlgorithm
         virtual Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
     };
     
+    /**
+    * @brief  extract line refine interactive
+    * 从点集中提取出具有线性特征的点集
+    * @note   
+    * @retval None
+    */
+    class PointCloudLineInteractive
+    {
+    public:
+        long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,)
+    }
 }
 
 #endif

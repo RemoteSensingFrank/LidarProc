@@ -7,6 +7,8 @@
 
 #include "httplib.h"
 #include "../LidarUtil/FileHelper.h"
+#include "../LidarUtil/GeojsonUtil.h"
+
 #include "../LidarBase/LASReceive.h"
 #include "../LidarBase/LASReader.h"
 #include "../LidarResearch/LASFormatTransform.h"
@@ -260,7 +262,7 @@ public:
             string path="../data/"+string(req.matches[1]);
             LASTransToPotree lasTrans;
             lasTrans.LASTransToPotree_Trans(path.c_str());
-            res.set_content("transed", "text/plain");
+            res.set_content(path, "text/plain");
             res.status=200;
         });    
     }    
@@ -294,42 +296,6 @@ public:
             res.status=200;
         });   
     }    
-};
-
-/**
- * @brief  查看API文档-手动维护
- * @note   
- * @retval None
- */
-class LidarControllerDoc:public LidarController
-{
-public:
-    LidarControllerDoc(LidarService* tService):LidarController(tService){}
-
-    virtual void LidarController_Run()
-    {
-        service->Get("/apidoc",[](const Request& req, Response& res){
-            string pageInfo="";
-            string apiDoc = "";
-            string apiInfo="Api:http://localhost:1234/info\nParams:null\nParamType:null\nRequestType:GET\nDesc:查看系统信息\n\n";
-            pageInfo+=apiInfo;
-            string apiExhibitlist="Api:http://localhost:1234/exhibitlist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可展示数据文件夹\n\n";
-            pageInfo+=apiExhibitlist;
-            string apiDatalist="Api:http://localhost:1234/datalist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可处理数据\n\n";
-            pageInfo+=apiDatalist;
-            string apiDatadelete="Api:http://localhost:1234/datadelete\nParams:待删除数据文件名（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除处理数据\n\n";
-            pageInfo+=apiDatadelete;
-            string apiExhibitdelete="Api:http://localhost:1234/exhibitdelete\nParams:待删除数据文件夹（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除展示数据\n\n";
-            pageInfo+=apiExhibitdelete;
-            string apiDatatrans="Api:http://localhost:1234/datatrans\nParams:待转换数据文件名\nParamType:url参数\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
-            pageInfo+=apiDatatrans;
-            string apiDataclasstype="Api:http://localhost:1234/dataclasstype\nParams:null\nParamType:\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
-            pageInfo+=apiDataclasstype;
-            string doc=pageInfo;
-            res.set_content(doc, "text/plain;charset=utf-8");
-            res.status=200;
-        });  
-    }   
 };
 
 /**
@@ -424,6 +390,12 @@ public:
     }   
 };
 
+/**
+ * @name: 点云简单分类算法
+ * @msg: 
+ * @param {type} 
+ * @return: 
+ */
 class LidarControllerClassfication:public LidarController
 {
 public:
@@ -471,4 +443,96 @@ public:
             res.status=200;
         });      
     }  
+};
+
+
+/**
+ * @name:  模型精化
+ * @msg: 
+ * @param {type} 
+ * @return: 
+ */
+class LidarControllerLineModelRefine:public LidarController
+{
+public:
+    LidarControllerLineModelRefine(LidarService* tService):LidarController(tService){}
+
+    /**
+     * @name: string jsonString:json string
+     * @msg: 
+     * @param {type} 
+     * @return: 
+     */
+    long LidarModelJsonExtract(string jsonString)
+    {
+        rapidjson::Document document;
+        document.Parse(jsonString.c_str());
+        if(document.HasMember("features")){
+            cout << "lover : " << endl;
+            const rapidjson::Value& chileValue = document["lover"];
+            rapidjson::Value::ConstMemberIterator chileIter = chileValue.FindMember("name");
+        }
+        return 0;
+    }
+
+    virtual void LidarController_Run()
+    {
+        service->Post(R"(/line_model_refine)",[](const Request& req, Response& res){
+            auto name = req.get_param_value("lines");
+
+            Document document;
+            document.Parse(((string)name).c_str());
+            if(document.HasMember("features") && document["features"].IsArray())
+            {
+                const Value& features = document["features"];
+                for (SizeType i = 0; i < features.Size(); i++) // 使用 SizeType 而不是 size_t
+                {
+                    GeoJsonLineStringJsonUtil lineFeature;
+                    lineFeature.DeSerialize(features[i]);
+                    printf("%s\n",lineFeature.type.c_str());
+
+                }
+            }
+            res.set_content(name, "application/json");
+            res.status=200;
+        });      
+    }  
+};
+
+
+
+/**
+ * @brief  查看API文档-手动维护
+ * @note   
+ * @retval None
+ */
+class LidarControllerDoc:public LidarController
+{
+public:
+    LidarControllerDoc(LidarService* tService):LidarController(tService){}
+
+    virtual void LidarController_Run()
+    {
+        service->Get("/apidoc",[](const Request& req, Response& res){
+            string pageInfo="";
+            string apiDoc = "";
+            string apiInfo="Api:http://localhost:1234/info\nParams:null\nParamType:null\nRequestType:GET\nDesc:查看系统信息\n\n";
+            pageInfo+=apiInfo;
+            string apiExhibitlist="Api:http://localhost:1234/exhibitlist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可展示数据文件夹\n\n";
+            pageInfo+=apiExhibitlist;
+            string apiDatalist="Api:http://localhost:1234/datalist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可处理数据\n\n";
+            pageInfo+=apiDatalist;
+            string apiDatadelete="Api:http://localhost:1234/datadelete\nParams:待删除数据文件名（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除处理数据\n\n";
+            pageInfo+=apiDatadelete;
+            string apiExhibitdelete="Api:http://localhost:1234/exhibitdelete\nParams:待删除数据文件夹（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除展示数据\n\n";
+            pageInfo+=apiExhibitdelete;
+            string apiDatatrans="Api:http://localhost:1234/datatrans\nParams:待转换数据文件名\nParamType:url参数\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
+            pageInfo+=apiDatatrans;
+            string apiDataclasstype="Api:http://localhost:1234/dataclasstype\nParams:null\nParamType:\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
+            pageInfo+=apiDataclasstype;
+            string doc=pageInfo;
+            res.set_content(doc, "text/plain;charset=utf-8");
+            res.status=200;
+        });  
+    }   
 };

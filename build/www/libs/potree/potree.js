@@ -16805,9 +16805,6 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode{
 };
 
 
-
-
-
 Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE.EventDispatcher{
 
 	constructor(){
@@ -18259,11 +18256,29 @@ Potree.Scene = class extends THREE.EventDispatcher{
 	addPointCloud (pointcloud) {
 		this.pointclouds.push(pointcloud);
 		this.scenePointCloud.add(pointcloud);
+		
 
 		this.dispatchEvent({
 			type: 'pointcloud_added',
 			pointcloud: pointcloud
 		});
+
+		//this.removePointCloud(pointcloud);
+	};
+
+	//add remove potree remove potree
+	//Frank.Wu
+	//2020-07-18
+	removePointCloud(pointcloud){
+		let index = this.pointclouds.indexOf(pointcloud);
+		this.scenePointCloud.remove(pointcloud);
+		if (index > -1) {
+			this.pointclouds.splice(index, 1);
+			this.dispatchEvent({
+				type: 'pointcloud_removed',
+				pointcloud: pointcloud
+			});
+		}
 	};
 
 	addVolume (volume) {
@@ -18352,10 +18367,21 @@ Potree.Scene = class extends THREE.EventDispatcher{
 		}
 	}
 
+	//add remove none line model measurements
+	//Modified：Frank.Wu
+	//2020-07-19
 	removeAllMeasurements () {
-		while (this.measurements.length > 0) {
-			this.removeMeasurement(this.measurements[0]);
+		var idxs = this.measurements.findIndex((measure)=>measure.name.indexOf('LineModel')>-1?true:false);
+		var itemList = [];
+		for(var idx=0;idx<this.measurements.length;++idx){
+			if(this.measurements[idx].name.indexOf('LineModel')<=-1){
+				itemList.push(this.measurements[idx]);
+			}
 		}
+		for(var idx=0;idx<itemList.length;++idx){
+			this.removeMeasurement(itemList[idx]);
+		}
+
 
 		while (this.profiles.length > 0) {
 			this.removeProfile(this.profiles[0]);
@@ -18364,6 +18390,50 @@ Potree.Scene = class extends THREE.EventDispatcher{
 		while (this.volumes.length > 0) {
 			this.removeVolume(this.volumes[0]);
 		}
+	}
+
+	//withdraw the last feature
+	//Added：Frank.Wu
+	//2020-07-19
+	withdrawFeature(){
+		var itemList = [];
+		for(var idx=0;idx<this.measurements.length;++idx){
+			if(this.measurements[idx].name.indexOf('LineModel')>-1){
+				itemList.push(this.measurements[idx]);
+			}
+		}
+		if(itemList.length>0){
+			this.removeMeasurement(itemList[itemList.length-1]);
+		}
+
+	}
+
+	//calculate the best match of the line model
+	//Added：Frank.Wu
+	//2020-07-19	
+	calculateFeature(){
+		var itemList = [];
+		for(var idx=0;idx<this.measurements.length;++idx){
+			if(this.measurements[idx].name.indexOf('LineModel')>-1){
+				itemList.push(this.measurements[idx]);
+			}
+		}
+
+		var lines=Potree.GeoJSONExporter.toString(itemList);
+		$.ajax({
+			type: "POST",
+			url: ip+"/line_model_refine",
+			dataType: "json",
+			data:{"lines":lines},
+			async:true,
+			success: function(data){
+
+			},     
+			error:function(data){
+				console.log(data)
+			}
+		});
+
 	}
 
 	removeAllClipVolumes(){
@@ -21351,6 +21421,9 @@ Potree.MapView = class {
 		this.setScene(this.viewer.scene);
 	}
 
+	//add Point cloud remove event listerner
+	//Frank.Wu
+	//2020-07-18
 	setScene (scene) {
 		if (this.scene === scene) {
 			return;
@@ -21358,12 +21431,15 @@ Potree.MapView = class {
 
 		if (this.scene) {
 			this.scene.removeEventListener('pointcloud_added', this.onPointcloudAdded);
+			this.scene.removeEventListener('pointcloud_removed', this.onPointcloudRemoved);
 			this.scene.annotations.removeEventListener('annotation_added', this.onAnnotationAdded);
 		}
 
 		this.scene = scene;
 
 		this.scene.addEventListener('pointcloud_added', this.onPointcloudAdded);
+		this.scene.addEventListener('pointcloud_removed', this.onPointcloudRemoved);
+
 		this.scene.annotations.addEventListener('annotation_added', this.onAnnotationAdded);
 
 		for (let pointcloud of this.viewer.scene.pointclouds) {
@@ -21965,7 +22041,8 @@ initSidebar = (viewer) => {
 
 		let createNode = (parent, text, icon, object) => {
 			let nodeID = tree.jstree('create_node', parent, { 
-					"text": text, 
+					"id": text,
+					"text": "<b>"+text+"<b>", 
 					"icon": icon,
 					"data": object
 				}, 
@@ -21989,6 +22066,7 @@ initSidebar = (viewer) => {
 		tree.jstree("check_node", measurementID);
 		tree.jstree("check_node", annotationsID);
 		tree.jstree("check_node", otherID);
+
 
 		tree.on('create_node.jstree', function(e, data){
 			tree.jstree("open_all");
@@ -22119,6 +22197,10 @@ initSidebar = (viewer) => {
 		let onMeasurementAdded = (e) => {
 			let measurement = e.measurement;
 			let icon = Potree.getMeasurementIcon(measurement);
+			//fix the bug of potree and 
+			//Frank.Wu
+			//2020-07-18
+			measurement.name=measurement.name+e.scene.measurements.length;
 			createNode(measurementID, measurement.name, icon, measurement);
 		};
 
@@ -22161,6 +22243,15 @@ initSidebar = (viewer) => {
 		viewer.scene.addEventListener("polygon_clip_volume_added", onVolumeAdded);
 		viewer.scene.annotations.addEventListener("annotation_added", onAnnotationAdded);
 
+		//add point cloud remove
+		//Frank.Wu
+		//2020-07-18
+		let onPointcloudRemoved = (e)=>{
+			let pcRoot = $("#jstree_scene").jstree().get_json("pointclouds");
+			let jsonNode = pcRoot.children.find(child => child.data.uuid === e.measurement.uuid);
+			tree.jstree("delete_node", jsonNode.id);
+		};
+
 		let onMeasurementRemoved = (e) => {
 			let measurementsRoot = $("#jstree_scene").jstree().get_json("measurements");
 			let jsonNode = measurementsRoot.children.find(child => child.data.uuid === e.measurement.uuid);
@@ -22182,6 +22273,9 @@ initSidebar = (viewer) => {
 			tree.jstree("delete_node", jsonNode.id);
 		};
 
+
+
+		viewer.scene.addEventListener("pointcloud_removed", onPointcloudRemoved);
 		viewer.scene.addEventListener("measurement_removed", onMeasurementRemoved);
 		viewer.scene.addEventListener("volume_removed", onVolumeRemoved);
 		viewer.scene.addEventListener("profile_removed", onProfileRemoved);
@@ -22208,7 +22302,6 @@ initSidebar = (viewer) => {
 		for(let volume of [...viewer.scene.volumes, ...viewer.scene.polygonClipVolumes]){
 			onVolumeAdded({volume: volume});
 		}
-
 
 		for(let profile of viewer.scene.profiles){
 			onProfileAdded({profile: profile});
@@ -22341,6 +22434,52 @@ initSidebar = (viewer) => {
 
 	}
 
+	// initial build line frame model tool
+	// Frank.Wu
+	// 2020-07-19
+	function initModelTool(){
+		let elModelTool = $('#modeltools');
+		elModelTool.append(createToolIcon(
+			Potree.resourcePath + '/icons/distance.svg',
+			'[title]tt.line_model',
+			function () {
+				$('#menu_measurements').next().slideDown();
+				let measurement = measuringTool.startInsertion({
+					showDistances: false,
+					showArea: false,
+					closed: false,
+					name: 'LineModel'});
+
+				let measurementsRoot = $("#jstree_scene").jstree().get_json("measurements");
+				let jsonNode = measurementsRoot.children.find(child => child.data.uuid === measurement.uuid);
+				$.jstree.reference(jsonNode.id).deselect_all();
+				$.jstree.reference(jsonNode.id).select_node(jsonNode.id);
+			}
+		));
+
+
+
+		//REMOVE ALL
+		elModelTool.append(createToolIcon(
+			Potree.resourcePath + '/icons/withdraw.svg',
+			'[title]tt.withdraw_model',
+			function () {
+				viewer.scene.withdrawFeature();
+			}
+		));
+
+		//REMOVE ALL
+		elModelTool.append(createToolIcon(
+			Potree.resourcePath + '/icons/calculate.svg',
+			'[title]tt.calculate_model',
+			function () {
+				viewer.scene.calculateFeature();
+			}
+		));
+
+		
+	}
+
 	/**
 	 * initial the classification from the config file
 	 * update：by Frank.Wu
@@ -22375,7 +22514,7 @@ initSidebar = (viewer) => {
 		//从后台获取分类然后展示分类信息,修改以前写死的那种分类类别的方法
 		$.ajax({
 			type: "GET",
-			url:"http://localhost:1234/dataclasstype",
+			url:ip+"/dataclasstype",
 			dataType: "text",
 			async:true,
 			beforeSend:function(XMLHttpRequest){ 
@@ -22732,6 +22871,7 @@ initSidebar = (viewer) => {
 	initAccordion();
 	initAppearance();
 	initToolbar();
+	initModelTool();
 	initScene();
 	initNavigation();
 	initClassificationList();

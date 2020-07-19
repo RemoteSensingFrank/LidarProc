@@ -66,11 +66,19 @@ function loadData()
     var selectedNodes = $("#tree").treeview("getSelected");
     var path = "pointclouds/"+selectedNodes[0].text+"/cloud.js";
     
-    //first remove all the data
-    viewer.scene.pointclouds.forEach(function(layer) {
-        window.viewer.scene.scenePointCloud.remove(layer);
+    const query = new AV.Query('laslink');
+    query.contains('LASPATH', selectedNodes[0].text)
+    query.find().then((objects)=>{
+        if(objects.length==0){
+            alert("注意，无对应LAS文件，无法进行对应操作！");
+        }
     });
-    viewer.scene.pointclouds = [];
+
+    //first remove all the data
+    // viewer.scene.pointclouds.forEach(function(layer) {
+    //     window.viewer.scene.scenePointCloud.remove(layer);
+    // });
+    // viewer.scene.pointclouds = [];
     
     //remove tree node
     let pcRoot = $("#jstree_scene").jstree().get_json("pointclouds");
@@ -80,13 +88,15 @@ function loadData()
         $("#jstree_scene").jstree("delete_node", childNodes[i].id)
     }
 
-    //remove map annotation
-    viewer.mapView.getSourcesLabelLayer().getSource().clear();
-    viewer.mapView.getSourcesLayer().getSource().clear();
-    viewer.mapView.getAnnotationsLayer().getSource().clear();
-    viewer.mapView.getExtentsLayer().getSource().clear();
 
-    CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
+
+    //remove map annotation
+    // viewer.mapView.getSourcesLabelLayer().getSource().clear();
+    // viewer.mapView.getSourcesLayer().getSource().clear();
+    // viewer.mapView.getAnnotationsLayer().getSource().clear();
+    // viewer.mapView.getExtentsLayer().getSource().clear();
+    //CesiumInitial('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer');
+
     LoadLASDataViewer(path,"+proj=utm +zone=50 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
     $('#fileModal').modal('hide');
 }
@@ -112,8 +122,8 @@ function deleteData(){
         //删除数据文件
         var selecteddataNodes = $("#treeDeleteData").treeview("getSelected");
         if(selecteddataNodes.length>0){
-            var parentdataNodes = $("#treeDeleteData").treeview('getParent', selectedNodes[0]);
-            var filename=parentNodes.text+"/"+selectedNodes[0].text;
+            var parentdataNodes = $("#treeDeleteData").treeview('getParent', selecteddataNodes[0]);
+            var filename=parentdataNodes.text+"/"+selecteddataNodes[0].text;
             deleteDataFile(filename);
         }
 
@@ -191,12 +201,6 @@ function classifiedFast(){
  * 加载相机信息
  */
 function loadCamera(e){
-    // if($(e).hasClass('active')){  //判断是否选中
-    //     unloadCameraPositions();
-    //  }else{
-    //     loadCameraPositions();
-    //  }
-    //  $(e).toggleClass('active');
     $("#cameraModel").modal({
         backdrop:"static",  //点击背景不关闭
         keyboard: false     //触发键盘esc事件时不关闭
@@ -208,10 +212,7 @@ function loadCamera(e){
  */
 function onReconstructionFileSelected(evt) {
     let file = evt.target.files[0];
-    console.log(file);
-
     $("#cameraModel").modal('hide');
-
     var reader = new FileReader();
     reader.onload = function(e) {
         data = JSON.parse(e.target.result);

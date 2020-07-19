@@ -6,6 +6,12 @@
  */
 
 ip = "http://localhost:1234";
+const { Query, User } = AV;
+AV.init({
+    appId: "uHNJtTxLkcGm3VRtuRGk53hb-gzGzoHsz",
+    appKey: "h8s1QFO2dLQ62H0axpKB6WnD",
+    serverURL: "https://uhnjttxl.lc-cn-n1-shared.com"
+  });
 
 /**
  * 文件选择对话框打开之前调用事件初始化文件树
@@ -246,6 +252,11 @@ function deleteDataFile(filename){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
             getDataDeleteTree(null);
+            const query = new AV.Query('laslink');
+            query.contains('LASPATH', filename)
+            query.find().then((objects)=>{
+                AV.Object.destroyAll(objects);
+            });
         },     
         error:function(data){
             console.log(data)
@@ -271,6 +282,12 @@ function deleteExhibitDirectory(dir){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
             getDataDeleteTree(null);
+            const query = new AV.Query('laslink');
+            query.contains('POTREEPATH', dir)
+            query.find().then((objects)=>{
+                AV.Object.destroyAll(objects);
+            });
+            
         },     
         error:function(data){
             console.log(data)
@@ -283,6 +300,9 @@ function deleteExhibitDirectory(dir){
  * @param {文件名} filename 
  */
 function transDataFile(filename){
+    const LinkLAS = AV.Object.extend('laslink');
+    const lnk = new LinkLAS();
+    
     $.ajax({
         type: "GET",
         url: ip+"/datatrans/"+filename,
@@ -295,9 +315,12 @@ function transDataFile(filename){
         success: function(data){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
-        },     
+            lnk.set('LASPATH', filename);
+            lnk.set('POTREEPATH', data);
+            lnk.save();
+        },
         error:function(data){
-            console.log(data)
+            console.log(data);
         }
     });
 }
@@ -429,40 +452,6 @@ function loadCameraPositions(reconstructions){
             imagenum+=1;
         }
     }
-
-
-    // for(var imagenum=0;imagenum<ncams;imagenum++){
-    //     imageobj[imagenum]=makeImageFrustrum(camRoll[imagenum],camPitch[imagenum],camYaw[imagenum],camX[imagenum],camY[imagenum],camZ[imagenum]);
-    //     imageobj[imagenum].myimagenum = imagenum;
-    //     imageobj[imagenum].isFiltered = false;
-    //     group.add(imageobj[imagenum]);
-    // }
-    
-    // //test measurement
-    // let measure = new Potree.Measure();
-    // measure.name = "Canopy";
-    // measure.showDistances = false;
-    // measure.showCoordinates = true;
-    // measure.maxMarkers = 1;
-    // measure.addMarker(new THREE.Vector3(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z));
-    // viewer.scene.addMeasurement(measure);
-
-    // viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z+100);
-    // viewer.scene.view.lookAt(new THREE.Vector3(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z));
-
-    // //test group 
-    // var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
-    // var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-    // var cubeA = new THREE.Mesh( geometry, material );
-    // cubeA.position.set( 100, 100, 0 );
-    // var cubeB = new THREE.Mesh( geometry, material );
-    // cubeB.position.set( -100, -100, 0 );
-    // var group = new THREE.Group();
-    // group.add( cubeA );
-    // group.add( cubeB );
-    // viewer.scene.scene.add(group);
-    // viewer.scene.view.position.set(100,100,0);
-    // viewer.scene.view.lookAt(new THREE.Vector3(0,0,0));
  
     viewer.scene.scene.add(group);
     viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z+100);
