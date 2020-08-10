@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-19 14:40:19
+ * @LastEditTime: 2020-07-20 11:20:54
  */
 #pragma once
 
@@ -175,7 +175,17 @@ namespace LasAlgorithm
     class PointCloudLineInteractive
     {
     public:
-        long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,)
+
+        long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,GeoJsonLineStringJsonUtil &featureLine);
+    
+        /**
+         * @name: 
+         * @msg: 
+         * @param {type} 
+         * @return: 
+         */
+        long PointCloudLineInteractive_GetPointsRange(ILASDataset *dataset,double range,Point3Ds points);
+
     }
 }
 
