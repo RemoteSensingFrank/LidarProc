@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-13 16:34:49
+ * @LastEditTime: 2020-08-14 10:28:38
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -181,29 +181,31 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     std::cout << "Computing the SIFT points takes "<<time.toc()/1000<<"seconds"<<std::endl;
     std::cout << "No. of SIFT points in the result are " << siftPointIdx.size () << std::endl;
 
-/*  std::cout << "Computing Points: "<<input_cloud->size()<<std::endl;
+/*
+    std::cout << "Computing Points: "<<input_cloud->size()<<std::endl;
     std::cout << "Computing FPFH Features: "<<fpfhs->size()<<std::endl;
     std::cout << "Computing Normals: "<<normals->size()<<std::endl;
     std::cout << "Computing the SIFT points takes "<<time.toc()/1000<<"seconds"<<std::endl;
     std::cout << "No. of SIFT points in the result are " << result.points.size () << std::endl;
  */
+
     // Copying the pointwithscale to pointxyz so as visualize the cloud
     //copyPointCloud(result, *feauture_cloud);
     //std::cout << "SIFT points in the result are " << feauture_cloud->points.size () << std::endl;
 
 #ifdef _DEBUG
-    // FILE *fs = fopen("../data/test/sift.txt","w+");
-    // if(fs!=nullptr)
-    // {
-    //     for(int i=0;i<siftPointIdx.points.size ();++i)
-    //         fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
-    //                                     input_cloud->points[siftPointIdx[i]].y,
-    //                                     input_cloud->points[siftPointIdx[i]].z);
-    //     fclose(fs);
-    // }else
-    // {
-    //     printf("create test output failed!\n");
-    // }
+    FILE *fs = fopen("../data/test/sift.txt","w+");
+    if(fs!=nullptr)
+    {
+        for(int i=0;i<siftPointIdx.points.size ();++i)
+            fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
+                                        input_cloud->points[siftPointIdx[i]].y,
+                                        input_cloud->points[siftPointIdx[i]].z);
+        fclose(fs);
+    }else
+    {
+        printf("create test output failed!\n");
+    }
 #endif
     return 0;
 }

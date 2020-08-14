@@ -181,7 +181,6 @@ int main(int argc ,char* argv[])
     LidarRegistrationUtil lidarRegUtil(100,0,0,30,15,30);
     lidarRegUtil.LidarRegistration_Simulation("/local/data/more.las","/local/data/moreSimulate2.las");
 
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
     ILASDataset *lasdst1 = new ILASDataset();
@@ -194,28 +193,27 @@ int main(int argc ,char* argv[])
     reader5->LidarReader_Open("/local/data/more.las",lasdst2);
     reader5->LidarReader_Read(true,1,lasdst2);
 
-
     //点云局部分析
-    LASInvarianceFeatureExtract lasInvariance;
-    int pointIndex=1;
-    Point3Ds pnts1=lasInvariance.LASInvariancePointsPart(lasdst1,500,20);
-    Point3Ds pnts2=lasInvariance.LASInvariancePointsPart(lasdst2,500,20);
+    // LASInvarianceFeatureExtract lasInvariance;
+    // int pointIndex=1;
+    // Point3Ds pnts1=lasInvariance.LASInvariancePointsPart(lasdst1,500,10);
+    // Point3Ds pnts2=lasInvariance.LASInvariancePointsPart(lasdst2,500,10);
 
-    double disHistro1[20],disHistro2[20];
-    lasInvariance.LASInvariancePointsLASDisHistroCal(pnts1,disHistro1);
-    lasInvariance.LASInvariancePointsLASDisHistroCal(pnts2,disHistro2);
-    lasInvariance.LASInvariancePointsLASAngleHistroCal(pnts1,disHistro1);
-    lasInvariance.LASInvariancePointsLASAngleHistroCal(pnts2,disHistro2);
+    // double disHistro1[20],disHistro2[20];
+    // lasInvariance.LASInvariancePointsLASDisHistroCal(pnts1,disHistro1);
+    // lasInvariance.LASInvariancePointsLASDisHistroCal(pnts2,disHistro2);
+    // lasInvariance.LASInvariancePointsLASAngleHistroCal(pnts1,disHistro1);
+    // lasInvariance.LASInvariancePointsLASAngleHistroCal(pnts2,disHistro2);
     
-    // LASTransToPCL transPCL;
-    // transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
+    LASTransToPCL transPCL;
+    transPCL.LASTransToPCL_Trans(lasdst1,pclPointCloudI);
     // transPCL.LASTransToPCL_Trans(lasdst2,pclPointCloudO);
 
-    // LidarFeaturePoints lidarFeatures;
-    // pcl::PointCloud<int> siftPointIdx1;
+    LidarFeaturePoints lidarFeatures;
+    pcl::PointCloud<int> siftPointIdx1;
     // pcl::PointCloud<int> siftPointIdx2;
-    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
-    // lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
+    lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
 
     // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
     // lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
