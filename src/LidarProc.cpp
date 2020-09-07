@@ -178,19 +178,20 @@ void SimpleLineExtract()
 
 int main(int argc ,char* argv[])
 {
-    LidarRegistrationUtil lidarRegUtil(100,0,0,30,15,30);
-    lidarRegUtil.LidarRegistration_Simulation("/local/data/more.las","/local/data/moreSimulate2.las");
+    // LidarRegistrationUtil lidarRegUtil(100,0,0,30,15,30);
+    // lidarRegUtil.LidarRegistration_Simulation("/local/data/more.las","/local/data/moreSimulate2.las");
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudI(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr pclPointCloudO(new pcl::PointCloud<pcl::PointXYZ>);
+
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("/local/data/moreSimulate2.las",lasdst1);
+    reader4->LidarReader_Open("../data/cube_filtered.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
 
     ILASDataset *lasdst2 = new ILASDataset();
     LASReader *reader5 = new LidarMemReader();
-    reader5->LidarReader_Open("/local/data/more.las",lasdst2);
+    reader5->LidarReader_Open("../data/cube_filtered_t.las",lasdst2);
     reader5->LidarReader_Read(true,1,lasdst2);
 
     //点云局部分析
@@ -211,12 +212,12 @@ int main(int argc ,char* argv[])
 
     LidarFeaturePoints lidarFeatures;
     pcl::PointCloud<int> siftPointIdx1;
-    // pcl::PointCloud<int> siftPointIdx2;
+    pcl::PointCloud<int> siftPointIdx2;
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs1(new pcl::PointCloud<pcl::FPFHSignature33>());
     lidarFeatures.LidarFeature_Sift(pclPointCloudI,siftPointIdx1,fpfhs1);
 
-    // pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
-    // lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs2(new pcl::PointCloud<pcl::FPFHSignature33>());
+    lidarFeatures.LidarFeature_Sift(pclPointCloudO,siftPointIdx2,fpfhs2);
 
     //std::string path="../data/"+to_string(int(0))+".txt";
     // FILE* fs = fopen("../data/0.txt","w+");

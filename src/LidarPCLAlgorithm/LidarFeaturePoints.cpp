@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-08-14 10:28:38
+ * @LastEditTime: 2020-08-17 16:13:20
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -119,7 +119,7 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     float min_scale = 1.0f;       //the standard deviation of the smallest scale in the scale space
     int n_octaves   = 8;          //the number of octaves (i.e. doublings of scale) to compute
     int n_scales_per_octave = 4;  //the number of scales to compute within each octave
-    float min_contrast = 0.2f;    //the minimum contrast required for detection
+    float min_contrast = 0.4f;    //the minimum contrast required for detection
 
     pcl::console::TicToc time;
     time.tic();
@@ -194,7 +194,7 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     //std::cout << "SIFT points in the result are " << feauture_cloud->points.size () << std::endl;
 
 #ifdef _DEBUG
-    FILE *fs = fopen("../data/test/sift.txt","w+");
+    FILE *fs = fopen("../data/test/sift2.txt","w+");
     if(fs!=nullptr)
     {
         for(int i=0;i<siftPointIdx.points.size ();++i)
