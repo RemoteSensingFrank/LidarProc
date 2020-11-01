@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-18 21:31:07
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-06 19:09:04
+ * @LastEditTime: 2020-10-22 11:37:19
  */
 #ifdef _USE_PCL_
 
@@ -64,6 +64,17 @@ public:
                            pcl::PointCloud<int> &siftPointIdx,
                            pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH);
 
+     /**
+     * @brief  ISS特征点提取算法应用于激光点云特征点提取
+     * @note   
+     * @param  input_cloud: 输入点云数据
+     * @param  &siftPointIdx: 提取的特征点点云的位置
+     * @param  siftFPFH: FPFH特征
+     * @retval 
+     */   
+    long LidarFeature_ISS(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
+                          pcl::PointCloud<int> &siftPointIdx,
+                          pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH);
 };
 
 /**

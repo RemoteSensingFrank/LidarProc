@@ -74,6 +74,7 @@ long LidarMemReader::LidarReader_Read(bool inMemory, int skip, _OUT_ ILASDataset
 		int widthNum = ceil(width / widthPer)+1;
 		int heightNum = ceil(height / heightPer)+1;
 
+
 		//反正先统计信息
 		//分配内存
 		dataset->LASDataset_AllocateMemory(widthNum*heightNum);
@@ -191,6 +192,7 @@ long LidarMemReader::LidarReader_Write(const char *pathLidar, ILASDataset* datas
 		int x = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.x - lasHeader.x_offset) / lasHeader.x_scale_factor;
 		int y = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y - lasHeader.y_offset) / lasHeader.y_scale_factor;
 		int z = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z - lasHeader.z_offset) / lasHeader.z_scale_factor;
+		
 		fwrite(&x, sizeof(int), 1, fLasOut);
 		fwrite(&y, sizeof(int), 1, fLasOut);
 		fwrite(&z, sizeof(int), 1, fLasOut);
@@ -637,6 +639,7 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 
 	//反复申请小内存可能出现内存碎片影响效率需要内存池优化
 	//memory pool
+
 	unsigned char *readOnce = new unsigned char[bytelen];
 	int totalLasNumber = 0;
 	int alread_read = 0;
@@ -659,7 +662,7 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 
 			int widtnIdx = int((lasPnts.m_vec3d.x - refLasHeader.min_x) / widthPre);
 			int heighIdx = int((lasPnts.m_vec3d.y - refLasHeader.min_y) / heightPre);
-			if (widtnIdx > widthNum || widtnIdx<0 || heighIdx>heightNum || heighIdx < 0)
+			if (widtnIdx >= widthNum || widtnIdx<0 || heighIdx>=heightNum || heighIdx < 0)
 				continue;
 
 			if (inMemory)
@@ -678,6 +681,7 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 		alread_read += read_once;
 		read_once_max = min(read_once_max, int(refLasHeader.number_of_point_records - alread_read));
 	}
+
 	totallasPnts += readlasPnts;
 	for (size_t i = 0; i < widthNum*heightNum; ++i)
 	{
@@ -686,8 +690,10 @@ long LidarMemReader::LidarReader_RectPoints(FILE* fs, ILASDataset* dataset, doub
 			dataset->m_lasRectangles[i].LASRectBuildTree();
 		}
 	}
+
 	delete[]pointsRect; pointsRect = nullptr;
 	delete[]readOnce; readOnce = nullptr;
+
 	return 0;
 }
 
@@ -845,6 +851,7 @@ long LidarReaderTxt::LidarReader_Read(bool inMemory, eTxtLASType type, ILASDatas
 	int widthNum = ceil(width / widthPer);
 	int heightNum = ceil(height / heightPer);
 
+	printf("%d  %d\n",widthNum,heightNum);
 	//反正先统计信息
 	//分配内存
 	dataset->LASDataset_AllocateMemory(widthNum*heightNum);

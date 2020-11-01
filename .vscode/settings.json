@@ -75,4 +75,5 @@
         "*.ipp": "cpp",
         "unordered_set": "cpp"
     },
+    "C_Cpp.dimInactiveRegions": false,
 }

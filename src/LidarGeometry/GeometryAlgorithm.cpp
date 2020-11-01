@@ -490,7 +490,14 @@ namespace GeometryLas {
 
 		return fabs(a * pt1.x + b*pt1.y + c*pt1.z + d) / sqrt(a * a + b * b + c * c);
 	}
-
+	double DistanceComputation::Distance(Point3D pt,Point3Ds line)
+	{
+		double v1[3]={line[1].x-line[0].x,line[1].y-line[0].y,line[1].z-line[0].z};
+		double v2[3]={pt.x-line[0].x,pt.y-line[0].y,pt.z-line[0].z};
+		double up=v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2];
+		double down = sqrt(v1[0]*v1[0]+v1[1]*v1[1]+v1[2]*v1[2]);
+		return up/down;
+	}
 	/*****************************************************************************
 	* @brief : ?????????
 	* @author : W.W.Frank

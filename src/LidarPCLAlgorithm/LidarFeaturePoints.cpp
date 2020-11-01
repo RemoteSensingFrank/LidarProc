@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2020-01-09 15:25:57
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-08-17 16:13:20
+ * @LastEditTime: 2020-11-01 10:36:33
  */
 #ifdef _USE_PCL_
 #include "LidarFeaturePoints.h"
@@ -24,7 +24,7 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/fpfh.h>
 #include <pcl/kdtree/kdtree_flann.h>
-
+#include <pcl/keypoints/iss_3d.h>
 #include<ceres/ceres.h>
 using namespace ceres;
 using namespace GeometryLas;
@@ -116,10 +116,10 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
                                            pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH)
 {
     // Parameters for sift computation
-    float min_scale = 1.0f;       //the standard deviation of the smallest scale in the scale space
-    int n_octaves   = 8;          //the number of octaves (i.e. doublings of scale) to compute
-    int n_scales_per_octave = 4;  //the number of scales to compute within each octave
-    float min_contrast = 0.4f;    //the minimum contrast required for detection
+    float min_scale = 2.0f;       //the standard deviation of the smallest scale in the scale space
+    int n_octaves   = 8;           //the number of octaves (i.e. doublings of scale) to compute
+    int n_scales_per_octave = 4;   //the number of scales to compute within each octave
+    float min_contrast = 0.5f;    //the minimum contrast required for detection
 
     pcl::console::TicToc time;
     time.tic();
@@ -194,13 +194,14 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     //std::cout << "SIFT points in the result are " << feauture_cloud->points.size () << std::endl;
 
 #ifdef _DEBUG
-    FILE *fs = fopen("../data/test/sift2.txt","w+");
+    FILE *fs = fopen("../data/test/ptSIFT.txt","w+");
     if(fs!=nullptr)
     {
         for(int i=0;i<siftPointIdx.points.size ();++i)
-            fprintf(fs,"%lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
+            fprintf(fs,"%lf  %lf  %lf  %lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
                                         input_cloud->points[siftPointIdx[i]].y,
-                                        input_cloud->points[siftPointIdx[i]].z);
+                                        input_cloud->points[siftPointIdx[i]].z,
+                                        255.0f,255.0f,0.0f);
         fclose(fs);
     }else
     {
@@ -208,6 +209,96 @@ long LidarFeaturePoints::LidarFeature_Sift(pcl::PointCloud<pcl::PointXYZ>::Ptr i
     }
 #endif
     return 0;
+}
+
+
+long LidarFeaturePoints::LidarFeature_ISS(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
+                                          pcl::PointCloud<int> &siftPointIdx,
+                                          pcl::PointCloud<pcl::FPFHSignature33>::Ptr siftFPFH)
+{
+    pcl::console::TicToc time;
+    time.tic();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_src_is(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::ISSKeypoint3D<pcl::PointXYZ, pcl::PointXYZ> iss_det;
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_1(new pcl::search::KdTree<pcl::PointXYZ>());
+
+    double model_solution = 0.4;//参数小，采取的关键点少，论文中为500左右
+
+    //参数设置
+    iss_det.setSearchMethod(tree_1);
+    iss_det.setSalientRadius(6*model_solution);//
+    iss_det.setNonMaxRadius(4*model_solution);//
+    iss_det.setThreshold21 (0.975);
+    iss_det.setThreshold32 (0.975);
+    iss_det.setMinNeighbors(5);
+    iss_det.setNumberOfThreads(4);
+    iss_det.setInputCloud(input_cloud);
+    iss_det.compute(*cloud_src_is);
+
+    clock_t end = clock();
+       //pcl::PointIndicesConstPtr keypoints_indices = sift.getKeypointsIndices();
+    //计算点云特征
+    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>());
+    pcl::NormalEstimation<pcl::PointXYZ,pcl::Normal> est_normal;
+    est_normal.setInputCloud(input_cloud);
+    est_normal.setSearchMethod(tree_1);
+    est_normal.setKSearch(10);          //近邻10个点
+    est_normal.compute(*normals);       //计算法线
+
+    //创建FPFH估计对象fpfh，并把输入数据集cloud和法线normals传递给它。
+    pcl::FPFHEstimation<pcl::PointXYZ,pcl::Normal,pcl::FPFHSignature33> fpfh;
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr treeFPFH(new pcl::search::KdTree<pcl::PointXYZ> ());
+    fpfh.setInputCloud(input_cloud);
+    fpfh.setInputNormals(normals);
+    fpfh.setSearchMethod(treeFPFH);
+    //fpfh.setIndices(keypoints_indices);
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs(new pcl::PointCloud<pcl::FPFHSignature33>());
+    fpfh.setKSearch(10);        //近邻10个点
+    fpfh.compute(*fpfhs);       //计算特征
+    
+    //判断SIFT点在原始点云中的index
+    const int searchNum=1;
+    std::vector<int> pointIdxNKNSearch(searchNum);
+    std::vector<float> pointNKNSquaredDistance(searchNum);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+    kdtree.setInputCloud(input_cloud);
+    
+    for(auto resPoint : cloud_src_is->points)
+    {
+        pcl::PointXYZ searchPoint;
+        searchPoint.x = resPoint.x;
+        searchPoint.y = resPoint.y;
+        searchPoint.z = resPoint.z;
+
+        if (kdtree.nearestKSearch(searchPoint, searchNum, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+        {
+            siftPointIdx.push_back(pointIdxNKNSearch[0]);
+            siftFPFH->push_back(fpfhs->points[pointIdxNKNSearch[0]]);
+        }
+    }
+
+    std::cout << "Computing Points: "<<input_cloud->size()<<std::endl;
+    std::cout << "Computing ISS Features: "<<siftFPFH->size()<<std::endl;
+    std::cout << "Computing the ISS points takes "<<time.toc()/1000<<"seconds"<<std::endl;
+    std::cout << "No. of ISS points in the result are " << siftPointIdx.size () << std::endl;
+
+#ifdef _DEBUG
+    FILE *fs = fopen("../data/test/ptISS.txt","w+");
+    if(fs!=nullptr)
+    {
+        for(int i=0;i<siftPointIdx.points.size ();++i)
+            fprintf(fs,"%lf  %lf  %lf  %lf  %lf  %lf\n",input_cloud->points[siftPointIdx[i]].x,
+                                        input_cloud->points[siftPointIdx[i]].y,
+                                        input_cloud->points[siftPointIdx[i]].z,
+                                        255.0f,255.0f,0.0f);
+        fclose(fs);
+    }else
+    {
+        printf("create test output failed!\n");
+    }
+#endif
+    return 0;
+    
 }
 
 // 直接通过kdtree查找比较快
@@ -274,8 +365,13 @@ long LidarFeatureRegistration::LidarRegistration_Match(pcl::PointCloud<int> idxL
             matchTmp.idx2 = matchTmp.relation>rel?matchTmp.idx2:idxList2[j];
             matchTmp.relation=max(rel,matchTmp.relation);
         }
-        matches.push_back(matchTmp);
+        if(matchTmp.relation<40)
+        {
+            // printf("%lf\n",matchTmp.relation);
+            matches.push_back(matchTmp);
+        }
     }
+    printf("match point count is : %d\n",matches.size());
     return 0;
 }
 
@@ -396,16 +492,17 @@ void LidarFeatureRegistration::LidarRegistration_OutputTest(pcl::PointCloud<pcl:
 
         std::string path="../data/"+to_string(i)+".txt";
         FILE* fs = fopen(path.c_str(),"w+");
-        //printf("%d\n",matchNum);
-        for(int tIdx=0;tIdx<matchNum;++tIdx)
-        {
-            fprintf(fs,"%lf,%lf,%lf\n", cloud1->points[pointIdxNKNSearch1[tIdx]].x,
-                            cloud1->points[pointIdxNKNSearch1[tIdx]].y,
-                            cloud1->points[pointIdxNKNSearch1[tIdx]].z);
-            fprintf(fs,"%lf,%lf,%lf\n", cloud2->points[pointIdxNKNSearch2[tIdx]].x,
-                            cloud2->points[pointIdxNKNSearch2[tIdx]].y,
-                            cloud2->points[pointIdxNKNSearch1[tIdx]].z);
-        }
+        fprintf(fs,"%lf,%lf,%lf,%lf,%lf,%lf\n", pnt1.x,pnt1.y,pnt1.z,0,0,255.0);
+        fprintf(fs,"%lf,%lf,%lf,%lf,%lf,%lf\n", pnt2.x,pnt2.y,pnt2.z,0,0,255.0);
+        // for(int tIdx=0;tIdx<matchNum;++tIdx)
+        // {
+        //     fprintf(fs,"%lf,%lf,%lf\n", cloud1->points[pointIdxNKNSearch1[tIdx]].x,
+        //                     cloud1->points[pointIdxNKNSearch1[tIdx]].y,
+        //                     cloud1->points[pointIdxNKNSearch1[tIdx]].z);
+        //     fprintf(fs,"%lf,%lf,%lf\n", cloud2->points[pointIdxNKNSearch2[tIdx]].x,
+        //                     cloud2->points[pointIdxNKNSearch2[tIdx]].y,
+        //                     cloud2->points[pointIdxNKNSearch1[tIdx]].z);
+        // }
         fclose(fs);
     }
 }
@@ -451,7 +548,9 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
 
         double x1 = pnt1.x-pntCenter.x,y1 = pnt1.y-pntCenter.y,z1=pnt1.z-pntCenter.z;
         double x2 = pnt2.x,y2 = pnt2.y,z2=pnt2.z;
-        
+        // Debug
+        // printf("center x: %lf y: %lf z: %lf\n",pntCenter.x,pntCenter.y,pntCenter.z);
+
         MatrixXd rotMat = MatrixXd::Identity(3,3);
         rotMat(0,0) = cos(r_t[1])*cos(r_t[2]);
         rotMat(0,1) = sin(r_t[0])*sin(r_t[1])*cos(r_t[2]) - cos(r_t[0])*sin(r_t[2]);
@@ -469,15 +568,16 @@ void LidarFeatureRegistration::LidarRegistration_Check(pcl::PointCloud<pcl::Poin
         ptMat(2,0) = z1;
         MatrixXd transMat=rotMat*ptMat;
 
-        double res1=((transMat(0,0)+r_t[3]-x2+pntCenter.x)*(transMat(0,0)+r_t[3]-x2+pntCenter.x));
-        double res2=((transMat(1,0)+r_t[4]-y2+pntCenter.y)*(transMat(1,0)+r_t[4]-y2+pntCenter.y));
-        double res3=((transMat(2,0)+r_t[5]-z2+pntCenter.z)*(transMat(2,0)+r_t[5]-z2+pntCenter.z));
+        double res1=((transMat(0,0)-r_t[3]-x2+pntCenter.x)*(transMat(0,0)-r_t[3]-x2+pntCenter.x));
+        double res2=((transMat(1,0)-r_t[4]-y2+pntCenter.y)*(transMat(1,0)-r_t[4]-y2+pntCenter.y));
+        double res3=((transMat(2,0)-r_t[5]-z2+pntCenter.z)*(transMat(2,0)-r_t[5]-z2+pntCenter.z));
         printf("RMS of x=%lf,y=%lf,z=%lf,total=%lf\n",res1,res2,res3,sqrt(res1+res2+res3)/3);
         totalRMS+=sqrt(res1+res2+res3)/3;
     }
 
     printf("total RMS error:%lf\n",totalRMS/matches.size());
 }
+
 double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXYZ pnt1,pcl::PointXYZ pnt2,
                                                                 pcl::KdTreeFLANN<pcl::PointXYZ> kdtree1,
                                                                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
@@ -495,8 +595,11 @@ double LidarFeatureRegistration::LidarRegistration_CorrelationMatch(pcl::PointXY
     double *distro1 = new double[nearPointsNum];
     double *distro2 = new double[nearPointsNum];
 
+    // 获取距离直方图
     LidarRegistration_DisHistro(pointIdxNKNSearch1[0],pointIdxNKNSearch1,cloud1,distro1);
     LidarRegistration_DisHistro(pointIdxNKNSearch2[0],pointIdxNKNSearch2,cloud2,distro2);
+
+    //距离直方图叠加角度直方图
     // LidarRegistration_DisAngleHistro(pointIdxNKNSearch1[0],pointIdxNKNSearch1,cloud1,distro1);
     // LidarRegistration_DisAngleHistro(pointIdxNKNSearch2[0],pointIdxNKNSearch2,cloud2,distro2);
     double colRel=LidarRegistration_Correlation(distro1,distro2,nearPointsNum);
@@ -692,11 +795,11 @@ static Point3D GetMaxMinCenterPoint(pcl::PointCloud<pcl::PointXYZ>::Ptr pts_clou
 //功能是做完了，最后也能够收敛，但是计算结果的残差太大，而且在匹配过程中可能存在误匹配的店
 //第一步是需要处理误匹配的店，然后再找到减小残差的办法
 long LidarFeatureRegistration::LidarRegistration_RotTrans(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud1,
-                                    pcl::PointCloud<int> ptSiftIdx1,
-                                    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
-                                    pcl::PointCloud<int> ptSiftIdx2,
-                                    pcl::PointCloud<int> siftMatchPointIdx,
-                                    double *r_t)
+                                                          pcl::PointCloud<int> ptSiftIdx1,
+                                                          pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2,
+                                                          pcl::PointCloud<int> ptSiftIdx2,
+                                                          pcl::PointCloud<int> siftMatchPointIdx,
+                                                          double *r_t)
 {
     Problem problem;
     for(int i=0;i<6;++i)
@@ -736,7 +839,7 @@ long LidarFeatureRegistration::LidarRegistration_RotTrans(pcl::PointCloud<pcl::P
     Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
 
-    delete obs;obs=nullptr;
+    delete obs;  obs=nullptr;
     delete match;match=nullptr;
 
     return 0;

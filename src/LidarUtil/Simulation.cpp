@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-12-26 15:39:14
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-01 10:49:17
+ * @LastEditTime: 2020-10-22 17:09:55
  */
 
 #include "Simulation.h"
@@ -60,6 +60,8 @@ long LidarRegistrationUtil::LidarRegistration_Simulation(const char* pathSrc,con
     reader1->LidarReader_Read(true,1,lasdst1);
     const LASHeader &header = lasdst1->m_lasHeader;
     Point3D centerPt((header.max_x+header.min_x)/2,(header.max_y+header.min_y)/2,(header.max_z+header.min_z)/2);
+    // Debug
+    // printf("center x: %lf y: %lf z: %lf\n",centerPt.x,centerPt.y,centerPt.z);
     for (int i = 0; i < lasdst1->m_totalReadLasNumber; ++i)
     {
         const LASIndex &idx = lasdst1->m_LASPointID[i];

@@ -113,6 +113,7 @@ public:
 		Point2D towerPnt:tower position
 		double range:tower range
 		LASColorExt color: the tower color
+		reference: 宋强, 吴永欢, 吴蔚, et al. 基于PCA的电力杆塔点云提取方法[C]// 第三届智能电网会议论文集——智能用电. 2019.
 	*/
 	long ElectricPatrolFast_Tower(ILASDataset* dataset, Point2D towerPnt, double range, LASColorExt color);
 
@@ -141,6 +142,7 @@ public:
 		4.if the points near the TIN classify the points as the ground point
 		ILASDataset* dataset:las dataset
 		LASColorExt color: the tower color
+		reference: 吴蔚, 刘岚, 黄文诚. 基于渐进三角网的线路巡检点云地面点快速提取方法[J]. 南方能源建设, 2020(S1).
 	*/
 	long ElectricPatrolFast_Ground(ILASDataset* dataset, double rectRange, double disThres, double angle, LASColorExt color);
 
