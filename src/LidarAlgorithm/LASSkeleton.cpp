@@ -414,4 +414,33 @@ namespace LasAlgorithm
 		}
 		return PointCloudLineSkeleton_Extract(pointSet,nearPointNum,lineResidual); 
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    long PointCloudLineInteractive::PointCloudLineInteractive_GetPointsRange(ILASDataset *dataset,double range,Point3Ds points,Point3Ds &innerPoints)
+    {
+        assert(points.size()>=2);
+
+		for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
+		{
+			const LASIndex &idx = dataset->m_LASPointID[i];
+            const LASPoint &lasPt = dataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect];
+
+            //点到线的距离
+            bool inner=false;
+            for(int j=1;j<points.size();++j)
+            {   
+                inner = DistanceComputation::Distance(lasPt.m_vec3d,points[j-1],points[j])<range?true:false;
+                
+                if(inner)
+                {
+                    innerPoints.push_back(lasPt.m_vec3d);
+                    break;  //避免重复添加
+                }
+            }
+		}
+        return 0;
+    }
+
+
 }

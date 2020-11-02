@@ -111,7 +111,7 @@ TEST(LASPROFILE,LASPROFILEProfileTestCase)
 }
 
 
-TEST(LASSKELETON,LASSKELETONTestCase)
+TEST(LASSKELETONShrink,LASSKELETONShrinkTestCase)
 {
     ILASDataset *dataset   = new ILASDataset();
     LidarMemReader *reader = new LidarMemReader();
@@ -177,4 +177,32 @@ TEST(LASKMEANS,LASKMEANSTestCase)
     // fs=nullptr;
     
     // EXPECT_GT(points.size(),0);
+}
+
+
+TEST(LASSKELETONLineInteractive,LASSKELETONLineInteractiveTestCase)
+{
+    ILASDataset *dataset   = new ILASDataset();
+    LidarMemReader *reader = new LidarMemReader();
+
+    reader->LidarReader_Open("../data/default/more.las",dataset);
+    reader->LidarReader_Read(true,1,dataset); 
+    Point3Ds mutiLines;
+    mutiLines.push_back(Point3D(529486.689014739939,2371539.049981002696,-16.912999782562));
+    mutiLines.push_back(Point3D(529487.870014495798,2371540.794981841929,-4.618999633789));
+    mutiLines.push_back(Point3D(529504.262012786814,2371543.854981307872,-4.507999572754));
+    mutiLines.push_back(Point3D(529506.700012512156,2371542.475981597789,-17.439999732971));
+    
+    PointCloudLineInteractive lineInteractive;
+    Point3Ds innerPoints;
+    long err=lineInteractive.PointCloudLineInteractive_GetPointsRange(dataset,0.5,mutiLines,innerPoints);
+    FILE *fs = fopen("../data/test/innerline.txt","w+");
+    //遍历点云数据输出
+    for(int i=0;i<innerPoints.size();++i)
+    {
+        fprintf(fs,"%lf,%lf,%lf\n",innerPoints[i].x,innerPoints[i].y,innerPoints[i].z);
+    }
+    fclose(fs);
+    fs=nullptr;
+    EXPECT_EQ(err,0);
 }

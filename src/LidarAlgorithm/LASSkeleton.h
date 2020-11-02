@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-07-20 11:20:54
+ * @LastEditTime: 2020-11-02 17:16:25
  */
 #pragma once
 
@@ -179,14 +179,16 @@ namespace LasAlgorithm
         long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,GeoJsonLineStringJsonUtil &featureLine);
     
         /**
-         * @name: 
-         * @msg: 
+         * @name: PointCloudLineInteractive_GetPointsRange
+         * @msg: 以线建立缓冲区，查找在缓冲区内所有点云数据
          * @param {type} 
          * @return: 
          */
-        long PointCloudLineInteractive_GetPointsRange(ILASDataset *dataset,double range,Point3Ds points);
+        long PointCloudLineInteractive_GetPointsRange(ILASDataset *dataset,double range,Point3Ds points,Point3Ds &innerPoints);
 
-    }
+
+        long PointCloudLineInteractive_LineFit();
+    };
 }
 
 #endif
