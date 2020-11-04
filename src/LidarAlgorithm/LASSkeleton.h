@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-11-02 17:16:25
+ * @LastEditTime: 2020-11-04 17:29:45
  */
 #pragma once
 
@@ -180,14 +180,31 @@ namespace LasAlgorithm
     
         /**
          * @name: PointCloudLineInteractive_GetPointsRange
-         * @msg: 以线建立缓冲区，查找在缓冲区内所有点云数据
+         * @msg:  以线建立缓冲区，查找在缓冲区内所有点云数据
          * @param {type} 
          * @return: 
          */
         long PointCloudLineInteractive_GetPointsRange(ILASDataset *dataset,double range,Point3Ds points,Point3Ds &innerPoints);
 
+        /**
+         * @name: PointCloudLineInteractive_FindNearestLinePoitns
+         * @msg: 在缓冲区点集中找到在距离所有直线中距离当前直线最近的点的点集
+         * @param Point3Ds innerPoints:所有近邻点
+         *                 Point3Ds &nearestPoints:距离给定线最近的点
+         *                 Point3Ds mutiLines:多段线
+         *                 int idx:给定直线从1开始，以idx-1以及idx两个点构成直线
+         * @return {*}
+         */                
+        long PointCloudLineInteractive_FindNearestLinePoitns(Point3Ds innerPoints,Point3Ds &nearestPoints,Point3Ds mutiLines,int idx);
 
-        long PointCloudLineInteractive_LineFit();
+
+        /**
+         * @name: PointCloudLineInteractive_LineFitOnce
+         * @msg: 单条直线拟合，与PointCloudLineInteractive_FindNearestLinePoitns配合使用，idx输入保持一致
+         * @param {*}
+         * @return {*}
+         */
+        long PointCloudLineInteractive_LineFitOnce(Point3Ds nearestPoints,Point3Ds &mutiLines,int idx);
     };
 }
 

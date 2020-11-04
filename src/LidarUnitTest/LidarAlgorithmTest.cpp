@@ -196,6 +196,45 @@ TEST(LASSKELETONLineInteractive,LASSKELETONLineInteractiveTestCase)
     PointCloudLineInteractive lineInteractive;
     Point3Ds innerPoints;
     long err=lineInteractive.PointCloudLineInteractive_GetPointsRange(dataset,0.5,mutiLines,innerPoints);
+    EXPECT_EQ(err,0);
+    Point3Ds nearestPoints;
+
+    int idx = 1;
+    err = lineInteractive.PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,mutiLines,idx);
+    EXPECT_EQ(err,0);
+
+    printf("pt1 before: %lf,%lf,%lf\n",mutiLines[idx-1].x,mutiLines[idx-1].y,mutiLines[idx-1].z);
+    printf("pt2 before: %lf,%lf,%lf\n",mutiLines[idx].x,mutiLines[idx].y,mutiLines[idx].z);
+    err = lineInteractive.PointCloudLineInteractive_LineFitOnce(nearestPoints,mutiLines,idx);
+    EXPECT_EQ(err,0);
+    printf("pt1 after: %lf,%lf,%lf\n",mutiLines[idx-1].x,mutiLines[idx-1].y,mutiLines[idx-1].z);
+    printf("pt2 after: %lf,%lf,%lf\n",mutiLines[idx].x,mutiLines[idx].y,mutiLines[idx].z);
+    printf("\n");
+
+    idx=2;
+    err = lineInteractive.PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,mutiLines,idx);
+    EXPECT_EQ(err,0);
+
+    printf("pt1 before: %lf,%lf,%lf\n",mutiLines[idx-1].x,mutiLines[idx-1].y,mutiLines[idx-1].z);
+    printf("pt2 before: %lf,%lf,%lf\n",mutiLines[idx].x,mutiLines[idx].y,mutiLines[idx].z);
+    err = lineInteractive.PointCloudLineInteractive_LineFitOnce(nearestPoints,mutiLines,idx);
+    EXPECT_EQ(err,0);
+    printf("pt1 after: %lf,%lf,%lf\n",mutiLines[idx-1].x,mutiLines[idx-1].y,mutiLines[idx-1].z);
+    printf("pt2 after: %lf,%lf,%lf\n",mutiLines[idx].x,mutiLines[idx].y,mutiLines[idx].z);
+    printf("\n");
+
+    idx=1;
+    err = lineInteractive.PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,mutiLines,idx);
+    EXPECT_EQ(err,0);
+
+    printf("pt1 before: %lf,%lf,%lf\n",mutiLines[idx-1].x,mutiLines[idx-1].y,mutiLines[idx-1].z);
+    printf("pt2 before: %lf,%lf,%lf\n",mutiLines[idx].x,mutiLines[idx].y,mutiLines[idx].z);
+    err = lineInteractive.PointCloudLineInteractive_LineFitOnce(nearestPoints,mutiLines,idx);
+    EXPECT_EQ(err,0);
+    printf("pt1 after: %lf,%lf,%lf\n",mutiLines[idx-1].x,mutiLines[idx-1].y,mutiLines[idx-1].z);
+    printf("pt2 after: %lf,%lf,%lf\n",mutiLines[idx].x,mutiLines[idx].y,mutiLines[idx].z);
+    printf("\n");
+    
     FILE *fs = fopen("../data/test/innerline.txt","w+");
     //遍历点云数据输出
     for(int i=0;i<innerPoints.size();++i)
@@ -203,6 +242,16 @@ TEST(LASSKELETONLineInteractive,LASSKELETONLineInteractiveTestCase)
         fprintf(fs,"%lf,%lf,%lf\n",innerPoints[i].x,innerPoints[i].y,innerPoints[i].z);
     }
     fclose(fs);
-    fs=nullptr;
-    EXPECT_EQ(err,0);
+
+    FILE *fs2 = fopen("../data/test/nearestline.txt","w+");
+    //遍历点云数据输出
+    for(int i=0;i<nearestPoints.size();++i)
+    {
+        fprintf(fs2,"%lf,%lf,%lf,%d,%d,%d\n",nearestPoints[i].x,nearestPoints[i].y,nearestPoints[i].z,255,255,0);
+    }
+    fclose(fs2);
+    
+    fs =nullptr;
+    fs2=nullptr;
+    
 }

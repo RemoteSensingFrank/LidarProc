@@ -442,5 +442,152 @@ namespace LasAlgorithm
         return 0;
     }
 
+    long PointCloudLineInteractive::PointCloudLineInteractive_FindNearestLinePoitns(Point3Ds innerPoints,Point3Ds &nearestPoints,Point3Ds mutiLines,int idx)
+    {
+        nearestPoints.clear();
+        for (size_t i = 0; i < innerPoints.size(); i++)
+        {
+            /* code */
+            double minDis = _MAX_LIMIT_;
+            int idxMin = 0;
+            for(int j=1;j<mutiLines.size();++j)
+            {   
+                double tmpMin = DistanceComputation::Distance(innerPoints[i],mutiLines[j-1],mutiLines[j]);
+                if(minDis>tmpMin)
+                {
+                    minDis = tmpMin;
+                    idxMin = j;
+                }
+            }
+            if(idxMin==idx)
+            {
+                nearestPoints.push_back(innerPoints[i]);
+            }
+        }
+        return 0;
+    }
 
+    long PointCloudLineInteractive::PointCloudLineInteractive_LineFitOnce(Point3Ds nearestPoints,Point3Ds &mutiLines,int idx)
+    {
+        // reference: 薛丽红. 三维空间点中基于最小二乘法的分段直线拟合方法[J]. 齐齐哈尔大学学报(自然科学版), 2015(04):87-88+92.
+        // x=k1*z+b1
+        // y=k2*z+b2
+        double sigmaXi=0,sigmaYi=0,sigmaZi=0,
+               sigmaXiZi=0,sigmaYiZi=0,sigmaZiZi=0,
+               cx=0,cy=0,cz=0;
+
+        //必须要去中心化避免出现计算越界的情况
+        for (size_t i = 0; i < nearestPoints.size(); i++)
+        {
+            cx+=nearestPoints[i].x/nearestPoints.size();
+            cy+=nearestPoints[i].y/nearestPoints.size();
+            cz+=nearestPoints[i].z/nearestPoints.size();
+        }
+        for (size_t i = 0; i < nearestPoints.size(); i++)
+        {
+            nearestPoints[i].x-=cx;
+            nearestPoints[i].y-=cy;
+            nearestPoints[i].z-=cz;
+        }
+
+        for (size_t i = 0; i < nearestPoints.size(); i++)
+        {
+            /* code */
+            sigmaXiZi+=nearestPoints[i].x*nearestPoints[i].z;
+            sigmaYiZi+=nearestPoints[i].y*nearestPoints[i].z;
+            sigmaZiZi+=nearestPoints[i].z*nearestPoints[i].z;
+
+            sigmaXi+=nearestPoints[i].x;
+            sigmaYi+=nearestPoints[i].y;
+            sigmaZi+=nearestPoints[i].z;
+        }
+        double k1 = (2*sigmaXiZi-sigmaXi*sigmaZi)/(2*sigmaZiZi-sigmaZi*sigmaZi);
+        double b1 = (sigmaXi-k1*sigmaZi)/2;
+        double k2 = (2*sigmaYiZi-sigmaYi*sigmaZi)/(2*sigmaZiZi-sigmaZi*sigmaZi);
+        double b2 = (sigmaYi-k2*sigmaZi)/2;
+
+        // for (size_t i = 0; i < nearestPoints.size(); i++)
+        // {
+        //     printf("RMS:%lf,%lf\n",fabs(nearestPoints[i].x-k1*nearestPoints[i].z-b1),fabs(nearestPoints[i].x-k2*nearestPoints[i].z-b2));
+        // }
+        //printf("k1: %lf,b1：%lf,k2：%lf,b2：%lf\n",k1,b1,k2,b2);
+
+        //求解在这个直线上的极值点
+        double maxz=_MIN_LIMIT_,minz=_MAX_LIMIT_,
+               maxx=_MIN_LIMIT_,minx=_MAX_LIMIT_,
+               maxy=_MIN_LIMIT_,miny=_MAX_LIMIT_;
+        int idmaxz=0,idminz=0,idmaxx=0,idminx=0,idminy=0,idmaxy=0;
+               
+        for (size_t i = 0; i < nearestPoints.size(); i++)
+        {
+            /* code */
+            if(nearestPoints[i].z>maxz)
+            {
+                maxz=nearestPoints[i].z;
+                idmaxz = i;
+            }
+            if(nearestPoints[i].z<minz)
+            {
+                minz=nearestPoints[i].z;
+                idminz = i;
+            }
+
+            if(nearestPoints[i].x>maxx)
+            {
+                maxx=nearestPoints[i].x;
+                idmaxx = i;
+            }
+            if(nearestPoints[i].x<minx)
+            {
+                minx=nearestPoints[i].x;
+                idminx = i;
+            }
+
+            if(nearestPoints[i].y>maxy)
+            {
+                maxy=nearestPoints[i].y;
+                idmaxy = i;
+            }
+            if(nearestPoints[i].y<miny)
+            {
+                miny=nearestPoints[i].y;
+                idminy = i;
+            }
+        }
+
+        //TODO：这里需要取极值，但是极值有可能z都是一个固定值，这样就比较麻烦了
+        if(minz!=maxz){
+            double x1 = k1*nearestPoints[idminz].z+b1;
+            double y1 = k2*nearestPoints[idminz].z+b2;
+
+            double x2 = k1*nearestPoints[idmaxz].z+b1;
+            double y2 = k2*nearestPoints[idmaxz].z+b2;
+            
+            if(mutiLines[idx-1].z<mutiLines[idx].x)
+            {
+                mutiLines[idx-1].x = x1+cx;
+                mutiLines[idx-1].y = y1+cy;
+                mutiLines[idx-1].z = minz+cz;
+
+                mutiLines[idx].x = x2+cx;
+                mutiLines[idx].y = y2+cy;
+                mutiLines[idx].z = maxz+cz;
+            }else{
+                mutiLines[idx].x = x1+cx;
+                mutiLines[idx].y = y1+cy;
+                mutiLines[idx].z = minz+cz;
+
+                mutiLines[idx-1].x = x2+cx;
+                mutiLines[idx-1].y = y2+cy;
+                mutiLines[idx-1].z = maxz+cz;
+            }
+        }
+        else if(minx!=maxx){
+            
+        }
+        else if(miny!=maxy){
+
+        }
+        return 0;
+    }
 }
