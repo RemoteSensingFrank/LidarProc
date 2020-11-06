@@ -5,9 +5,13 @@
 #include <exception>
 #include <iterator>
 
+//httplib from https://github.com/yhirose/cpp-httplib.git
 #include "httplib.h"
+
+
 #include "../LidarUtil/FileHelper.h"
-#include "../LidarUtil/GeojsonUtil.h"
+//json parase code from https://github.com/Nomango/jsonxx.git
+#include "../LidarUtil/json.hpp"
 
 #include "../LidarBase/LASReceive.h"
 #include "../LidarBase/LASReader.h"
@@ -17,6 +21,7 @@
 
 using namespace std;
 using namespace httplib;
+using namespace jsonxx;
 
 class LidarService;
 
@@ -129,6 +134,7 @@ public:
     virtual void LidarController_Run()
     {
         service->Get("/info", [](const Request& req, Response& res) {
+            json infoJson;
             ifstream incpu("/proc/cpuinfo");
             istreambuf_iterator<char> cpu_begin(incpu);
             istreambuf_iterator<char> cpu_end;
@@ -139,9 +145,10 @@ public:
             istreambuf_iterator<char> mem_end;
             string mem_str(mem_begin, mem_end);
 
-            string info = cpu_str+"\n"+mem_str;
+            infoJson["cpuinfo"]=cpu_str;
+            infoJson["memInfo"]=mem_str;
 
-            res.set_content(info, "text/plain");
+            res.set_content(infoJson.dump(), "application/json");
         });        
     }    
 };
@@ -159,12 +166,17 @@ public:
     virtual void LidarController_Run()
     {
         service->Get("/exhibitlist", [](const Request& req, Response& res){
-            string dirNameList="";
             vector<string> namelist;
             FileHelper::listDirNames("./www/pointclouds/",namelist);
+            json listFileJson;
+            listFileJson["filecount"]=namelist.size();
+            listFileJson["fileList"]=json::array({});
             for(int i=0;i<namelist.size();++i)
-                dirNameList+=namelist[i]+";";
-            res.set_content(dirNameList, "text/plain");
+            {
+                listFileJson["fileList"].push_back({{"filename",namelist[i]}});
+            }
+                
+            res.set_content(listFileJson.dump(), "application/json");
             res.status=200;
 	    });        
     }    
@@ -186,17 +198,26 @@ public:
             string jstr="";
             vector<string> dirs;
             FileHelper::listDirNames("../data/",dirs);
+            json dirsJson;
+            dirsJson["dircount"]=dirs.size();
+            dirsJson["dirobjects"]=json::array({});
+
             for(int i=0;i<dirs.size();++i)
             {
-                jstr+=","+dirs[i]+";";
-                vector<string> filelist;
+                std::vector<std::string> filelist;
                 FileHelper::listNames(string("../data/"+dirs[i]+"/"),filelist,"las");
+                json dirJson;
+                dirJson["filecount"]=filelist.size();
+                dirJson["dirname"] = dirs[i];
+                dirJson["fileobjects"]=json::array({});
+
                 for(int j=0;j<filelist.size();++j)
                 {
-                    jstr+=filelist[j]+";";
+                    dirJson["fileobjects"].push_back({{"name",filelist[j]}});
                 }
+                dirsJson["dirobjects"].push_back({{"dir",dirJson}});
             }
-            res.set_content(jstr, "text/plain");
+            res.set_content(dirsJson.dump(), "application/json");
             res.status=200;
         });        
     }    
@@ -218,7 +239,8 @@ public:
         service->Get(R"(/datadelete/(.*?))",[](const Request& req, Response& res){
             string path="../data/"+string(req.matches[1]);
             remove(path.c_str());
-            res.set_content("deleted", "text/plain");
+            json delJson=json::object({"delete","success"});
+            res.set_content(delJson.dump(), "application/json");
             res.status=200;
         });       
     }    
@@ -239,7 +261,8 @@ public:
         service->Get(R"(/exhibitdelete/(.*?))",[](const Request& req, Response& res){
             string path="rm -rf ./www/pointclouds/"+string(req.matches[1])+"/";
             system(path.c_str());
-            res.set_content("deleted", "text/plain");
+            json delJson=json::object({"delete","success"});
+            res.set_content(delJson.dump(), "application/json");
             res.status=200;
         });      
     }    
@@ -262,7 +285,8 @@ public:
             string path="../data/"+string(req.matches[1]);
             LASTransToPotree lasTrans;
             lasTrans.LASTransToPotree_Trans(path.c_str());
-            res.set_content(path, "text/plain");
+            json lasPathJson=json::object({"path",path});
+            res.set_content(lasPathJson.dump(), "application/json");
             res.status=200;
         });    
     }    
@@ -284,15 +308,15 @@ public:
         service->Get("/dataclasstype",[](const Request& req, Response& res){
             FILE *fs = fopen("./config/classtype.conf","r+");
             char line[2048];
-            string jstr="";
+            json typeJson=json::array({});
             while(fgets (line, 2048, fs)!=NULL)
             {
                 vector<string> lineItems;
                 SplitString(string(line),lineItems,",");
-                jstr+=lineItems[0]+","+lineItems[1]+";";
+                typeJson.push_back({{lineItems[0],lineItems[1]}});
             }
             fclose(fs);
-            res.set_content(jstr, "text/plain");
+            res.set_content(typeJson.dump(), "application/json");
             res.status=200;
         });   
     }    
@@ -403,43 +427,55 @@ public:
 
     virtual void LidarController_Run()
     {
-        service->Get(R"(/classification/(.*?))",[](const Request& req, Response& res){
-            string content=string(req.matches[1]);
-            vector<string> contents;
-            SplitString(content,contents,"-");
+        service->Post(R"(/classification)",[](const Request& req, Response& res){
+            string params = req.body.c_str();
+            json paramsJson;
+            paramsJson=json::parse(params);
+            std::vector<json> pnts = paramsJson["points"];
+            double towerRange = paramsJson["towerRange"];
+            double lineHeight = paramsJson["lineHeight"];
+            double groundNetSize = paramsJson["groundNetSize"];
+            double groundNetAngle = paramsJson["groundNetAngle"];
+            double vegeDistance = paramsJson["vegeDistance"];
+            string classifiedName = paramsJson["classifiedName"];
+            string dirFileName = paramsJson["dirFileName"];
+            string srcFileName = paramsJson["srcFileName"];
             ILASDataset *lasdst1 = new ILASDataset();
             LASReader *reader4 = new LidarMemReader();
-            string pathsrc=string("../data/")+contents[11]+string("/")+contents[12];
-            printf("%s\n",pathsrc.c_str());
+            string pathsrc=string("../data/")+dirFileName+string("/")+srcFileName;
             reader4->LidarReader_Open(pathsrc.c_str(),lasdst1);
             reader4->LidarReader_Read(true,1,lasdst1);
-            
+            printf("1");
             classifyElectricPatrolFast classFast;
             Point2Ds points;
             LASColorExt colorTower;
             colorTower.Red=colorTower.Blue=colorTower.Green=255;
             
-            points.push_back(Point2D(atof(contents[0].c_str()),atof(contents[1].c_str())));
-            points.push_back(Point2D(atof(contents[2].c_str()),atof(contents[3].c_str())));
-            classFast.ElectricPatrolFast_Tower(lasdst1,points,atof(contents[4].c_str()),colorTower);
-            
+            points.push_back(Point2D(pnts[0]["x"],pnts[0]["y"]));
+            points.push_back(Point2D(pnts[1]["x"],pnts[1]["y"]));
+            classFast.ElectricPatrolFast_Tower(lasdst1,points,towerRange,colorTower);
+            printf("2");
             LASColorExt lineTower;
             lineTower.Red=lineTower.Green=0;lineTower.Blue=255;
-            long err=classFast.ElectricPatrolFast_Lines(lasdst1,points,atof(contents[4].c_str()),atof(contents[5].c_str()),lineTower);
-
+            long err=classFast.ElectricPatrolFast_Lines(lasdst1,points,towerRange,lineHeight,lineTower);
+            printf("3");
             LASColorExt groundTower;
             groundTower.Red=groundTower.Green=255;groundTower.Blue=0;
-            classFast.ElectricPatrolFast_Ground(lasdst1,atof(contents[6].c_str()),atof(contents[7].c_str()),atof(contents[8].c_str()),groundTower);
-            
+            classFast.ElectricPatrolFast_Ground(lasdst1,groundNetSize,groundNetAngle,vegeDistance,groundTower);
+            printf("4");
             LASColorExt vegetationTower;
             vegetationTower.Red=vegetationTower.Blue=0;vegetationTower.Green=255;
             classFast.ElectricPatrolFast_VegetationLast(lasdst1,vegetationTower);
-            string classifiedpath="../data/default/"+contents[10];
+            printf("5");
+
+            string classifiedpath="../data/default/"+classifiedName;
             reader4->LidarReader_Write(classifiedpath.c_str(),lasdst1);
 
             delete lasdst1;
             delete reader4;
-            res.set_content("classified", "text/plain");
+
+            json procJson=json::object({"process","classified"});
+            res.set_content(procJson.dump(), "application/json");
             res.status=200;
         });      
     }  
@@ -465,13 +501,7 @@ public:
      */
     long LidarModelJsonExtract(string jsonString)
     {
-        rapidjson::Document document;
-        document.Parse(jsonString.c_str());
-        if(document.HasMember("features")){
-            cout << "lover : " << endl;
-            const rapidjson::Value& chileValue = document["lover"];
-            rapidjson::Value::ConstMemberIterator chileIter = chileValue.FindMember("name");
-        }
+
         return 0;
     }
 
@@ -479,21 +509,9 @@ public:
     {
         service->Post(R"(/line_model_refine)",[](const Request& req, Response& res){
             auto name = req.get_param_value("lines");
-
-            Document document;
-            document.Parse(((string)name).c_str());
-            if(document.HasMember("features") && document["features"].IsArray())
-            {
-                const Value& features = document["features"];
-                for (SizeType i = 0; i < features.Size(); i++) // 使用 SizeType 而不是 size_t
-                {
-                    GeoJsonLineStringJsonUtil lineFeature;
-                    lineFeature.DeSerialize(features[i]);
-                    printf("%s\n",lineFeature.type.c_str());
-
-                }
-            }
-            res.set_content(name, "application/json");
+            // json lines;
+            // lines=json::parse(((string)name).c_str());
+            // res.set_content(lines.dump(), "application/json");
             res.status=200;
         });      
     }  
@@ -514,24 +532,70 @@ public:
     virtual void LidarController_Run()
     {
         service->Get("/apidoc",[](const Request& req, Response& res){
-            string pageInfo="";
-            string apiDoc = "";
-            string apiInfo="Api:http://localhost:1234/info\nParams:null\nParamType:null\nRequestType:GET\nDesc:查看系统信息\n\n";
-            pageInfo+=apiInfo;
-            string apiExhibitlist="Api:http://localhost:1234/exhibitlist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可展示数据文件夹\n\n";
-            pageInfo+=apiExhibitlist;
-            string apiDatalist="Api:http://localhost:1234/datalist\nParams:null\nParamType:null\nRequestType:GET\nDesc:列出所有可处理数据\n\n";
-            pageInfo+=apiDatalist;
-            string apiDatadelete="Api:http://localhost:1234/datadelete\nParams:待删除数据文件名（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除处理数据\n\n";
-            pageInfo+=apiDatadelete;
+
+            json apiListInfo=json::array({});
+
+            json apiInfoJson;
+            apiInfoJson["api"]="http://localhost:1234/info";
+            apiInfoJson["params"]="null";
+            apiInfoJson["paramType"]="";
+            apiInfoJson["requestType"]="GET";
+            apiInfoJson["Desc"]="查看系统信息";
+            apiListInfo.push_back({{"apiInfo",apiInfoJson}});
+
+            json apiExhibitJson;
+            apiExhibitJson["api"]="http://localhost:1234/exhibitlist";
+            apiExhibitJson["params"]="null";
+            apiExhibitJson["paramType"]="";
+            apiExhibitJson["requestType"]="GET";
+            apiExhibitJson["Desc"]="列出所有可展示数据文件夹";
+            apiListInfo.push_back({{"exhibitInfo",apiExhibitJson}});
+            
+            json apiDataJson;
+            apiDataJson["api"]="http://localhost:1234/datalist";
+            apiDataJson["params"]="null";
+            apiDataJson["paramType"]="";
+            apiDataJson["requestType"]="GET";
+            apiDataJson["Desc"]="列出所有可处理数据";
+            apiListInfo.push_back({{"dataInfo",apiDataJson}});
+            
+            json datadeleteJson;
+            datadeleteJson["api"]="http://localhost:1234/datadelete";
+            datadeleteJson["params"]="待删除数据文件名（根据列出数据文件获取";
+            datadeleteJson["paramType"]="url参数";
+            datadeleteJson["requestType"]="GET";
+            datadeleteJson["Desc"]="删除处理数据";
+            apiListInfo.push_back({{"datadelete",datadeleteJson}});            
+            
+
             string apiExhibitdelete="Api:http://localhost:1234/exhibitdelete\nParams:待删除数据文件夹（根据列出数据文件获取）\nParamType:url参数\nRequestType:GET\nDesc:删除展示数据\n\n";
-            pageInfo+=apiExhibitdelete;
-            string apiDatatrans="Api:http://localhost:1234/datatrans\nParams:待转换数据文件名\nParamType:url参数\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
-            pageInfo+=apiDatatrans;
+            json exhibitdeleteJson;
+            exhibitdeleteJson["api"]="http://localhost:1234/exhibitdelete";
+            exhibitdeleteJson["params"]="待删除数据文件名（根据列出数据文件获取";
+            exhibitdeleteJson["paramType"]="url参数";
+            exhibitdeleteJson["requestType"]="GET";
+            exhibitdeleteJson["Desc"]="删除展示数据";
+            apiListInfo.push_back({{"deleteexhibit",exhibitdeleteJson}});            
+            
+            json dataTransJson;
+            dataTransJson["api"]="http://localhost:1234/datatrans";
+            dataTransJson["params"]="待转换数据文件名";
+            dataTransJson["paramType"]="url参数";
+            dataTransJson["requestType"]="GET";
+            dataTransJson["Desc"]="将处理数据转换为展示数据";
+            apiListInfo.push_back({{"dataTrans",dataTransJson}});                
+            
+            
             string apiDataclasstype="Api:http://localhost:1234/dataclasstype\nParams:null\nParamType:\nRequestType:GET\nDesc:将处理数据转换为展示数据\n\n";
-            pageInfo+=apiDataclasstype;
-            string doc=pageInfo;
-            res.set_content(doc, "text/plain;charset=utf-8");
+            json classTypeJson;
+            classTypeJson["api"]="http://localhost:1234/dataclasstype";
+            classTypeJson["params"]="null";
+            classTypeJson["paramType"]="";
+            classTypeJson["requestType"]="GET";
+            classTypeJson["Desc"]="获取分类展示类型";
+            apiListInfo.push_back({{"classType",classTypeJson}});              
+            
+            res.set_content(apiListInfo.dump(), "application/json;charset=utf-8");
             res.status=200;
         });  
     }   

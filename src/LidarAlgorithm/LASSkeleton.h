@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-11-04 17:29:45
+ * @LastEditTime: 2020-11-05 11:49:44
  */
 #pragma once
 
@@ -20,7 +20,6 @@
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASPoint.h"
 #include "../LidarBase/LASReader.h"
-#include "../LidarUtil/GeojsonUtil.h"
 #include "Eigen/Eigen"
 
 using namespace GeometryLas;
@@ -176,7 +175,7 @@ namespace LasAlgorithm
     {
     public:
 
-        long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,GeoJsonLineStringJsonUtil &featureLine);
+        //long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,GeoJsonLineStringJsonUtil &featureLine);
     
         /**
          * @name: PointCloudLineInteractive_GetPointsRange

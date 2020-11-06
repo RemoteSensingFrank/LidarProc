@@ -49,19 +49,20 @@ protected:
 };
 
 
-TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
+TEST(LASSIMPLECLASSIFY,LASSIMPLECLASSIFYFastTestCase)
 {
     Point2Ds pntTower(2);
-    pntTower[0].x = 201136.7999877;
-    pntTower[0].y = 2488348.81000137;
+
+    pntTower[0].x = 182232.660003662109;
+    pntTower[0].y = 2481201.869995117188;
     
-    pntTower[1].x = 201485.930057;
-    pntTower[1].y = 2488217.08000183;
+    pntTower[1].x = 182707.520019531250;
+    pntTower[1].y = 2481000.750000000000;
     
     ILASDataset *dataset   = new ILASDataset();
     LidarMemReader *reader = new LidarMemReader();
 
-    reader->LidarReader_Open("../data/default/classify.las",dataset);
+    reader->LidarReader_Open("../data/default/segment2.las",dataset);
     reader->LidarReader_Read(true,1,dataset); 
     LASColorExt color;
     color.Red   = 255;
@@ -71,20 +72,25 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
     //EXPECT_EQ(-1,classifyFast.ElectricPatrolFast_Tower(nullptr,pntTower[0],13,color));
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Tower(dataset,pntTower[0],13,color));
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Tower(dataset,pntTower[1],13,color));
-    reader->LidarReader_Write("../data/default/Tower.las",dataset,elcTowerUp);
 
     color.Red   = 0;
     color.Green = 0;
     color.Blue  = 255;
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Lines(dataset,pntTower,13,5,color));
-    reader->LidarReader_Write("../data/default/Line.las",dataset,elcLine);
 
     color.Red   = 218;
     color.Green = 165;
     color.Blue  = 32;
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Ground(dataset,5,0.5,10,color));
-    reader->LidarReader_Write("../data/default/Ground.las",dataset,elcGround);
-    reader->LidarReader_Write("../data/default/classify_tower_line.las",dataset);
+
+    LASColorExt vegetationTower;
+    vegetationTower.Red=vegetationTower.Blue=0;vegetationTower.Green=255;
+    EXPECT_EQ(0,classifyFast.ElectricPatrolFast_VegetationLast(dataset,vegetationTower));
+
+    reader->LidarReader_Write("../data/default/classifiedTest.las",dataset);
+
+    delete dataset;
+    delete reader;
 }
 
 

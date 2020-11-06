@@ -84,7 +84,6 @@ function loadData()
     let pcRoot = $("#jstree_scene").jstree().get_json("pointclouds");
     var childNodes = $("#jstree_scene").jstree().get_children_dom(pcRoot);
     for (var i = 0; i < childNodes.length; i++) {
-
         $("#jstree_scene").jstree("delete_node", childNodes[i].id)
     }
 
@@ -161,8 +160,8 @@ function classifiedFast(){
         var treedata=[];
         $.ajax({
             type: "GET",
-            url: ip+"/datalist",
-            dataType: "text",
+            url: "/datalist",
+            dataType: "json",
             async:true,
             beforeSend:function(XMLHttpRequest){ 
                 $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -173,15 +172,14 @@ function classifiedFast(){
                 $("#loading").empty(); //ajax返回成功，清除loading图标
                 $("#loading").hide();
 
-                var strs= new Array();
-                strs=data.split(",");
-                for(i=0;i<strs.length ;i++){
-                    if(strs[i]!=""){
-                        var fstr= new Array();
-                        fstr=strs[i].split(";");
-                        for(j=1;j<fstr.length; j++){
-                            $("#classifiedFileList")[0].options.add(new Option(fstr[j],fstr[0]));
-                        }               
+                for(i=0;i<data["dirobjects"].length ;i++){
+                    if(data["dirobjects"][i]["dir"]["dirname"]!=""){
+                        for(j=0;j<data["dirobjects"][i]["dir"]["fileobjects"].length; j++){
+                            if(data["dirobjects"][i]["dir"]["fileobjects"][j]["name"]!=""){
+                                $("#classifiedFileList")[0].options.add(new Option(data["dirobjects"][i]["dir"]["fileobjects"][j]["name"],
+                                                                                   data["dirobjects"][i]["dir"]["dirname"]));
+                            }
+                        }
                     }
                 }
             },     

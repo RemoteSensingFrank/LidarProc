@@ -391,7 +391,6 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Lines(ILASDataset* dataset, 
 
 	double miny = min(min(rp1(0, 1), rp2(0, 1)), min(rp3(0, 1), rp4(0, 1)));
 	double maxy = max(max(rp1(0, 1), rp2(0, 1)), max(rp3(0, 1), rp4(0, 1)));
-
 	Rect2D sRect(minx, miny, maxx, maxy);
 	dataset->LASDataset_Search(0, sRect, rectIds);
 	Point3Ds seedPnts;
@@ -452,6 +451,7 @@ long classifyElectricPatrolFast::ElectrixPatrolFast_Seed(ILASDataset* dataset, P
 
 	//seed point grow algorithm
 	do {
+		printf("%d\r",preparePntSet.size());
 		//depth first
 		int i = preparePntSet.size() - 1;
 		double pnt[3] = { preparePntSet[i].x,preparePntSet[i].y,preparePntSet[i].z };
@@ -475,6 +475,7 @@ long classifyElectricPatrolFast::ElectrixPatrolFast_Seed(ILASDataset* dataset, P
 			}
 		}
 	} while (!preparePntSet.empty());
+	printf("\n");
 	pointSet.clear();
 	idxLists.clear();
 	return 0;
@@ -483,10 +484,14 @@ long classifyElectricPatrolFast::ElectrixPatrolFast_Seed(ILASDataset* dataset, P
 long classifyElectricPatrolFast::ElectricPatrolFast_Ground(ILASDataset* dataset, double rectRange, double disThres,double angle, LASColorExt color)
 {
 	std::vector<LASIndex> pntIdxs;
+	printf("1\n");
 	ElectricPatrolFast_Angle(dataset, rectRange, angle*M_PI/180, pntIdxs);
+	printf("2\n");
 	ElectricPatrolFast_GroundDis(dataset, rectRange/2, disThres, pntIdxs);
+
 	for (int k = 0; k < pntIdxs.size(); ++k)
 	{
+		printf("%d\r",k);
 		int i = pntIdxs[k].rectangle_idx;
 		int j = pntIdxs[k].point_idx_inRect;
 		LASPoint &pnt = dataset->m_lasRectangles[i].m_lasPoints[j];
@@ -496,6 +501,7 @@ long classifyElectricPatrolFast::ElectricPatrolFast_Ground(ILASDataset* dataset,
 			pnt.m_colorExt = color;
 		}
 	}
+	printf("\n");
 	return 0;
 }
 
@@ -903,6 +909,7 @@ long classifyElectricPatrolFast::ElectricPatrolFast_VegetationLast(ILASDataset* 
 	//get point of vegetation and line split
 	for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
 	{
+		printf("%d\r",i);
 		const LASIndex &idx = dataset->m_LASPointID[i];
 		LASPoint &pt =dataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect]; 
 		if(pt.m_classify == elcCreated)
@@ -911,6 +918,8 @@ long classifyElectricPatrolFast::ElectricPatrolFast_VegetationLast(ILASDataset* 
 			pt.m_colorExt=color;
 		}
 	}
+	printf("\n");
+	return 0;
 }
 
 

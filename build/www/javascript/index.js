@@ -45,8 +45,6 @@ function LoadLASDataViewer(path,projec_def)
 {
     currentViewerFilePath = path;
 
-    
-
     var pos=currentViewerFilePath.lastIndexOf("\/");
     var strFilePath=currentViewerFilePath.substring(0,pos);
     pos=strFilePath.lastIndexOf("\/");
