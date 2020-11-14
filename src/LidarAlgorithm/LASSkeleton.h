@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-11-05 11:49:44
+ * @LastEditTime: 2020-11-12 21:50:47
  */
 #pragma once
 
@@ -174,8 +174,7 @@ namespace LasAlgorithm
     class PointCloudLineInteractive
     {
     public:
-
-        //long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,GeoJsonLineStringJsonUtil &featureLine);
+        long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines);
     
         /**
          * @name: PointCloudLineInteractive_GetPointsRange
@@ -204,6 +203,24 @@ namespace LasAlgorithm
          * @return {*}
          */
         long PointCloudLineInteractive_LineFitOnce(Point3Ds nearestPoints,Point3Ds &mutiLines,int idx);
+
+
+        /**
+         * @name: PointCloudLineInteractive_LineMerge
+         * @msg: 对所有的点和线进行调整和合并，将两个近邻点合并为一个点，将点与线近邻的情况点连接到线上
+         * @param {*}
+         * @return {*}vector<
+         */
+        long PointCloudLineInteractive_LineMerge(vector<Point3Ds> &mutiSimpleLines,double disThreshold=0.3);
+
+
+        /**
+         * @name: PointCloudLineInteractive_Trans2Simple
+         * @msg: trans mutilines to simple lines
+         * @param {*}
+         * @return {*}
+         */
+        long PointCloudLineInteractive_Trans2Simple(vector<Point3Ds> mutiComplexLines,vector<Point3Ds> &mutiSimpleLines);
     };
 }
 

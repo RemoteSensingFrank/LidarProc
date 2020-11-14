@@ -655,7 +655,7 @@ function classifiedProc(){
         console.log("杆塔数应该为两个表示一个档段");
         return;
     }
-    var pointsParam="";
+
     var params={};
     params["points"]=[];
     measuresmens.forEach(function(measureItem){
@@ -671,8 +671,6 @@ function classifiedProc(){
     params["classifiedName"]=classifiedName;
     params["dirFileName"]=selects.options[indexs].value;
     params["srcFileName"]=selects.options[indexs].text;
-
-    pointsParam+=towerRange+"-"+lineHeight+"-"+groundNetSize+"-"+groundNetDis+"-"+groundNetAngle+"-"+vegeDistance+"-"+classifiedName+"-"+srcFileName;
 
     $.ajax({
         type: "POST",

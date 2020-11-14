@@ -590,4 +590,107 @@ namespace LasAlgorithm
         }
         return 0;
     }
+
+    long PointCloudLineInteractive::PointCloudLineInteractive_LineMerge(vector<Point3Ds> &mutiSimpleLines,double disThreshold/*=0.3*/)
+    {
+        //二维点变成一维点
+        Point3Ds pointlink;
+        for (size_t i = 0; i < mutiSimpleLines.size(); i++)
+        {
+            for (size_t j = 0; j < mutiSimpleLines[i].size(); j++)
+            {
+                pointlink.push_back(mutiSimpleLines[i][j]);
+            }
+        }
+
+        //合并距离小于阈值的点
+        for(size_t i=0;i<pointlink.size();++i)
+        {   
+            vector<int> pointindex;
+            pointindex.push_back(i);
+            for(size_t j=0;j<pointlink.size();++j)
+            {
+                if(DistanceComputation::Distance(pointlink[i],pointlink[j])<disThreshold)
+                {
+                    pointindex.push_back(j);
+                }
+            }
+            
+            Point3D pt;
+            pt.x=pt.y=pt.z=0;
+            for(int j=0;j<pointindex.size();++j)
+            {
+                pt.x+=pointlink[pointindex[j]].x/double(pointindex.size());
+                pt.y+=pointlink[pointindex[j]].y/double(pointindex.size());
+                pt.z+=pointlink[pointindex[j]].z/double(pointindex.size());
+            }
+
+            for(int j=0;j<pointindex.size();++j)
+            {
+                pointlink[pointindex[j]].x=pt.x;
+                pointlink[pointindex[j]].y=pt.y;
+                pointlink[pointindex[j]].z=pt.z;
+            }
+
+        }
+
+        // 恢复为二维点，这样还是有问题
+        // 如果点在直线上则可能出现连不上的情况
+        // 另外如果每一条直线都是一个对象则可能对象太多，需要通过拓扑关系减少对象数量
+        int countParam=0;
+        for (size_t i = 0; i < mutiSimpleLines.size(); i++)
+        {
+            for (size_t j = 0; j < mutiSimpleLines[i].size(); j++)
+            {
+                mutiSimpleLines[i][j]=pointlink[countParam];
+                countParam++;
+            }
+        }
+
+
+        // for(size_t i = 0; i < mutiSimpleLines.size(); i++)
+        // {   
+        //     for(size_t j=0;j<mutiSimpleLines.size();++j)
+        //     {
+        //         if(i==j){
+        //             continue;
+        //         }else{
+                    
+        //         }
+        //     }
+        // }
+        
+    }
+
+    long PointCloudLineInteractive::PointCloudLineInteractive_Trans2Simple(vector<Point3Ds> mutiComplexLines,vector<Point3Ds> &mutiSimpleLines)
+    {
+        mutiSimpleLines.clear();
+        for (size_t i = 0; i < mutiComplexLines.size(); i++)
+        {
+            for(size_t j=0; j<mutiComplexLines[i].size()-1;++j)
+            {
+                Point3Ds line;
+                line.push_back(mutiComplexLines[i][j]);
+                line.push_back(mutiComplexLines[i][j+1]);
+                mutiSimpleLines.push_back(line);
+            }
+        }
+        return 0;
+    }
+
+    long PointCloudLineInteractive::PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines)
+    {
+        vector<Point3Ds> simpleLine;
+        PointCloudLineInteractive_Trans2Simple(featureLines,simpleLine);
+        for(int i=0;i<simpleLine.size();++i)
+        {
+            Point3Ds innerPoints,nearestPoints;
+            PointCloudLineInteractive_GetPointsRange(dataset,0.5,simpleLine[i],innerPoints);
+            PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,simpleLine[i],1);
+            PointCloudLineInteractive_LineFitOnce(nearestPoints,simpleLine[i],1);
+        }
+        PointCloudLineInteractive_LineMerge(simpleLine,2);
+        featureLines.swap(simpleLine);
+        return 0;
+    }
 }

@@ -18,6 +18,8 @@
 #include "../LidarResearch/LASFormatTransform.h"
 #include "../LidarAlgorithm/LASSimpleClassify.h"
 #include "../LidarAlgorithm/LASDangerPoints.h"
+#include "../LidarAlgorithm/LASSkeleton.h"
+
 
 using namespace std;
 using namespace httplib;
@@ -488,30 +490,112 @@ public:
  * @param {type} 
  * @return: 
  */
+
+/**
+ * @name: LidarControllerLineModelRefineProc
+ * @msg: 
+ * @param {*}
+ * @return {*}
+ */
+static json LidarControllerLineModelRefineProc(json featureJson)
+{
+    std::vector<json> features=featureJson["features"];
+
+    vector<Point3Ds> line3ds;
+    for(int i=0;i<features.size();++i)
+    {
+        Point3Ds line;
+        std::vector<json> coordinates = features[i]["geometry"]["coordinates"];
+        for(int j=0;j<coordinates.size();++j)
+        {
+            Point3D pnt3d;
+            int k=0;
+            for (auto& tmp : coordinates[j]) 
+            {
+                switch (k)
+                {
+                case 0:
+                    if(tmp.is_integer()){
+                        int tmpInt=0;
+                        tmpInt=tmp;
+                        pnt3d.x = (double)tmpInt;
+                    }else{
+                        pnt3d.x = (double)tmp;
+                    }
+                    k++;
+                    break;
+                case 1:
+                    if(tmp.is_integer()){
+                        int tmpInt=0;
+                        tmpInt=tmp;
+                        pnt3d.y = (double)tmpInt;
+                    }else{
+                        pnt3d.y = (double)tmp;
+                    }
+                    k++;
+                    break;
+                case 2:
+                    if(tmp.is_integer()){
+                        int tmpInt=0;
+                        tmpInt=tmp;
+                        pnt3d.z = (double)tmpInt;
+                    }else{
+                        pnt3d.z = (double)tmp;
+                    }
+                    k++;
+                    break;
+                default:
+                    break;
+                }
+                
+            }
+            line.push_back(pnt3d);
+        }
+        line3ds.push_back(line);
+    }
+    //for test
+    ILASDataset *lasdst1 = new ILASDataset();
+    LASReader *reader4 = new LidarMemReader();
+    reader4->LidarReader_Open("../data/default/more.las",lasdst1);
+    reader4->LidarReader_Read(true,1,lasdst1);
+    LasAlgorithm::PointCloudLineInteractive lineInteractive;
+
+    lineInteractive.PointCloudLineInteractive_ModelRefine(lasdst1,line3ds);
+
+    json featureLines;
+    featureLines["featurelines"]=json::array({});
+    for(int i=0;i<line3ds.size();++i)
+    {
+        json lineJson;
+        lineJson=json::array({});
+        for(int j=0;j<line3ds[i].size();++j)
+        {
+            json pointJson;
+            pointJson["x"]=line3ds[i][j].x;
+            pointJson["y"]=line3ds[i][j].y;
+            pointJson["z"]=line3ds[i][j].z;
+            lineJson.push_back({{"point",pointJson}});
+        }
+        featureLines["featurelines"].push_back({{"line",lineJson}});
+    }
+    return featureLines;
+}
+
 class LidarControllerLineModelRefine:public LidarController
 {
 public:
     LidarControllerLineModelRefine(LidarService* tService):LidarController(tService){}
 
-    /**
-     * @name: string jsonString:json string
-     * @msg: 
-     * @param {type} 
-     * @return: 
-     */
-    long LidarModelJsonExtract(string jsonString)
-    {
-
-        return 0;
-    }
 
     virtual void LidarController_Run()
     {
         service->Post(R"(/line_model_refine)",[](const Request& req, Response& res){
-            auto name = req.get_param_value("lines");
-            // json lines;
-            // lines=json::parse(((string)name).c_str());
-            // res.set_content(lines.dump(), "application/json");
+
+            string params = req.body.c_str();
+            json paramsJson;
+            paramsJson=json::parse(params);
+            json featureResult = LidarControllerLineModelRefineProc(paramsJson);
+            res.set_content(featureResult.dump(), "application/json");
             res.status=200;
         });      
     }  

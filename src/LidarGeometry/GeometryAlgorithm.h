@@ -84,6 +84,14 @@ namespace GeometryLas {
 		 * @return: 
 		 */
 		static void Normalize(const Point3D vec1,Point3D &vec2);
+
+		/**
+		 * @name: ProjectionPoint
+		 * @msg:  get the projection foot point from point to line
+		 * @param {*}
+		 * @return {*}
+		 */ 
+		static Point3D ProjectionPoint(const Point3D pnt1,Point3Ds line);
 	};
 
 	/*?????????*/
@@ -95,12 +103,12 @@ namespace GeometryLas {
 		*/
 		static double SquarePointToBeeline(double x, double y, double x0, double y0, double x1, double y1);
 		/*
-		* ??????????��????????????????
+		* compute distance form linked points
 		*/
 		static double Distance(Point2Ds& pts, bool isclosed);
 
 		/*
-		* ?????????????
+		* compute distance from point to point
 		*/
 		static double Distance(Point3D pt1, Point3D pt2);
 
@@ -110,7 +118,7 @@ namespace GeometryLas {
 		static double Distance(Point3D pt, Point3D pl1, Point3D pl2,bool segment=true);
 
 		/*
-		* ??????????????
+		* compute distance from point to polygon
 		*/
 		static double Distance(Point3D pt1, Point3D pl1, Point3D pl2, Point3D pl3);
 

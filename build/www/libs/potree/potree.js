@@ -5083,7 +5083,6 @@ Potree.LasLazBatcher = class LasLazBatcher {
 			Potree.numNodesLoading--;
 			this.node.mean = new THREE.Vector3(...e.data.mean);
 
-			//debugger;
 
 			Potree.workerPool.returnWorker(workerPath, worker);
 		};
@@ -12317,7 +12316,7 @@ Potree.Measure = class Measure extends THREE.Object3D {
 			point = {position: new THREE.Vector3(...point)};
 		}
 		this.points.push(point);
-
+		debugger
 		// sphere
 		let sphere = new THREE.Mesh(this.sphereGeometry, this.createSphereMaterial());
 
@@ -12531,6 +12530,7 @@ Potree.Measure = class Measure extends THREE.Object3D {
 	};
 
 	update () {
+		debugger
 		if (this.points.length === 0) {
 			return;
 		} else if (this.points.length === 1) {
@@ -12764,10 +12764,16 @@ Potree.MeasuringTool = class MeasuringTool extends THREE.EventDispatcher {
 
 		this.viewer.inputHandler.registerInteractiveScene(this.scene);
 
-		this.onRemove = (e) => { this.scene.remove(e.measurement);};
-		this.onAdd = e => {this.scene.add(e.measurement);};
+		this.onRemove = (e) => { 
+			debugger;
+			this.scene.remove(e.measurement);
+		};
+		this.onAdd = e => {
+			this.scene.add(e.measurement);
+		};
 
 		for(let measurement of viewer.scene.measurements){
+			debugger
 			this.onAdd({measurement: measurement});
 		}
 
@@ -12842,10 +12848,10 @@ Potree.MeasuringTool = class MeasuringTool extends THREE.EventDispatcher {
 			this.viewer.addEventListener('cancel_insertions', cancel.callback);
 			domElement.addEventListener('mouseup', insertionCallback, true);
 		}
-
+		debugger
 		measure.addMarker(new THREE.Vector3(0, 0, 0));
-		this.viewer.inputHandler.startDragging(
-			measure.spheres[measure.spheres.length - 1]);
+		
+		this.viewer.inputHandler.startDragging(measure.spheres[measure.spheres.length - 1]);
 
 		this.viewer.scene.addMeasurement(measure);
 
@@ -12853,6 +12859,7 @@ Potree.MeasuringTool = class MeasuringTool extends THREE.EventDispatcher {
 	}
 	
 	update(){
+		debugger
 		let camera = this.viewer.scene.getActiveCamera();
 		let domElement = this.renderer.domElement;
 		let measurements = this.viewer.scene.measurements;
@@ -13420,7 +13427,6 @@ Potree.ProfileTool = class ProfileTool extends THREE.EventDispatcher {
 		this.viewer.renderer.render(this.scene, this.viewer.scene.getActiveCamera());
 	}
 };
-
 
 
 Potree.TransformationTool = class TransformationTool {
@@ -18420,14 +18426,40 @@ Potree.Scene = class extends THREE.EventDispatcher{
 		}
 
 		var lines=Potree.GeoJSONExporter.toString(itemList);
+		var jsonlines=JSON.parse(lines);
+		var _this = this;
 		$.ajax({
 			type: "POST",
-			url: ip+"/line_model_refine",
+			url: "/line_model_refine",
 			dataType: "json",
-			data:{"lines":lines},
+			data:JSON.stringify(jsonlines),
 			async:true,
 			success: function(data){
+				//获取json 更新measurement
 
+				var itemList = [];
+				for(var idx=0;idx<_this.measurements.length;++idx){
+					if(_this.measurements[idx].name.indexOf('LineModel')>-1){
+						itemList.push(_this.measurements[idx]);
+					}
+				}
+				for(var idx =0;idx<itemList.length;++idx){
+					_this.removeMeasurement(itemList[idx]);
+				}
+
+				//定义Measurement 并添加展示
+				for(var i=0;i<data["featurelines"].length;++i){
+					let measure = new Potree.Measure();
+					measure.showDistances=false;
+					measure.name="LineModel";
+					for(var j=0;j<data["featurelines"][i]["line"].length;++j){
+						measure.addMarker(new THREE.Vector3(
+							data["featurelines"][i]["line"][j]["point"]["x"], 
+							data["featurelines"][i]["line"][j]["point"]["y"], 
+							data["featurelines"][i]["line"][j]["point"]["z"]));
+					}
+					_this.addMeasurement(measure);
+				}
 			},     
 			error:function(data){
 				console.log(data)
@@ -18597,6 +18629,8 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		this.edlStrength = 1.0;
 		this.edlRadius = 1.4;
 		this.useEDL = false;
+
+		//这里是默认的分类情况
 		this.classifications = {
 			0: { visible: true, name: 'never classified' },
 			1: { visible: true, name: 'unclassified' },
@@ -19447,6 +19481,8 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			});
 
 			$(() => {
+				debugger;
+				//加载sidebar
 				initSidebar(this);
 
 				//if (callback) {
@@ -22067,7 +22103,6 @@ initSidebar = (viewer) => {
 		tree.jstree("check_node", annotationsID);
 		tree.jstree("check_node", otherID);
 
-
 		tree.on('create_node.jstree', function(e, data){
 			tree.jstree("open_all");
 		});
@@ -22456,8 +22491,6 @@ initSidebar = (viewer) => {
 				$.jstree.reference(jsonNode.id).select_node(jsonNode.id);
 			}
 		));
-
-
 
 		//REMOVE ALL
 		elModelTool.append(createToolIcon(
@@ -22997,6 +23030,7 @@ class DistancePanel extends MeasurePanel{
 	}
 
 	update(){
+		debugger
 		let elCoordiantesContainer = this.elContent.find('.coordinates_table_container');
 		elCoordiantesContainer.empty();
 		elCoordiantesContainer.append(this.createCoordinatesTable(this.measurement.points.map(p => p.position)));
