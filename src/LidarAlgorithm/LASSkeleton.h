@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-11-12 21:50:47
+ * @LastEditTime: 2020-11-25 10:55:43
  */
 #pragma once
 
@@ -168,13 +168,14 @@ namespace LasAlgorithm
     /**
     * @brief  extract line refine interactive
     * 从点集中提取出具有线性特征的点集
-    * @note   
+    * @note   此方式为实验性方法，主要目的为专利与论文，主要参考文献为：
+    * 参考文献：薛丽红. 三维空间点中基于最小二乘法的分段直线拟合方法[J]. 齐齐哈尔大学学报(自然科学版), 2015(04):87-88+92.
     * @retval None
     */
     class PointCloudLineInteractive
     {
     public:
-        long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines);
+        virtual long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines)=0;
     
         /**
          * @name: PointCloudLineInteractive_GetPointsRange
@@ -194,6 +195,38 @@ namespace LasAlgorithm
          * @return {*}
          */                
         long PointCloudLineInteractive_FindNearestLinePoitns(Point3Ds innerPoints,Point3Ds &nearestPoints,Point3Ds mutiLines,int idx);
+    };
+
+    /**
+     * @name: PointCloudLineInteractiveSimple
+     * @msg: 在实际处理过程中对空间多段线的全局最优的约束求解实际上存在较大困难；
+     *       如果在无法证明是全局最优选点的情况下难以进行很好的直线拟合算法因此
+     *       对整体算法进行了简化，简化的主要过程为将多段线转换为简单直线进行拟合
+     *       然后对简单直线进行合并
+     * @param {*}
+     * @return {*}
+     */
+    class PointCloudLineInteractiveSimple:public PointCloudLineInteractive
+    {
+    public:
+        virtual long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines);
+
+        /**
+         * @name: PointCloudLineInteractive_LineCheck
+         * @msg:  判断两个点是否包含直线
+         * @param {type} 
+         * @return: true means maybe contain line else means don't contain
+         */        
+        bool PointCloudLineInteractive_LineCheck(ILASDataset *dataset,double range,double density, Point3Ds points);
+
+        
+        /**
+         * @name: PointCloudLineInteractive_LineGet
+         * @msg: 获取直线
+         * @param {*}
+         * @return {*}
+         */
+        long PointCloudLineInteractive_LineGet(ILASDataset *dataset,double range,double density, Point3Ds points,vector<Point3Ds> &lines);
 
 
         /**
@@ -221,6 +254,8 @@ namespace LasAlgorithm
          * @return {*}
          */
         long PointCloudLineInteractive_Trans2Simple(vector<Point3Ds> mutiComplexLines,vector<Point3Ds> &mutiSimpleLines);
+ 
+        long PointCloudLineInteractive_Trans2Point(vector<Point3Ds> mutiComplexLines,Point3Ds &points);
     };
 }
 

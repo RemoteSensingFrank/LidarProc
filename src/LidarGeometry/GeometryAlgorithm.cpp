@@ -447,13 +447,13 @@ namespace GeometryLas {
 	Point3D GeometryRelation::ProjectionPoint(const Point3D pnt1,Point3Ds line)
 	{
 		Point3D ac,ab;
-		ac.x=pnt1.x-line[0].x; ac.y=pnt1.y-line[0].y; ac.z=pnt1.z-line[0].z;
+		ac.x=pnt1.x-line[0].x;   ac.y=pnt1.y-line[0].y;   ac.z=pnt1.z-line[0].z;
 		ab.x=line[1].x-line[0].x;ab.y=line[1].y-line[0].y;ab.z=line[1].z-line[0].z;
+
 		double acDotab = ac.x*ab.x+ac.y*ab.y+ac.z*ab.z;
 		double dis2_ab = ab.x*ab.x+ab.y*ab.y+ab.z*ab.z;
 		double d22 = acDotab*acDotab/dis2_ab;
-		double ratio = d22/dis2_ab;
-
+		double ratio = sqrt(d22)/sqrt(dis2_ab);
 
 		if(acDotab>0)
 		{

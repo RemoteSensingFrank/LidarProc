@@ -558,7 +558,7 @@ static json LidarControllerLineModelRefineProc(json featureJson)
     LASReader *reader4 = new LidarMemReader();
     reader4->LidarReader_Open("../data/default/more.las",lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
-    LasAlgorithm::PointCloudLineInteractive lineInteractive;
+    LasAlgorithm::PointCloudLineInteractiveSimple lineInteractive;
 
     lineInteractive.PointCloudLineInteractive_ModelRefine(lasdst1,line3ds);
 

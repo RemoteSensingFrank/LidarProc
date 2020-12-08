@@ -464,19 +464,91 @@ namespace LasAlgorithm
                 nearestPoints.push_back(innerPoints[i]);
             }
         }
+
+        /**
+         * export nearest point
+         **/ 
+        FILE* fs = fopen("../data/test/innerline.txt","w+");
+        for(int i=0;i<innerPoints.size();++i)
+        {
+            fprintf(fs,"%lf,%lf,%lf\n",innerPoints[i].x,innerPoints[i].y,innerPoints[i].z);
+        }
+        fclose(fs);
+
         return 0;
     }
 
-    long PointCloudLineInteractive::PointCloudLineInteractive_LineFitOnce(Point3Ds nearestPoints,Point3Ds &mutiLines,int idx)
+
+   
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    bool PointCloudLineInteractiveSimple::PointCloudLineInteractive_LineCheck(ILASDataset *dataset,double range,double density, Point3Ds points)
+    {
+        assert(points.size()>=2);
+        int totalContainPoint=0;
+        double dis = DistanceComputation::Distance(points[0],points[1]);
+        if(dis<2.0)
+        {
+            return false;
+        }
+		for (int i = 0; i < dataset->m_totalReadLasNumber; ++i)
+		{
+			const LASIndex &idx = dataset->m_LASPointID[i];
+            const LASPoint &lasPt = dataset->m_lasRectangles[idx.rectangle_idx].m_lasPoints[idx.point_idx_inRect];
+
+            //点到线的距离
+            bool inner=false;
+            for(int j=1;j<points.size();++j)
+            {   
+                inner = DistanceComputation::Distance(lasPt.m_vec3d,points[j-1],points[j])<range?true:false;
+                
+                if(inner)
+                {
+                    totalContainPoint++;
+                    break;  //避免重复添加
+                }
+            }
+		}
+
+        
+        return totalContainPoint/dis>density;
+    }
+
+    long PointCloudLineInteractiveSimple::PointCloudLineInteractive_LineGet(ILASDataset *dataset,double range,double density, Point3Ds points,vector<Point3Ds> &lines)
+    {
+        //针对任意两点判断是为直线，如果为直线则获取直线
+        for(int i=0;i<points.size();++i)
+        {
+            for(int j=i+1;j<points.size();++j)
+            {
+                Point3Ds pnts;
+                pnts.push_back(points[i]);
+                pnts.push_back(points[j]);
+
+                if(PointCloudLineInteractive_LineCheck(dataset,range,density,points))
+                {
+                    lines.push_back(pnts);
+                }
+                
+            }
+        }
+        return 0;
+    }
+
+    long PointCloudLineInteractiveSimple::PointCloudLineInteractive_LineFitOnce(Point3Ds nearestPoints,Point3Ds &mutiLines,int idx)
     {
         // reference: 薛丽红. 三维空间点中基于最小二乘法的分段直线拟合方法[J]. 齐齐哈尔大学学报(自然科学版), 2015(04):87-88+92.
-        // x=k1*z+b1
-        // y=k2*z+b2
-        double sigmaXi=0,sigmaYi=0,sigmaZi=0,
-               sigmaXiZi=0,sigmaYiZi=0,sigmaZiZi=0,
+        // 不能简单的对公式进行套用，需要分不同情况进行讨论
+        
+        double maxz=_MIN_LIMIT_,minz=_MAX_LIMIT_,
+               maxx=_MIN_LIMIT_,minx=_MAX_LIMIT_,
+               maxy=_MIN_LIMIT_,miny=_MAX_LIMIT_,
                cx=0,cy=0,cz=0;
 
-        //必须要去中心化避免出现计算越界的情况
+        int idmaxz=0,idminz=0,
+            idmaxx=0,idminx=0,
+            idminy=0,idmaxy=0;
+
+          //必须要去中心化避免出现计算越界的情况
         for (size_t i = 0; i < nearestPoints.size(); i++)
         {
             cx+=nearestPoints[i].x/nearestPoints.size();
@@ -490,34 +562,6 @@ namespace LasAlgorithm
             nearestPoints[i].z-=cz;
         }
 
-        for (size_t i = 0; i < nearestPoints.size(); i++)
-        {
-            /* code */
-            sigmaXiZi+=nearestPoints[i].x*nearestPoints[i].z;
-            sigmaYiZi+=nearestPoints[i].y*nearestPoints[i].z;
-            sigmaZiZi+=nearestPoints[i].z*nearestPoints[i].z;
-
-            sigmaXi+=nearestPoints[i].x;
-            sigmaYi+=nearestPoints[i].y;
-            sigmaZi+=nearestPoints[i].z;
-        }
-        double k1 = (2*sigmaXiZi-sigmaXi*sigmaZi)/(2*sigmaZiZi-sigmaZi*sigmaZi);
-        double b1 = (sigmaXi-k1*sigmaZi)/2;
-        double k2 = (2*sigmaYiZi-sigmaYi*sigmaZi)/(2*sigmaZiZi-sigmaZi*sigmaZi);
-        double b2 = (sigmaYi-k2*sigmaZi)/2;
-
-        // for (size_t i = 0; i < nearestPoints.size(); i++)
-        // {
-        //     printf("RMS:%lf,%lf\n",fabs(nearestPoints[i].x-k1*nearestPoints[i].z-b1),fabs(nearestPoints[i].x-k2*nearestPoints[i].z-b2));
-        // }
-        //printf("k1: %lf,b1：%lf,k2：%lf,b2：%lf\n",k1,b1,k2,b2);
-
-        //求解在这个直线上的极值点
-        double maxz=_MIN_LIMIT_,minz=_MAX_LIMIT_,
-               maxx=_MIN_LIMIT_,minx=_MAX_LIMIT_,
-               maxy=_MIN_LIMIT_,miny=_MAX_LIMIT_;
-        int idmaxz=0,idminz=0,idmaxx=0,idminx=0,idminy=0,idmaxy=0;
-               
         for (size_t i = 0; i < nearestPoints.size(); i++)
         {
             /* code */
@@ -554,44 +598,230 @@ namespace LasAlgorithm
                 idminy = i;
             }
         }
+        
 
-        //TODO：这里需要取极值，但是极值有可能z都是一个固定值，这样就比较麻烦了
-        if(minz!=maxz){
+        int type=0;
+        double k1 =0 , b1 =0 ,k2 =0 ,b2 =0;
+        if(((maxz-minz)>=(maxx-minx))&&((maxz-minz)>=(maxy-miny)))
+        {
+            // x=k1*z+b1
+            // y=k2*z+b2
+            double sigmaXi=0,sigmaYi=0,sigmaZi=0,
+                   sigmaXiZi=0,sigmaYiZi=0,sigmaZiZi=0;
+
+            for (size_t i = 0; i < nearestPoints.size(); i++)
+            {
+                /* code */
+                sigmaXiZi+=nearestPoints[i].x*nearestPoints[i].z;
+                sigmaYiZi+=nearestPoints[i].y*nearestPoints[i].z;
+                sigmaZiZi+=nearestPoints[i].z*nearestPoints[i].z;
+
+                sigmaXi+=nearestPoints[i].x;
+                sigmaYi+=nearestPoints[i].y;
+                sigmaZi+=nearestPoints[i].z;
+            }
+            k1 = (2*sigmaXiZi-sigmaXi*sigmaZi)/(2*sigmaZiZi-sigmaZi*sigmaZi);
+            b1 = (sigmaXi-k1*sigmaZi)/2;
+            k2 = (2*sigmaYiZi-sigmaYi*sigmaZi)/(2*sigmaZiZi-sigmaZi*sigmaZi);
+            b2 = (sigmaYi-k2*sigmaZi)/2;
+            type=1;
+        }
+        else if(((maxx-minx)>=(maxz-minz))&&((maxx-minx)>=(maxy-miny)))
+        {
+            //z = k1*x+b1
+            //y = k2*x+b2
+            double sigmaZi=0,sigmaYi=0,sigmaXi=0,
+                   sigmaZiXi=0,sigmaYiXi=0,sigmaXiXi=0;
+            for (size_t i = 0; i < nearestPoints.size(); i++)
+            {
+                /* code */
+                sigmaZiXi+=nearestPoints[i].z*nearestPoints[i].x;
+                sigmaYiXi+=nearestPoints[i].y*nearestPoints[i].x;
+                sigmaXiXi+=nearestPoints[i].x*nearestPoints[i].x;
+
+                sigmaXi+=nearestPoints[i].x;
+                sigmaYi+=nearestPoints[i].y;
+                sigmaZi+=nearestPoints[i].z;
+            }                   
+            k1 = (2*sigmaZiXi-sigmaZi*sigmaXi)/(2*sigmaXiXi-sigmaXi*sigmaXi);
+            b1 = (sigmaZi-k1*sigmaXi)/2;
+            k2 = (2*sigmaYiXi-sigmaYi*sigmaXi)/(2*sigmaXiXi-sigmaXi*sigmaXi);
+            b2 = (sigmaYi-k2*sigmaXi)/2;
+
+            type=2;
+        }else if(((maxy-miny)>(maxz-minz))&&((maxy-miny)>(maxx-minx)))
+        {
+            // x=k1*y+b1
+            // z=k2*y+b2
+            double sigmaXi=0,sigmaZi=0,sigmaYi=0,
+                   sigmaXiYi=0,sigmaZiYi=0,sigmaYiYi=0;
+
+            for (size_t i = 0; i < nearestPoints.size(); i++)
+            {
+                /* code */
+                sigmaXiYi+=nearestPoints[i].x*nearestPoints[i].y;
+                sigmaZiYi+=nearestPoints[i].z*nearestPoints[i].y;
+                sigmaYiYi+=nearestPoints[i].y*nearestPoints[i].y;
+
+                sigmaXi+=nearestPoints[i].x;
+                sigmaYi+=nearestPoints[i].y;
+                sigmaZi+=nearestPoints[i].z;
+            }
+            k1 = (2*sigmaXiYi-sigmaXi*sigmaYi)/(2*sigmaYiYi-sigmaYi*sigmaYi);
+            b1 = (sigmaXi-k1*sigmaYi)/2;
+            k2 = (2*sigmaZiYi-sigmaZi*sigmaYi)/(2*sigmaYiYi-sigmaYi*sigmaYi);
+            b2 = (sigmaZi-k2*sigmaYi)/2;
+            type=3;
+        }
+        
+        // for (size_t i = 0; i < nearestPoints.size(); i++)
+        // {
+        //     printf("RMS:%lf,%lf\n",fabs(nearestPoints[i].x-k1*nearestPoints[i].z-b1),fabs(nearestPoints[i].x-k2*nearestPoints[i].z-b2));
+        // }
+        //printf("k1: %lf,b1：%lf,k2：%lf,b2：%lf\n",k1,b1,k2,b2);
+
+        //求解在这个直线上的极值点
+        if(type==1){
+            // x=k1*z+b1
+            // y=k2*z+b2
             double x1 = k1*nearestPoints[idminz].z+b1;
             double y1 = k2*nearestPoints[idminz].z+b2;
 
             double x2 = k1*nearestPoints[idmaxz].z+b1;
             double y2 = k2*nearestPoints[idmaxz].z+b2;
             
+            Point3D pt1,pt2;
+
             if(mutiLines[idx-1].z<mutiLines[idx].x)
             {
-                mutiLines[idx-1].x = x1+cx;
-                mutiLines[idx-1].y = y1+cy;
-                mutiLines[idx-1].z = minz+cz;
+                pt1.x = x1+cx;
+                pt1.y = y1+cy;
+                pt1.z = minz+cz;
 
-                mutiLines[idx].x = x2+cx;
-                mutiLines[idx].y = y2+cy;
-                mutiLines[idx].z = maxz+cz;
-            }else{
-                mutiLines[idx].x = x1+cx;
-                mutiLines[idx].y = y1+cy;
-                mutiLines[idx].z = minz+cz;
+                pt2.x = x2+cx;
+                pt2.y = y2+cy;
+                pt2.z = maxz+cz;
+                Point3Ds line;
+                line.push_back(pt1);
+                line.push_back(pt2);
+                
+                // mutiLines[idx]    = pt1;
+                // mutiLines[idx-1]  = pt2;
+                mutiLines[idx-1]=GeometryRelation::ProjectionPoint(mutiLines[idx-1],line);
+                mutiLines[idx]=GeometryRelation::ProjectionPoint(mutiLines[idx],line);
+            }
+            else{
+                pt2.x = x1+cx;
+                pt2.y = y1+cy;
+                pt2.z = minz+cz;
 
-                mutiLines[idx-1].x = x2+cx;
-                mutiLines[idx-1].y = y2+cy;
-                mutiLines[idx-1].z = maxz+cz;
+                pt1.x = x2+cx;
+                pt1.y = y2+cy;
+                pt1.z = maxz+cz;
+                Point3Ds line;
+                line.push_back(pt1);
+                line.push_back(pt2);
+                // mutiLines[idx-1]    =pt1;
+                // mutiLines[idx]  =pt2;
+                mutiLines[idx-1]=GeometryRelation::ProjectionPoint(mutiLines[idx-1],line);
+                mutiLines[idx]=GeometryRelation::ProjectionPoint(mutiLines[idx],line);
             }
         }
-        else if(minx!=maxx){
-            
-        }
-        else if(miny!=maxy){
+        else if(type==2){
+            //z = k1*x+b1
+            //y = k2*x+b2
+            double z1 = k1*nearestPoints[idminx].x+b1;
+            double y1 = k2*nearestPoints[idminx].x+b2;
 
+            double z2 = k1*nearestPoints[idmaxx].x+b1;
+            double y2 = k2*nearestPoints[idmaxx].x+b2;
+            
+            Point3D pt1,pt2;
+            if(mutiLines[idx-1].x<mutiLines[idx].x)
+            {
+                pt1.x = minx+cx;
+                pt1.y = y1+cy;
+                pt1.z = z1+cz;
+
+                pt2.x = maxx+cx;
+                pt2.y = y2+cy;
+                pt2.z = z2+cz;
+                Point3Ds line;
+                line.push_back(pt1);
+                line.push_back(pt2);
+                
+                // mutiLines[idx]    = pt1;
+                // mutiLines[idx-1]  = pt2;
+                mutiLines[idx-1]=GeometryRelation::ProjectionPoint(mutiLines[idx-1],line);
+                mutiLines[idx]=GeometryRelation::ProjectionPoint(mutiLines[idx],line);
+            }
+            else{
+                pt2.x = minx+cx;
+                pt2.y = y1+cy;
+                pt2.z = z1+cz;
+
+                pt1.x = maxx+cx;
+                pt1.y = y2+cy;
+                pt1.z = z2+cz;
+                Point3Ds line;
+                line.push_back(pt1);
+                line.push_back(pt2);
+                // mutiLines[idx-1]    =pt1;
+                // mutiLines[idx]  =pt2;
+                mutiLines[idx-1]=GeometryRelation::ProjectionPoint(mutiLines[idx-1],line);
+                mutiLines[idx]=GeometryRelation::ProjectionPoint(mutiLines[idx],line);
+            }
+ 
+        }
+        else if(type==3){
+            // x=k1*y+b1
+            // z=k2*y+b2
+            double x1 = k1*nearestPoints[idminy].x+b1;
+            double z1 = k2*nearestPoints[idminy].x+b2;
+
+            double x2 = k1*nearestPoints[idmaxy].x+b1;
+            double z2 = k2*nearestPoints[idmaxy].x+b2;
+
+            Point3D pt1,pt2;
+            if(mutiLines[idx-1].y<mutiLines[idx].y)
+            {
+                pt1.x = x1+cx;
+                pt1.y = miny+cy;
+                pt1.z = z1+cz;
+
+                pt2.x = x2+cx;
+                pt2.y = maxy+cy;
+                pt2.z = z2+cz;
+                Point3Ds line;
+                line.push_back(pt1);
+                line.push_back(pt2);
+                
+                // mutiLines[idx]    = pt1;
+                // mutiLines[idx-1]  = pt2;
+                mutiLines[idx-1]=GeometryRelation::ProjectionPoint(mutiLines[idx-1],line);
+                mutiLines[idx]=GeometryRelation::ProjectionPoint(mutiLines[idx],line);
+            }
+            else{
+                pt2.x = x1+cx;
+                pt2.y = miny+cy;
+                pt2.z = z1+cz;
+
+                pt1.x = x2+cx;
+                pt1.y = maxy+cy;
+                pt1.z = z2+cz;
+                Point3Ds line;
+                line.push_back(pt1);
+                line.push_back(pt2);
+                // mutiLines[idx-1]    =pt1;
+                // mutiLines[idx]  =pt2;
+                mutiLines[idx-1]=GeometryRelation::ProjectionPoint(mutiLines[idx-1],line);
+                mutiLines[idx]=GeometryRelation::ProjectionPoint(mutiLines[idx],line);
+            }
         }
         return 0;
     }
 
-    long PointCloudLineInteractive::PointCloudLineInteractive_LineMerge(vector<Point3Ds> &mutiSimpleLines,double disThreshold/*=0.3*/)
+    long PointCloudLineInteractiveSimple::PointCloudLineInteractive_LineMerge(vector<Point3Ds> &mutiSimpleLines,double disThreshold/*=0.3*/)
     {
         //二维点变成一维点
         Point3Ds pointlink;
@@ -662,7 +892,7 @@ namespace LasAlgorithm
         
     }
 
-    long PointCloudLineInteractive::PointCloudLineInteractive_Trans2Simple(vector<Point3Ds> mutiComplexLines,vector<Point3Ds> &mutiSimpleLines)
+    long PointCloudLineInteractiveSimple::PointCloudLineInteractive_Trans2Simple(vector<Point3Ds> mutiComplexLines,vector<Point3Ds> &mutiSimpleLines)
     {
         mutiSimpleLines.clear();
         for (size_t i = 0; i < mutiComplexLines.size(); i++)
@@ -678,7 +908,20 @@ namespace LasAlgorithm
         return 0;
     }
 
-    long PointCloudLineInteractive::PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines)
+    long PointCloudLineInteractiveSimple::PointCloudLineInteractive_Trans2Point(vector<Point3Ds> mutiComplexLines,Point3Ds &points)
+    {
+        points.clear();
+        for (size_t i = 0; i < mutiComplexLines.size(); i++)
+        {
+            for(size_t j=0; j<mutiComplexLines[i].size();++j)
+            {
+                points.push_back(mutiComplexLines[i][j]);
+            }
+        }
+        return 0;
+    }
+
+    long PointCloudLineInteractiveSimple::PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines)
     {
         vector<Point3Ds> simpleLine;
         PointCloudLineInteractive_Trans2Simple(featureLines,simpleLine);
@@ -689,7 +932,7 @@ namespace LasAlgorithm
             PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,simpleLine[i],1);
             PointCloudLineInteractive_LineFitOnce(nearestPoints,simpleLine[i],1);
         }
-        PointCloudLineInteractive_LineMerge(simpleLine,2);
+        //PointCloudLineInteractive_LineMerge(simpleLine,2);
         featureLines.swap(simpleLine);
         return 0;
     }
