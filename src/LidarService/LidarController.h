@@ -499,8 +499,11 @@ public:
  */
 static json LidarControllerLineModelRefineProc(json featureJson)
 {
-    std::vector<json> features=featureJson["features"];
+    std::vector<json> features=featureJson["lines"]["features"];
 
+    string filename = featureJson["filename"];
+    filename = "../data/"+filename;
+    
     vector<Point3Ds> line3ds;
     for(int i=0;i<features.size();++i)
     {
@@ -554,13 +557,17 @@ static json LidarControllerLineModelRefineProc(json featureJson)
         line3ds.push_back(line);
     }
     //for test
+
     ILASDataset *lasdst1 = new ILASDataset();
     LASReader *reader4 = new LidarMemReader();
-    reader4->LidarReader_Open("../data/default/more.las",lasdst1);
+    reader4->LidarReader_Open(filename.c_str(),lasdst1);
     reader4->LidarReader_Read(true,1,lasdst1);
     LasAlgorithm::PointCloudLineInteractiveSimple lineInteractive;
 
     lineInteractive.PointCloudLineInteractive_ModelRefine(lasdst1,line3ds);
+
+    delete lasdst1;
+    delete reader4;
 
     json featureLines;
     featureLines["featurelines"]=json::array({});

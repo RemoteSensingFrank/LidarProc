@@ -499,8 +499,8 @@ namespace LasAlgorithm
             bool inner=false;
             for(int j=1;j<points.size();++j)
             {   
-                inner = DistanceComputation::Distance(lasPt.m_vec3d,points[j-1],points[j])<range?true:false;
-                
+                double tmpdis2line=DistanceComputation::Distance(lasPt.m_vec3d,points[j-1],points[j]);
+                inner = tmpdis2line<range?true:false;
                 if(inner)
                 {
                     totalContainPoint++;
@@ -509,7 +509,7 @@ namespace LasAlgorithm
             }
 		}
 
-        
+        printf("%d\n",totalContainPoint);
         return totalContainPoint/dis>density;
     }
 
@@ -524,7 +524,7 @@ namespace LasAlgorithm
                 pnts.push_back(points[i]);
                 pnts.push_back(points[j]);
 
-                if(PointCloudLineInteractive_LineCheck(dataset,range,density,points))
+                if(PointCloudLineInteractive_LineCheck(dataset,range,density,pnts))
                 {
                     lines.push_back(pnts);
                 }
@@ -923,8 +923,18 @@ namespace LasAlgorithm
 
     long PointCloudLineInteractiveSimple::PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines)
     {
+
         vector<Point3Ds> simpleLine;
-        PointCloudLineInteractive_Trans2Simple(featureLines,simpleLine);
+        Point3Ds points;
+
+        //// 根据绘制得线进行拟合
+        // PointCloudLineInteractive_Trans2Simple(featureLines,simpleLine);
+
+        //根据点先check线，然后进行拟合
+        PointCloudLineInteractive_Trans2Point(featureLines,points);
+        PointCloudLineInteractive_LineGet(dataset,0.5,50,points,simpleLine);
+
+
         for(int i=0;i<simpleLine.size();++i)
         {
             Point3Ds innerPoints,nearestPoints;
@@ -932,7 +942,9 @@ namespace LasAlgorithm
             PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,simpleLine[i],1);
             PointCloudLineInteractive_LineFitOnce(nearestPoints,simpleLine[i],1);
         }
-        //PointCloudLineInteractive_LineMerge(simpleLine,2);
+        PointCloudLineInteractive_LineMerge(simpleLine,2);
+
+
         featureLines.swap(simpleLine);
         return 0;
     }

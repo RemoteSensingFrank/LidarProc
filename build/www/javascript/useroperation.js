@@ -112,6 +112,17 @@ function transData(){
 }
 
 /**
+ * 线拟合优化
+ */
+function lineRefine(){
+    var selectedNodes = $("#treeRefine").treeview("getSelected");
+    var parentNodes = $("#treeRefine").treeview('getParent', selectedNodes[0]);
+    var filename=parentNodes.text+"/"+selectedNodes[0].text;
+    viewer.scene.calculateFeature(filename);
+    $('#lineRefine').modal('hide');
+}
+
+/**
  * 删除选择文件
  */
 function deleteData(){

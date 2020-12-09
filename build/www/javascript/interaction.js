@@ -119,6 +119,64 @@ function getDataTransTree(callback){
 }
 
 /**
+ * 数据选择对话框打开之前调用初始化数据转换
+ * @param {*} callback 
+ */
+function getDataLineRefineTree(callback){
+    var treedata=[];
+    $.ajax({
+        type: "GET",
+        url: "/datalist",
+        dataType: "json",
+        async:true,
+        beforeSend:function(XMLHttpRequest){ 
+            $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+            $("#loading").show()
+        }, 
+
+        success: function(data){
+            $("#loading").empty(); //ajax返回成功，清除loading图标
+            $("#loading").hide();
+
+
+            var item={};
+            item["text"]="数据文件";
+            item["icon"]="glyphicon glyphicon-th-list",
+            item["nodes"]=[];
+
+            for(i=0;i<data["dirobjects"].length ;i++){
+                if(data["dirobjects"][i]["dir"]["dirname"]!=""){
+                    var sitem={};
+                    sitem["text"]=data["dirobjects"][i]["dir"]["dirname"];
+                    sitem["icon"]="glyphicon glyphicon-th-list";
+                    sitem["nodes"]=[];
+
+                    for(j=0;j<data["dirobjects"][i]["dir"]["fileobjects"].length; j++){
+                        if(data["dirobjects"][i]["dir"]["fileobjects"][j]["name"]!=""){
+                            var subitem={};
+                            subitem["text"]=data["dirobjects"][i]["dir"]["fileobjects"][j]["name"];
+                            subitem["selectedIcon"]="glyphicon glyphicon-ok";
+                            sitem["nodes"].push(subitem);
+                        }
+                    }
+                    item["nodes"].push(sitem);
+                }
+            }
+            treedata.push(item);
+            $('#treeRefine').treeview({
+                data: treedata,         // data is not optional
+                levels: 2,
+                backColor:'white'
+              });
+            callback();
+        },     
+        error:function(data){
+            console.log(data)
+        }
+    });    
+}
+
+/**
  * 数据选择对话框打开之前调用初始化数据删除
  * @param {*} callback 
  */

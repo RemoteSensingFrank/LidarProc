@@ -18417,7 +18417,7 @@ Potree.Scene = class extends THREE.EventDispatcher{
 	//calculate the best match of the line model
 	//Added：Frank.Wu
 	//2020-07-19	
-	calculateFeature(){
+	calculateFeature(filename){
 		var itemList = [];
 		for(var idx=0;idx<this.measurements.length;++idx){
 			if(this.measurements[idx].name.indexOf('LineModel')>-1){
@@ -18427,12 +18427,16 @@ Potree.Scene = class extends THREE.EventDispatcher{
 
 		var lines=Potree.GeoJSONExporter.toString(itemList);
 		var jsonlines=JSON.parse(lines);
+		var jsonInput={
+			"lines":jsonlines,
+			"filename":filename
+		};
 		var _this = this;
 		$.ajax({
 			type: "POST",
 			url: "/line_model_refine",
 			dataType: "json",
-			data:JSON.stringify(jsonlines),
+			data:JSON.stringify(jsonInput),
 			async:true,
 			success: function(data){
 				//获取json 更新measurement
@@ -22506,7 +22510,13 @@ initSidebar = (viewer) => {
 			Potree.resourcePath + '/icons/calculate.svg',
 			'[title]tt.calculate_model',
 			function () {
-				viewer.scene.calculateFeature();
+			    getDataLineRefineTree(function(){
+					$("#lineRefine").modal({
+						backdrop:"static", //点击背景不关闭
+						keyboard: false     //触发键盘esc事件时不关闭
+					});
+				});
+				//viewer.scene.calculateFeature();
 			}
 		));
 
