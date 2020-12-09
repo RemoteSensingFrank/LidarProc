@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-12-04 15:10:02
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-12-17 14:53:11
+ * @LastEditTime: 2020-07-19 11:58:26
  */
 // LidarProc.cpp: 定义控制台应用程序的入口点。
 //
@@ -70,6 +70,7 @@ int main(int argc, char **argv)
 	LidarControllerClassfication *lidarControllerClass = new LidarControllerClassfication(lidarService);
 	LidarControllerUpload *lidarControllerUploads=new LidarControllerUpload(lidarService);
 	LidarControllerUploadFinished *lidarControllerUploadFinish=new LidarControllerUploadFinished(lidarService);
+	LidarControllerLineModelRefine *lidarControllerModeRefine=new LidarControllerLineModelRefine(lidarService);
 
 	lidarService->LidarService_Register(lidarControllerInfo);
 	lidarService->LidarService_Register(lidarControllerExhibit);
@@ -81,7 +82,7 @@ int main(int argc, char **argv)
 	lidarService->LidarService_Register(lidarControllerDoc);
 	lidarService->LidarService_Register(lidarControllerUploads);
 	lidarService->LidarService_Register(lidarControllerUploadFinish);
+	lidarService->LidarService_Register(lidarControllerModeRefine);
 	lidarService->LidarService_Register(lidarControllerClass);
-	
 	lidarService->LidarService_Run();
 }

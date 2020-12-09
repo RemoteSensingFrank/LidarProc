@@ -22,6 +22,7 @@
 </head>
 
 <body>
+	<script src="//cdn.jsdelivr.net/npm/leancloud-storage@4.6.1/dist/av-min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
 	<script src="../libs/jquery/jquery-3.1.1.min.js"></script>
 	<script src="../libs/spectrum/spectrum.js"></script>
@@ -40,14 +41,13 @@
 	<script src="../libs/Cesium/Cesium.js"></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
-	<script src="javascript/camera.js"></script>
-	<script src="javascript/addCamera.js"></script>
-	<script src="javascript/index.js"></script>
-	<script src="javascript/useroperation.js"></script>
-	<script src="javascript/uilib/bootstrap-treeview.js"></script>
+	<!-- <script src="javascript/camera.js"></script>
+	<script src="javascript/addCamera.js"></script> -->
 	<script src="javascript/interaction.js"></script>
+	<script src="javascript/useroperation.js"></script>
+	<script src="javascript/index.js"></script>
+	<script src="javascript/uilib/bootstrap-treeview.js"></script>
 	
-
 	<!--待展示的文件选择模态对话框-->
 	<div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectModal">  
 		<div class="modal-dialog" role="document">  
@@ -89,6 +89,28 @@
 				<div class="modal-footer">  
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
 					<button type="button" class="btn btn-primary" onclick="transData();">转换</button>  
+				</div>  
+			</div>  
+		</div>  
+	</div> 
+
+	<div class="modal fade" id="lineRefine" tabindex="-1" role="dialog" aria-labelledby="transSelectModal">  
+		<div class="modal-dialog" role="document">  
+			<div class="modal-content">  
+				<div class="modal-header">  
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">  
+						<span aria-hidden="true">×</span>  
+					</button>  
+					<h4 class="modal-title" id="lineRefineTitle">选择数据</h4>  
+				</div>  
+				<div class="modal-body">  
+					<div style=" overflow:scroll;width:100%; height:200px;float:center">
+						<div id="treeRefine"></div>
+					</div>
+				</div>  
+				<div class="modal-footer">  
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>  
+					<button type="button" class="btn btn-primary" onclick="lineRefine();">拟合</button>  
 				</div>  
 			</div>  
 		</div>  
@@ -180,7 +202,7 @@
 		</div>
     </div>
 
-	
+	<!-- 杆塔快速分类参数 -->
     <div class="modal fade" id="paramModal" tabindex="-1" role="dialog" aria-labelledby="paramModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -204,7 +226,7 @@
 		</div>
     </div>
 
-
+	<!-- 加载SFM照片影像姿态数据 -->
 	<div class="modal fade" id="cameraModel" tabindex="-1" role="dialog" aria-labelledby="cameraModelLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -213,8 +235,8 @@
                     <h4 class="modal-title" id="deleteModalLabel">确认框</h4>
                 </div>
                 <div class="modal-body">
-					成图中心经度：<input type="text" class="form-control" id="centerCameraLng" />
-					成图中心纬度：<input type="text" class="form-control" id="centerCameraLat" />
+					成图中心经度：<input type="text" value="115.16577067" class="form-control" id="centerCameraLng" />
+					成图中心纬度：<input type="text" value="26.102325" class="form-control" id="centerCameraLat" />
 					<input id='loadCameraModel' type="file" value="open reconstruction" />
                 </div>
                 <div class="modal-footer">
@@ -265,7 +287,6 @@
 	</div>
 	<script>
 		Initial();
-		document.getElementById('loadCameraModel').addEventListener('change', onReconstructionFileSelected, false);
 	</script>
 
   </body>

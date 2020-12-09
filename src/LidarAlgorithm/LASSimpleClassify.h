@@ -43,7 +43,6 @@ public:
 	*/
 	long LASClassifyByElevation(ILASDataset* dataset, float elevation, bool direct, eLASClassification eclass);
 
-
 	/**
 	* classufy data by intensity
 	* @param dataset

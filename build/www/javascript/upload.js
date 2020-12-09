@@ -4,7 +4,7 @@
  * @Author: Frank.Wu
  * @Date: 2019-11-20 16:48:01
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2019-11-29 23:40:57
+ * @LastEditTime: 2020-11-05 15:35:07
  */
 $(document).ready(function() {
     var task_id = WebUploader.Base.guid(); // 产生文件唯一标识符task_id
@@ -40,7 +40,7 @@ $(document).ready(function() {
         var data = task_id+","+file.source['name'];
         $.ajax({
             type: "POST",
-            url: ip+"/upload-finish",
+            url: "/upload-finish",
             contentType: "text/plain",
             data:data
         });

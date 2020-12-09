@@ -49,19 +49,20 @@ protected:
 };
 
 
-TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
+TEST(LASSIMPLECLASSIFY,LASSIMPLECLASSIFYFastTestCase)
 {
     Point2Ds pntTower(2);
-    pntTower[0].x = 201136.7999877;
-    pntTower[0].y = 2488348.81000137;
+
+    pntTower[0].x = 182232.660003662109;
+    pntTower[0].y = 2481201.869995117188;
     
-    pntTower[1].x = 201485.930057;
-    pntTower[1].y = 2488217.08000183;
+    pntTower[1].x = 182707.520019531250;
+    pntTower[1].y = 2481000.750000000000;
     
     ILASDataset *dataset   = new ILASDataset();
     LidarMemReader *reader = new LidarMemReader();
 
-    reader->LidarReader_Open("../data/default/classify.las",dataset);
+    reader->LidarReader_Open("../data/default/segment2.las",dataset);
     reader->LidarReader_Read(true,1,dataset); 
     LASColorExt color;
     color.Red   = 255;
@@ -71,20 +72,25 @@ TEST(LASSIMPLECLASSIFY,ClassifyElectricPatrolFastTestCase)
     //EXPECT_EQ(-1,classifyFast.ElectricPatrolFast_Tower(nullptr,pntTower[0],13,color));
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Tower(dataset,pntTower[0],13,color));
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Tower(dataset,pntTower[1],13,color));
-    reader->LidarReader_Write("../data/default/Tower.las",dataset,elcTowerUp);
 
     color.Red   = 0;
     color.Green = 0;
     color.Blue  = 255;
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Lines(dataset,pntTower,13,5,color));
-    reader->LidarReader_Write("../data/default/Line.las",dataset,elcLine);
 
     color.Red   = 218;
     color.Green = 165;
     color.Blue  = 32;
     EXPECT_EQ(0,classifyFast.ElectricPatrolFast_Ground(dataset,5,0.5,10,color));
-    reader->LidarReader_Write("../data/default/Ground.las",dataset,elcGround);
-    reader->LidarReader_Write("../data/default/classify_tower_line.las",dataset);
+
+    LASColorExt vegetationTower;
+    vegetationTower.Red=vegetationTower.Blue=0;vegetationTower.Green=255;
+    EXPECT_EQ(0,classifyFast.ElectricPatrolFast_VegetationLast(dataset,vegetationTower));
+
+    reader->LidarReader_Write("../data/default/classifiedTest.las",dataset);
+
+    delete dataset;
+    delete reader;
 }
 
 
@@ -111,7 +117,7 @@ TEST(LASPROFILE,LASPROFILEProfileTestCase)
 }
 
 
-TEST(LASSKELETON,LASSKELETONTestCase)
+TEST(LASSKELETONShrink,LASSKELETONShrinkTestCase)
 {
     ILASDataset *dataset   = new ILASDataset();
     LidarMemReader *reader = new LidarMemReader();
@@ -177,4 +183,69 @@ TEST(LASKMEANS,LASKMEANSTestCase)
     // fs=nullptr;
     
     // EXPECT_GT(points.size(),0);
+}
+
+
+TEST(LASSKELETONLineInteractive,LASSKELETONLineInteractiveTestCase)
+{
+    long err=0;
+    ILASDataset *dataset   = new ILASDataset();
+    LidarMemReader *reader = new LidarMemReader();
+
+    reader->LidarReader_Open("../data/default/more.las",dataset);
+    reader->LidarReader_Read(true,1,dataset); 
+    Point3Ds mutiLines;
+    mutiLines.push_back(Point3D(529486.689014739939,2371539.049981002696,-16.912999782562));
+    mutiLines.push_back(Point3D(529487.870014495798,2371540.794981841929,-4.618999633789));
+    mutiLines.push_back(Point3D(529504.262012786814,2371543.854981307872,-4.507999572754));
+    mutiLines.push_back(Point3D(529506.700012512156,2371542.475981597789,-17.439999732971));
+    
+    PointCloudLineInteractiveSimple lineInteractive;
+    Point3Ds scatterPoints;
+    vector<Point3Ds> lines,simpleLines;
+    lines.push_back(mutiLines);
+    err=lineInteractive.PointCloudLineInteractive_Trans2Point(lines,scatterPoints);
+    EXPECT_EQ(err,0);
+    err=lineInteractive.PointCloudLineInteractive_LineGet(dataset,0.5,80,scatterPoints,simpleLines);
+    EXPECT_EQ(err,0);
+  
+    for(int i=0;i<simpleLines.size();++i)
+    {
+        Point3Ds innerPoints;
+        err=lineInteractive.PointCloudLineInteractive_GetPointsRange(dataset,0.5,simpleLines[i],innerPoints);
+        EXPECT_EQ(err,0);
+
+        Point3Ds nearestPoints;
+        int idx = 1;
+        err = lineInteractive.PointCloudLineInteractive_FindNearestLinePoitns(innerPoints,nearestPoints,simpleLines[i],idx);
+        EXPECT_EQ(err,0);
+
+        printf("pt1 before: %lf,%lf,%lf\n",simpleLines[i][idx-1].x,simpleLines[i][idx-1].y,simpleLines[i][idx-1].z);
+        printf("pt2 before: %lf,%lf,%lf\n",simpleLines[i][idx].x,simpleLines[i][idx].y,simpleLines[i][idx].z);
+        err = lineInteractive.PointCloudLineInteractive_LineFitOnce(nearestPoints,simpleLines[i],idx);
+        EXPECT_EQ(err,0);
+        printf("pt1 after: %lf,%lf,%lf\n",simpleLines[i][idx-1].x,simpleLines[i][idx-1].y,simpleLines[i][idx-1].z);
+        printf("pt2 after: %lf,%lf,%lf\n",simpleLines[i][idx].x,simpleLines[i][idx].y,simpleLines[i][idx].z);
+        printf("\n");
+    }
+    
+    // FILE *fs = fopen("../data/test/innerline.txt","w+");
+    // //遍历点云数据输出
+    // for(int i=0;i<innerPoints.size();++i)
+    // {
+    //     fprintf(fs,"%lf,%lf,%lf\n",innerPoints[i].x,innerPoints[i].y,innerPoints[i].z);
+    // }
+    // fclose(fs);
+
+    // FILE *fs2 = fopen("../data/test/nearestline.txt","w+");
+    // //遍历点云数据输出
+    // for(int i=0;i<nearestPoints.size();++i)
+    // {
+    //     fprintf(fs2,"%lf,%lf,%lf,%d,%d,%d\n",nearestPoints[i].x,nearestPoints[i].y,nearestPoints[i].z,255,255,0);
+    // }
+    // fclose(fs2);
+    
+    // fs =nullptr;
+    // fs2=nullptr;
+    
 }

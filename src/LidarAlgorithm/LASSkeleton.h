@@ -9,7 +9,7 @@
  * @Author: Frank.Wu
  * @Date: 19-10-17. 13:11:49
  * @LastEditors: Frank.Wu
- * @LastEditTime: 2020-05-22 16:43:56
+ * @LastEditTime: 2020-11-25 10:55:43
  */
 #pragma once
 
@@ -165,6 +165,98 @@ namespace LasAlgorithm
         virtual Point3Ds PointCloudLineSkeleton_Extract(ILASDataset* lasDataset,int nearPointNum,double lineResidual);
     };
     
+    /**
+    * @brief  extract line refine interactive
+    * 从点集中提取出具有线性特征的点集
+    * @note   此方式为实验性方法，主要目的为专利与论文，主要参考文献为：
+    * 参考文献：薛丽红. 三维空间点中基于最小二乘法的分段直线拟合方法[J]. 齐齐哈尔大学学报(自然科学版), 2015(04):87-88+92.
+    * @retval None
+    */
+    class PointCloudLineInteractive
+    {
+    public:
+        virtual long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines)=0;
+    
+        /**
+         * @name: PointCloudLineInteractive_GetPointsRange
+         * @msg:  以线建立缓冲区，查找在缓冲区内所有点云数据
+         * @param {type} 
+         * @return: 
+         */
+        long PointCloudLineInteractive_GetPointsRange(ILASDataset *dataset,double range,Point3Ds points,Point3Ds &innerPoints);
+
+        /**
+         * @name: PointCloudLineInteractive_FindNearestLinePoitns
+         * @msg: 在缓冲区点集中找到在距离所有直线中距离当前直线最近的点的点集
+         * @param Point3Ds innerPoints:所有近邻点
+         *                 Point3Ds &nearestPoints:距离给定线最近的点
+         *                 Point3Ds mutiLines:多段线
+         *                 int idx:给定直线从1开始，以idx-1以及idx两个点构成直线
+         * @return {*}
+         */                
+        long PointCloudLineInteractive_FindNearestLinePoitns(Point3Ds innerPoints,Point3Ds &nearestPoints,Point3Ds mutiLines,int idx);
+    };
+
+    /**
+     * @name: PointCloudLineInteractiveSimple
+     * @msg: 在实际处理过程中对空间多段线的全局最优的约束求解实际上存在较大困难；
+     *       如果在无法证明是全局最优选点的情况下难以进行很好的直线拟合算法因此
+     *       对整体算法进行了简化，简化的主要过程为将多段线转换为简单直线进行拟合
+     *       然后对简单直线进行合并
+     * @param {*}
+     * @return {*}
+     */
+    class PointCloudLineInteractiveSimple:public PointCloudLineInteractive
+    {
+    public:
+        virtual long PointCloudLineInteractive_ModelRefine(ILASDataset *dataset,vector<Point3Ds> &featureLines);
+
+        /**
+         * @name: PointCloudLineInteractive_LineCheck
+         * @msg:  判断两个点是否包含直线
+         * @param {type} 
+         * @return: true means maybe contain line else means don't contain
+         */        
+        bool PointCloudLineInteractive_LineCheck(ILASDataset *dataset,double range,double density, Point3Ds points);
+
+        
+        /**
+         * @name: PointCloudLineInteractive_LineGet
+         * @msg: 获取直线
+         * @param {*}
+         * @return {*}
+         */
+        long PointCloudLineInteractive_LineGet(ILASDataset *dataset,double range,double density, Point3Ds points,vector<Point3Ds> &lines);
+
+
+        /**
+         * @name: PointCloudLineInteractive_LineFitOnce
+         * @msg: 单条直线拟合，与PointCloudLineInteractive_FindNearestLinePoitns配合使用，idx输入保持一致
+         * @param {*}
+         * @return {*}
+         */
+        long PointCloudLineInteractive_LineFitOnce(Point3Ds nearestPoints,Point3Ds &mutiLines,int idx);
+
+
+        /**
+         * @name: PointCloudLineInteractive_LineMerge
+         * @msg: 对所有的点和线进行调整和合并，将两个近邻点合并为一个点，将点与线近邻的情况点连接到线上
+         * @param {*}
+         * @return {*}vector<
+         */
+        long PointCloudLineInteractive_LineMerge(vector<Point3Ds> &mutiSimpleLines,double disThreshold=0.3);
+
+
+        /**
+         * @name: PointCloudLineInteractive_Trans2Simple
+         * @msg: trans mutilines to simple lines
+         * @param {*}
+         * @return {*}
+         */
+        long PointCloudLineInteractive_Trans2Simple(vector<Point3Ds> mutiComplexLines,vector<Point3Ds> &mutiSimpleLines);
+ 
+        long PointCloudLineInteractive_Trans2Point(vector<Point3Ds> mutiComplexLines,Point3Ds &points);
+    };
 }
 
 #endif

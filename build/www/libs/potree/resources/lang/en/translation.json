@@ -13,6 +13,9 @@
 		"about_opt": "About"
 	},
 	"tt": {
+		"calculate_model":"calculate best matches",
+		"withdraw_model":"withdraw last feauture",
+		"line_model":"Line Model",
 		"angle_measurement": "Angle measurement",
 		"point_measurement": "Point measurement",
 		"distance_measurement": "Distance measurement",

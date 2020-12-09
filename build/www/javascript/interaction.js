@@ -6,6 +6,12 @@
  */
 
 ip = "http://localhost:1234";
+const { Query, User } = AV;
+AV.init({
+    appId: "uHNJtTxLkcGm3VRtuRGk53hb-gzGzoHsz",
+    appKey: "h8s1QFO2dLQ62H0axpKB6WnD",
+    serverURL: "https://uhnjttxl.lc-cn-n1-shared.com"
+  });
 
 /**
  * 文件选择对话框打开之前调用事件初始化文件树
@@ -15,8 +21,8 @@ function getFileTree(callback)
     var treedata=[];
     $.ajax({
         type: "GET",
-        url: ip+"/exhibitlist",
-        dataType: "text",
+        url: "/exhibitlist",
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -27,16 +33,15 @@ function getFileTree(callback)
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
 
-            var strs= new Array();
-            strs=data.split(";");
             var item={};
             item["text"]="数据文件";
             item["icon"]="glyphicon glyphicon-th-list",
             item["nodes"]=[];
-            for(i=0;i<strs.length ;i++){
-                if(strs[i]!=""){
+            
+            for(i=0;i<data["fileList"].length ;i++){
+                if(data["fileList"][i]["filename"]!=""){
                     var subitem={};
-                    subitem["text"]=strs[i];
+                    subitem["text"]=data["fileList"][i]["filename"];
                     subitem["selectedIcon"]="glyphicon glyphicon-ok",
                     item["nodes"].push(subitem);
                 }
@@ -63,8 +68,8 @@ function getDataTransTree(callback){
     var treedata=[];
     $.ajax({
         type: "GET",
-        url: ip+"/datalist",
-        dataType: "text",
+        url: "/datalist",
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -75,28 +80,23 @@ function getDataTransTree(callback){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
 
-            var strs= new Array();
-            strs=data.split(",");
 
             var item={};
             item["text"]="数据文件";
             item["icon"]="glyphicon glyphicon-th-list",
             item["nodes"]=[];
 
-            for(i=0;i<strs.length ;i++){
-                if(strs[i]!=""){
-                    var fstr= new Array();
-                    fstr=strs[i].split(";");
-
+            for(i=0;i<data["dirobjects"].length ;i++){
+                if(data["dirobjects"][i]["dir"]["dirname"]!=""){
                     var sitem={};
-                    sitem["text"]=fstr[0];
+                    sitem["text"]=data["dirobjects"][i]["dir"]["dirname"];
                     sitem["icon"]="glyphicon glyphicon-th-list";
                     sitem["nodes"]=[];
 
-                    for(j=1;j<fstr.length; j++){
-                        if(fstr[j]!=""){
+                    for(j=0;j<data["dirobjects"][i]["dir"]["fileobjects"].length; j++){
+                        if(data["dirobjects"][i]["dir"]["fileobjects"][j]["name"]!=""){
                             var subitem={};
-                            subitem["text"]=fstr[j];
+                            subitem["text"]=data["dirobjects"][i]["dir"]["fileobjects"][j]["name"];
                             subitem["selectedIcon"]="glyphicon glyphicon-ok";
                             sitem["nodes"].push(subitem);
                         }
@@ -119,16 +119,15 @@ function getDataTransTree(callback){
 }
 
 /**
- * 数据选择对话框打开之前调用初始化数据删除
+ * 数据选择对话框打开之前调用初始化数据转换
  * @param {*} callback 
  */
-function getDataDeleteTree(callback){
-    //数据文件删除文件列表
+function getDataLineRefineTree(callback){
     var treedata=[];
     $.ajax({
         type: "GET",
-        url: ip+"/datalist",
-        dataType: "text",
+        url: "/datalist",
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -139,28 +138,81 @@ function getDataDeleteTree(callback){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
 
-            var strs= new Array();
-            strs=data.split(",");
 
             var item={};
             item["text"]="数据文件";
             item["icon"]="glyphicon glyphicon-th-list",
             item["nodes"]=[];
 
-            for(i=0;i<strs.length ;i++){
-                if(strs[i]!=""){
-                    var fstr= new Array();
-                    fstr=strs[i].split(";");
-
+            for(i=0;i<data["dirobjects"].length ;i++){
+                if(data["dirobjects"][i]["dir"]["dirname"]!=""){
                     var sitem={};
-                    sitem["text"]=fstr[0];
+                    sitem["text"]=data["dirobjects"][i]["dir"]["dirname"];
                     sitem["icon"]="glyphicon glyphicon-th-list";
                     sitem["nodes"]=[];
 
-                    for(j=1;j<fstr.length; j++){
-                        if(fstr[j]!=""){
+                    for(j=0;j<data["dirobjects"][i]["dir"]["fileobjects"].length; j++){
+                        if(data["dirobjects"][i]["dir"]["fileobjects"][j]["name"]!=""){
                             var subitem={};
-                            subitem["text"]=fstr[j];
+                            subitem["text"]=data["dirobjects"][i]["dir"]["fileobjects"][j]["name"];
+                            subitem["selectedIcon"]="glyphicon glyphicon-ok";
+                            sitem["nodes"].push(subitem);
+                        }
+                    }
+                    item["nodes"].push(sitem);
+                }
+            }
+            treedata.push(item);
+            $('#treeRefine').treeview({
+                data: treedata,         // data is not optional
+                levels: 2,
+                backColor:'white'
+              });
+            callback();
+        },     
+        error:function(data){
+            console.log(data)
+        }
+    });    
+}
+
+/**
+ * 数据选择对话框打开之前调用初始化数据删除
+ * @param {*} callback 
+ */
+function getDataDeleteTree(callback){
+    //数据文件删除文件列表
+    var treedata=[];
+    $.ajax({
+        type: "GET",
+        url: "/datalist",
+        dataType: "json",
+        async:true,
+        beforeSend:function(XMLHttpRequest){ 
+            $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
+            $("#loading").show()
+        }, 
+
+        success: function(data){
+            $("#loading").empty(); //ajax返回成功，清除loading图标
+            $("#loading").hide();
+
+            var item={};
+            item["text"]="数据文件";
+            item["icon"]="glyphicon glyphicon-th-list",
+            item["nodes"]=[];
+
+            for(i=0;i<data["dirobjects"].length ;i++){
+                if(data["dirobjects"][i]["dir"]["dirname"]!=""){
+                    var sitem={};
+                    sitem["text"]=data["dirobjects"][i]["dir"]["dirname"];
+                    sitem["icon"]="glyphicon glyphicon-th-list";
+                    sitem["nodes"]=[];
+
+                    for(j=0;j<data["dirobjects"][i]["dir"]["fileobjects"].length; j++){
+                        if(data["dirobjects"][i]["dir"]["fileobjects"][j]["name"]!=""){
+                            var subitem={};
+                            subitem["text"]=data["dirobjects"][i]["dir"]["fileobjects"][j]["name"];
                             subitem["selectedIcon"]="glyphicon glyphicon-ok";
                             sitem["nodes"].push(subitem);
                         }
@@ -187,7 +239,7 @@ function getDataDeleteTree(callback){
     $.ajax({
         type: "GET",
         url: ip+"/exhibitlist",
-        dataType: "text",
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -198,16 +250,15 @@ function getDataDeleteTree(callback){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
 
-            var strs= new Array();
-            strs=data.split(";");
             var item={};
-            item["text"]="展示文件";
+            item["text"]="数据文件";
             item["icon"]="glyphicon glyphicon-th-list",
             item["nodes"]=[];
-            for(i=0;i<strs.length ;i++){
-                if(strs[i]!=""){
+            
+            for(i=0;i<data["fileList"].length ;i++){
+                if(data["fileList"][i]["filename"]!=""){
                     var subitem={};
-                    subitem["text"]=strs[i];
+                    subitem["text"]=data["fileList"][i]["filename"];
                     subitem["selectedIcon"]="glyphicon glyphicon-ok",
                     item["nodes"].push(subitem);
                 }
@@ -235,8 +286,8 @@ function getDataDeleteTree(callback){
 function deleteDataFile(filename){
     $.ajax({
         type: "GET",
-        url: ip+"/datadelete/"+filename,
-        dataType: "text",
+        url: "/datadelete/"+filename,
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -246,6 +297,11 @@ function deleteDataFile(filename){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
             getDataDeleteTree(null);
+            const query = new AV.Query('laslink');
+            query.contains('LASPATH', filename)
+            query.find().then((objects)=>{
+                AV.Object.destroyAll(objects);
+            });
         },     
         error:function(data){
             console.log(data)
@@ -260,8 +316,8 @@ function deleteDataFile(filename){
 function deleteExhibitDirectory(dir){
     $.ajax({
         type: "GET",
-        url: ip+"/exhibitdelete/"+dir,
-        dataType: "text",
+        url: "/exhibitdelete/"+dir,
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -271,6 +327,12 @@ function deleteExhibitDirectory(dir){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
             getDataDeleteTree(null);
+            const query = new AV.Query('laslink');
+            query.contains('POTREEPATH', dir)
+            query.find().then((objects)=>{
+                AV.Object.destroyAll(objects);
+            });
+            
         },     
         error:function(data){
             console.log(data)
@@ -283,10 +345,13 @@ function deleteExhibitDirectory(dir){
  * @param {文件名} filename 
  */
 function transDataFile(filename){
+    const LinkLAS = AV.Object.extend('laslink');
+    const lnk = new LinkLAS();
+    
     $.ajax({
         type: "GET",
-        url: ip+"/datatrans/"+filename,
-        dataType: "text",
+        url: "/datatrans/"+filename,
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $("#loading").html("<img src='../resources/loading.svg'/>"); //在后台返回success之前显示loading图标
@@ -295,9 +360,12 @@ function transDataFile(filename){
         success: function(data){
             $("#loading").empty(); //ajax返回成功，清除loading图标
             $("#loading").hide();
-        },     
+            lnk.set('LASPATH', filename);
+            lnk.set('POTREEPATH', data);
+            lnk.save();
+        },
         error:function(data){
-            console.log(data)
+            console.log(data);
         }
     });
 }
@@ -424,21 +492,15 @@ function loadCameraPositions(reconstructions){
                 imageobj[imagenum]=cameraLineGeo(reconstructions[reconstruction_id],shot_id);
                 imageobj[imagenum].myimagenum = imagenum;
                 imageobj[imagenum].isFiltered = false;
-                group.add(imageobj[imagenum]);
+                group.add(imageobj[imagenum].children[0]);
             }
             imagenum+=1;
         }
     }
-
-
-    // for(var imagenum=0;imagenum<ncams;imagenum++){
-    //     imageobj[imagenum]=makeImageFrustrum(camRoll[imagenum],camPitch[imagenum],camYaw[imagenum],camX[imagenum],camY[imagenum],camZ[imagenum]);
-    //     imageobj[imagenum].myimagenum = imagenum;
-    //     imageobj[imagenum].isFiltered = false;
-    //     group.add(imageobj[imagenum]);
-    // }
+ 
     viewer.scene.scene.add(group);
-    viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z);
+    viewer.scene.view.position.set(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z+100);
+    viewer.scene.view.lookAt(new THREE.Vector3(imageobj[0].position.x,imageobj[0].position.y,imageobj[0].position.z));
 }
 
 /**
@@ -552,6 +614,7 @@ function pixelToVertex(cam, shot, u, v, scale) {
     Rt.x = Rt.x+centWorld[0];
     Rt.y = Rt.y+centWorld[1];
     Rt.z = Rt.z+centWorld[2];
+
     //var lla=projectedToWGS84(Rt.x,Rt.y);
     // Rt.x = lla[0];
     // Rt.y = lla[1];
@@ -589,7 +652,7 @@ function cameraLineGeo(reconstruction, shot_id) {
     ];
 
     var pyramidmaterial = new THREE.MeshBasicMaterial( {   color: 0xff0000,
-        wireframe: false
+        wireframe: true
     } );
     var lng=$("#centerCameraLng")[0].value==""?0:$("#centerCameraLng")[0].value
     var lat=$("#centerCameraLat")[0].value==""?0:$("#centerCameraLat")[0].value
@@ -610,6 +673,7 @@ function cameraLineGeo(reconstruction, shot_id) {
     // imagepyramid.scale.x = 1;
     // imagepyramid.scale.y = 1;
     // imagepyramid.scale.z = 1;
+
     var pyramid = new THREE.Mesh( pyramidgeometry, pyramidmaterial );
     imagepyramid.add(pyramid);
     return imagepyramid
@@ -620,17 +684,17 @@ function cameraLineGeo(reconstruction, shot_id) {
  * 点击分类处理进行分类
  */
 function classifiedProc(){
-    var towerRange=$("#towerRange")[0].value==""?15:$("#towerRange")[0].value;
-    var lineHeight=$("#lineHeight")[0].value==""?7:$("#lineHeight")[0].value;
-    var groundNetSize=$("#groundNetSize")[0].value==""?5:$("#groundNetSize")[0].value;
-    var groundNetDis=$("#groundNetDis")[0].value==""?5:$("#groundNetDis")[0].value;
-    var groundNetAngle=$("#groundNetAngle")[0].value==""?30:$("#groundNetAngle")[0].value;
-    var vegeDistance=$("#vegeDistance")[0].value==""?15:$("#vegeDistance")[0].value;
+    var towerRange=$("#towerRange")[0].value==""?15.01:$("#towerRange")[0].value;
+    var lineHeight=$("#lineHeight")[0].value==""?7.01:$("#lineHeight")[0].value;
+    var groundNetSize=$("#groundNetSize")[0].value==""?5.01:$("#groundNetSize")[0].value;
+    var groundNetDis=$("#groundNetDis")[0].value==""?5.01:$("#groundNetDis")[0].value;
+    var groundNetAngle=$("#groundNetAngle")[0].value==""?30.01:$("#groundNetAngle")[0].value;
+    var vegeDistance=$("#vegeDistance")[0].value==""?15.01:$("#vegeDistance")[0].value;
     var classifiedName=$("#classifiedName")[0].value==""?"temp.las":$("#classifiedName")[0].value;
     var selects=$("#classifiedFileList")[0];
     var indexs = selects.selectedIndex;
-    console.log(selects.options[indexs]);
-    var srcFileName = selects.options[indexs].value+"-"+selects.options[indexs].text;
+
+    var srcFileName = selects.options[indexs].value+"/"+selects.options[indexs].text;
     if(srcFileName==undefined){
         console.log("未选择原始文件");
         return ;
@@ -649,16 +713,28 @@ function classifiedProc(){
         console.log("杆塔数应该为两个表示一个档段");
         return;
     }
-    var pointsParam="";
+
+    var params={};
+    params["points"]=[];
     measuresmens.forEach(function(measureItem){
-        pointsParam+=measureItem.points[0].position.x+"-"+measureItem.points[0].position.y+"-";
+        params["points"].push({"x":measureItem.points[0].position.x,"y":measureItem.points[0].position.y});
     });
-    pointsParam+=towerRange+"-"+lineHeight+"-"+groundNetSize+"-"+groundNetDis+"-"+groundNetAngle+"-"+vegeDistance+"-"+classifiedName+"-"+srcFileName;
+
+    params["towerRange"]=towerRange;
+    params["lineHeight"]=lineHeight;
+    params["groundNetSize"]=groundNetSize;
+    params["groundNetDis"]=groundNetDis;
+    params["groundNetAngle"]=groundNetDis;
+    params["vegeDistance"]=vegeDistance;
+    params["classifiedName"]=classifiedName;
+    params["dirFileName"]=selects.options[indexs].value;
+    params["srcFileName"]=selects.options[indexs].text;
 
     $.ajax({
-        type: "GET",
-        url: ip+"/classification/"+pointsParam,
-        dataType: "text",
+        type: "POST",
+        url: "/classification",
+        data:JSON.stringify(params),
+        dataType: "json",
         async:true,
         beforeSend:function(XMLHttpRequest){ 
             $('#paramModal').modal('hide');

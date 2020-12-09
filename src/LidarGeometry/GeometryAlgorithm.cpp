@@ -444,6 +444,25 @@ namespace GeometryLas {
 		vec2.z = vec1.z/dlen;
 	}
 
+	Point3D GeometryRelation::ProjectionPoint(const Point3D pnt1,Point3Ds line)
+	{
+		Point3D ac,ab;
+		ac.x=pnt1.x-line[0].x;   ac.y=pnt1.y-line[0].y;   ac.z=pnt1.z-line[0].z;
+		ab.x=line[1].x-line[0].x;ab.y=line[1].y-line[0].y;ab.z=line[1].z-line[0].z;
+
+		double acDotab = ac.x*ab.x+ac.y*ab.y+ac.z*ab.z;
+		double dis2_ab = ab.x*ab.x+ab.y*ab.y+ab.z*ab.z;
+		double d22 = acDotab*acDotab/dis2_ab;
+		double ratio = sqrt(d22)/sqrt(dis2_ab);
+
+		if(acDotab>0)
+		{
+			return Point3D(line[0].x+ab.x*ratio,line[0].y+ab.y*ratio,line[0].z+ab.z*ratio);
+		}else{
+			ratio=ratio*(-1);
+			return Point3D(line[0].x+ab.x*ratio,line[0].y+ab.y*ratio,line[0].z+ab.z*ratio);
+		}
+	}
 
 	/*****************************************************************************
 	* @brief : ???????
@@ -481,6 +500,44 @@ namespace GeometryLas {
 			(pt1.y - pt2.y)*(pt1.y - pt2.y) +
 			(pt1.z - pt2.z)*(pt1.z - pt2.z));
 	}
+
+	double DistanceComputation::Distance(Point3D pt, Point3D pl1, Point3D pl2,bool segment/*=true*/)
+	{
+		// reference: http://wuweiblog.com/2020/11/02/%E7%82%B9%E5%88%B0%E4%B8%89%E7%BB%B4%E7%A9%BA%E9%97%B4%E7%9B%B4%E7%BA%BF%E8%B7%9D%E7%A6%BB%E8%AE%A1%E7%AE%97%E4%BB%A5%E5%90%91%E9%87%8F%E6%96%B9%E5%BC%8F%E8%AE%A1%E7%AE%97/
+		Point3D ac,ab;
+		ac.x=pt.x-pl1.x; ac.y=pt.y-pl1.y; ac.z=pt.z-pl1.z;
+		ab.x=pl2.x-pl1.x;ab.y=pl2.y-pl1.y;ab.z=pl2.z-pl1.z;
+
+		double acDotab = ac.x*ab.x+ac.y*ab.y+ac.z*ab.z;
+		double dis2_ac = ac.x*ac.x+ac.y*ac.y+ac.z*ac.z;
+		double dis2_ab = ab.x*ab.x+ab.y*ab.y+ab.z*ab.z;
+
+		double d12 = dis2_ac;
+		double d22 = acDotab*acDotab/dis2_ab;
+
+		// //just for check the rightness of the computation
+		// if(acDotab/sqrt(dis2_ac)/sqrt(dis2_ab)>1)
+		// {
+		// 	printf("%lf, %lf,%lf\n",acDotab,sqrt(dis2_ac),sqrt(dis2_ab));
+		// }
+
+		//if compute the segment
+		if(segment)
+		{
+			if(acDotab/sqrt(dis2_ac)/sqrt(dis2_ab)<0)
+			{
+				return Distance(pt,pl1);
+			}else if(acDotab/sqrt(dis2_ab)>sqrt(dis2_ab)){
+				return Distance(pt,pl2);
+			}else{
+				return sqrt(d12-d22);
+			}
+		}
+		else{
+			return sqrt(d12-d22);
+		}
+	}
+
 	double DistanceComputation::Distance(Point3D pt1, Point3D pl1, Point3D pl2, Point3D pl3)
 	{
 		double a = (pl2.y - pl1.y)*(pl3.z - pl1.z) - (pl2.z - pl1.z)*(pl3.y - pl1.y);

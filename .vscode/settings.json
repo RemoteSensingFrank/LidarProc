@@ -73,7 +73,8 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "*.ipp": "cpp",
-        "unordered_set": "cpp"
+        "unordered_set": "cpp",
+        "csignal": "cpp"
     },
     "C_Cpp.dimInactiveRegions": false,
 }
