@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 #include "LASPoint.h"
-
+#include "../LidarGeometry/tsmToUTM.h"
 #define LargestMemoryToRead 2147483648
 #define BlockPointNumbers 2048
 
@@ -193,6 +193,104 @@ long LidarMemReader::LidarReader_Write(const char *pathLidar, ILASDataset* datas
 		int y = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y - lasHeader.y_offset) / lasHeader.y_scale_factor;
 		int z = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z - lasHeader.z_offset) / lasHeader.z_scale_factor;
 		
+		fwrite(&x, sizeof(int), 1, fLasOut);
+		fwrite(&y, sizeof(int), 1, fLasOut);
+		fwrite(&z, sizeof(int), 1, fLasOut);
+
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_intensity, sizeof(unsigned short), 1, fLasOut);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_rnseByte, sizeof(unsigned char), 1, fLasOut);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_classify, sizeof(unsigned char), 1, fLasOut);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_scanAngle, sizeof(unsigned char), 1, fLasOut);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_userdata, sizeof(unsigned char), 1, fLasOut);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_flightID, sizeof(unsigned short), 1, fLasOut);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_gpsTime, sizeof(double), 1, fLasOut);
+		//printf("%d\n",&dataset->m_lasRectangles[i].m_lasPoints[j].m_colorExt.Red);
+		fwrite(&dataset->m_lasRectangles[i].m_lasPoints[j].m_colorExt, sizeof(LASColorExt), 1, fLasOut);
+	}
+	fclose(fLasOut);
+	return 0;
+}
+
+long LidarMemReader::LidarReader_Write(const char* pathLidar,Point2D cntPnt,bool isWgs84, ILASDataset* dataset)
+{
+	assert(dataset != nullptr);
+
+	if (dataset->m_lasRectangles == nullptr)
+	{
+		printf("no las data\n");
+		return -1;
+	}
+
+	double x,y;
+	int nZone;
+	if(isWgs84)
+	{
+		tsmLatLongToUTM(cntPnt.y,cntPnt.x,&nZone,&x,&y);
+		printf("%lf,%lf\n",x,y);
+
+	}
+
+	//新建一个LASHeader
+	LASHeader &refHeader = dataset->m_lasHeader;
+	LASHeader lasHeader(refHeader);
+	int totalPoints = 0;
+
+	//写数据之前重新检查一下以免出现不一致的现象
+	for (size_t i = 0; i < dataset->m_numRectangles; i++)
+	{
+		for (size_t j = 0; j < dataset->m_lasRectangles[i].m_lasPoints_numbers; ++j)
+		{
+			lasHeader.max_x = max(dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.x, lasHeader.max_x);
+			lasHeader.min_x = min(dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.x, lasHeader.min_x);
+			lasHeader.max_y = max(dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y, lasHeader.max_y);
+			lasHeader.min_y = min(dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y, lasHeader.min_y);
+			lasHeader.max_z = max(dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z, lasHeader.max_z);
+			lasHeader.min_z = min(dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z, lasHeader.min_z);
+		}
+		totalPoints += dataset->m_lasRectangles[i].m_lasPoints_numbers;
+	}
+	// lasHeader.max_x += x;
+	// lasHeader.min_x += x;
+	// lasHeader.max_y += y;
+	// lasHeader.min_y += y;
+	lasHeader.number_of_point_records = totalPoints;
+	lasHeader.point_data_record_length = 34;
+	lasHeader.point_data_format = 3;
+	lasHeader.version_major = 1;
+	lasHeader.version_minor = 2;
+	FILE* fLasOut = fopen(pathLidar, "wb");
+	if (fLasOut == nullptr)
+	{
+		printf("create las file failed!\n");
+		return -1;
+	}
+	lasHeader.WriteHeader(fLasOut);
+
+	//中间有问题 不知道怎么搞 变长字段还没有进行处理
+	int sizeBuff = lasHeader.offset_to_point_data - sizeof(LASHeader);
+	if (sizeBuff != 0)
+	{
+		char* buffer = new char[sizeBuff];
+		memset(buffer, 0, sizeof(char) * sizeBuff);
+		fwrite(buffer, 1, sizeBuff, fLasOut);
+		delete[]buffer; buffer = NULL;
+	}
+
+	//写数据
+	for (int k = 0; k<dataset->m_totalReadLasNumber; ++k)
+	{
+		//printf("\r%d", k);
+		int i = dataset->m_LASPointID[k].rectangle_idx;
+		int j = dataset->m_LASPointID[k].point_idx_inRect;
+
+		//printf("%lf,%lf,%lf\n",dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.x,
+		//dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y,
+		//dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z);
+
+		int x = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.x - lasHeader.x_offset) / lasHeader.x_scale_factor;
+		int y = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.y - lasHeader.y_offset) / lasHeader.y_scale_factor;
+		int z = (dataset->m_lasRectangles[i].m_lasPoints[j].m_vec3d.z - lasHeader.z_offset) / lasHeader.z_scale_factor;
+
 		fwrite(&x, sizeof(int), 1, fLasOut);
 		fwrite(&y, sizeof(int), 1, fLasOut);
 		fwrite(&z, sizeof(int), 1, fLasOut);

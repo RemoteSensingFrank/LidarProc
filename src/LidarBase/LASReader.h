@@ -78,6 +78,16 @@ public:
 	*/
 	long LidarReader_Write(const char* pathLidar, ILASDataset* dataset);
 
+
+	//3.将las文件进行坐标平移后写入文件中
+	/*
+		@param pathLidar：文件路径
+		@param cntPnt：待平移的点的坐标
+		@param isWgs84：是否为wgs84坐标
+		@param dataset：待写入的数据集
+	*/
+	long LidarReader_Write(const char* pathLidar,Point2D cntPnt,bool isWgs84, ILASDataset* dataset);
+
 	//4.将某一类las文件写入，写入文件中为LAS格式
 	/*
 		将某一类的数据集写入文件中

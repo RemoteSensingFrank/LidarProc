@@ -122,6 +122,11 @@ namespace GeometryLas {
 		*/
 		static double Distance(Point3D pt1, Point3D pl1, Point3D pl2, Point3D pl3);
 
+		/**
+		 * compute distance from point to line
+		 */ 
+		static double Distance(Point3D pt,Point3Ds line);
+
 	};
 
 	/*??????????*/
